@@ -1,0 +1,12 @@
+This directory contains header files needed by the DSPs and by the
+host machines. They are a single place to specify necessary information and
+define needed parameters. Accordingly, each user of these files must define one 
+and only one of the following logical names by using a "-Dxxx" in the compile 
+command or a including a "#define xxx" statement in the source code, where xxx 
+is the logical name.
+
+The possible logical names are:
+   I_AM_MASTER_DSP
+   I_AM_SLAVE_DSP
+   I_AM_NT_HOST
+   I_AM_LINUX_HOST

@@ -1,0 +1,57 @@
+Notes: 
+
+/*** 8 January 2005 ***/
+
+	Stop writing .bin files for primitives on host
+	
+x	Who resets reply buffer index? This is a host responsibility after the primitive list has been completed
+	
+	Should the reply buffer have additional structure?
+	
+x	Decouple primitive list source from system dependency. Need to give control and status locations.
+	
+x	Make the Host/Master interface more symmetrical with the Master/Slave interface, including nomenclature.
+	
+	PrimitiveListProc on master to handle the slave?
+
+	How does one generate pin4 interrupts to the slave under software control?
+	
+/*** 9 January 2005 ***/
+
+	Add version capability
+	
+	Add text buffer identification ( [MASTER], [SLAVEx], ... )
+	
+	Host: allocate Module structures as necessary ( permanent allocation )
+	
+	cast functions instead of using void * and setting to structure types
+	
+	common primitives need to be unified
+	
+/*** 10 January 2005 ***/
+
+	delete revision fields in primitive header/trailer structures
+	
+/*** 11 January 2005 ***/
+
+	reduce alloc chain
+	
+	heap marker algorithm
+	
+	ensure tanks are aligned on a 4 byte boundary
+	
+	add scrubber to heaps, tasks, etc...
+	
+	does 1 byte marker suffice for heap(s)?
+	
+	add permanent allocation heap
+	
+/*** 12 January 2005 ***/
+
+	add dynamic primitive registering capability
+	
+	add file i/o
+	
+/*** 14 January 2005 ***/
+
+	primLists should have a pointer to the queue to which they belong

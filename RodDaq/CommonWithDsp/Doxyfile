@@ -1,0 +1,35 @@
+# Doxyfile 1.2.18
+
+# General configuration options
+
+INPUT                = . release.notes
+FILE_PATTERNS        = *.h *.cxx
+RECURSIVE            = YES
+PROJECT_NAME         = CommonWithDsp
+PROJECT_NUMBER       = 0.1
+OUTPUT_DIRECTORY     = doxygen
+EXTRACT_ALL          = YES
+EXTRACT_PRIVATE      = YES
+EXTRACT_STATIC       = YES
+
+QUIET                = YES
+SOURCE_BROWSER       = YES
+
+# configuration options related to the HTML output
+
+GENERATE_HTML        = YES
+ENUM_VALUES_PER_LINE = 1
+GENERATE_TREEVIEW    = YES
+TREEVIEW_WIDTH       = 250
+
+# configuration options related to the LaTeX output
+
+GENERATE_LATEX       = YES
+COMPACT_LATEX        = YES
+PDF_HYPERLINKS       = YES
+USE_PDFLATEX         = YES
+
+# configuration options related to the dot tool
+
+HIDE_UNDOC_RELATIONS = NO
+HAVE_DOT             = NO

@@ -1,0 +1,94 @@
+/*! @file release.notes
+ *
+ *  Managers: Tom Meyer (meyer@iastate.edu), John Hill (hill@hep.phy.cam.ac.uk)
+ *
+ *
+ *   - Pending Pixel release, Pixel-01-00 (not yet tagged or made official).
+       THIS VERSION MUST HAVE DSP CODE VERSION 1.2 OR LATER!!!!!
+ *       -# Dynamically load DSP memory maps from ROD during start-up. This adds
+ *          four new classes: MdspMemoryMap, MdspInternal, SdspMemoryMap, and SdspInternal.
+  *   - Version 2.1     
+ *       -# BocCard updated to support the latest versions of the series
+ *          BOCs (12-bit rather than 10-bit ADC, new reset register bit) 
+ *   - First official Pixel release, Pixel-00-01. (5 Mar 04)
+ *       -# Dsp code has been split between SCY and Pixel areas, many
+ *          structural changes.
+ *       -# Fixed a warning from comparing a signed to an unsigned in
+ *          RodModule.cxx.
+ *       -# Added safe code from Paolo. For now, this may write to cout.
+ *   - Version 2.1 (in progress)      
+ *       -# Poll PRM registers during configure and reset
+ *          Missing RodException from exception prototypes
+ *          Throw PrimListException when PrimList too big! Bruce Gallop 9 Feb 04
+ *       -# exception handling added to BocCard, with BocException inheriting
+ *          from BaseException. Excptions are for argument errors (coding bugs
+ *          if you prefer.  John Hill. 17 Dec 03
+ *       -# Added exception base class called BaseException. RodException,
+ *          HpiExcpetion, NoImageFile, and PrimListException all inherit from
+ *          it.  Users can now catch a generic BaseException to get all of these
+ *          types.  VmeException is NOT included. This is to keep VmeInterface
+ *          as an independent package.  11 Sep 03
+ *       -# Added test in loadSlaveImage to call a RodException if we try to load the
+ *          image while the slave is running. 7 Sep 03
+ *       -# Added a method that returns the flash sector size for this ROD (getSlaveSectorSize())
+ *          7 Sep 03
+ *       -# Added a method that returns the ROD type (0xe for Rev E, etc.)
+ *   - Version 2.0 (Tagged as RODDAQ-2-0) 6 Sep 03
+ *       -# Made hard reset of ROD optional in call to initialize().  Must use
+ *          initialize(true) to get four second hard reset.  initialize() and 
+ *          initialize(false) do everything except set the register bit to init the ROD.
+ *       -# Added code to support Rev E boards.  This affects only chipErase() and
+ *          sectorErase().
+ *   - Version 1.4 (Tagged as RODDAQ-1-4) 6 Sep 03
+ *       -# Many incremental changes. Tag done just before adding support for Rev E boards.
+ *   - Version 1.3.3 18 Mar 03
+ *       -# Remove reference to emif file in slave initialisation (loaded with MDSP)
+ *   - Version 1.3.2 10 Mar 03
+ *       -# BocTest uses parameters.h
+ *       -# Add BocCard as private member of RodModule
+ *   - Version 1.3.1 5 Mar 03
+ *       -# First version of BocCard added to the repository
+ *           BocAddresses.h, BocCard.h and .cxx in RodCrate directory
+ *           BocTest.cxx in RodTests directory
+ *           Makefiles updated to build the extra stuff
+ *       -# No changes to RodModule or TimModule in this release 
+ *   - Version 1.3 12 Feb 03
+ *       -# New version of dsp headers
+ *           PRIM and REPLY variables refer to mdsp addresses
+ *           Command register 1 has disappeared
+ *           Changes for new text buffer structure
+ *       -# Copy constructor and assignment operator in private section
+ *       -# Add setExceptionTrapping(true) to constructor (VME library generates VmeException)
+ *       -# Add validate option to initSlaveDsp (pass through to loadSlaveImage)
+ *       -# In validate section, delete buffer2
+ *       -# TextHandler code, fix to work with buffers other than 0
+ *       -# Clear text buffer request command
+ *       -# SynchPrimList:
+ *       -# While instead of if for text handling
+ *             Check for IDLE as well as WAITING in final loop (so can use primitives with no reply)
+ *   - Version 1.2.1 12 Feb 03
+ *       -# Final version with current primParams.h etc.
+ *       -# Fixed board reset value from 0xC0 to 0x$0. Only one bit can be set 
+ *          at a time.
+ *       -# The RodModule insertion operator now returns to decimal mode before
+ *          exiting.
+ *       -# primHandler() now sets INLISTRDY correctly even if there is no reply
+ *          list.
+ *   - Version 1.2 13 Dec 02
+ *       -# Fixed exception handling following calls to "new" operator
+ *       -# Changed comments to follow ATLAS Doxygen recommendations
+ *       -# Removed redundant call to registerPort in RodModule constructor
+ *   - Version 1.1 27 Nov 02
+ *       -# Worked around VME block read problem by looping over single reads  
+ *       -# Patched mdspBlockRead verification of HPIA value
+ *       -# Overloaded << to give status information
+ *       -# Fixed syntax in exception throws
+ *       -# Added NoImageFile to exception list in initSlaveDsp
+ *       -# Test results of all "new" items, throw exception if a problem exists.
+ *       -# Added throw() to all significant methods that do not throw exceptions
+ *       -# Changed rodResetValue in initialize() and reset() from 0x80 to 0xc0
+ *   - Version 1.0. 25 Oct 02. 
+ *       -# Tagged it as RodModule-1-0 in CVS. Module name of
+ *       -# RodDaq also defined.
+ *       -# VME block write problem worked around by looping over single writes.
+ */

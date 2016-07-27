@@ -1,0 +1,27 @@
+/*! @file release.notes
+ *
+ *  Manager: Tom Meyer (meyer@iastate.edu)
+ *
+ *  - Versions:
+ *   - Rod-Pixel-1-43  23 Mar. 05  The histogramming tasks will automatically start & stop
+ *                                 caching if the appropriate bit is set in the options field.
+ *   - Rod-Pixel-1-42  07 Mar. 05  Fitting performed with conversion from vcal to electrons
+ *                                 1st, and histogramming information output format modified.
+ *   - Rod-Pixel-1-41  06 Dec. 04  Multiple SDSP scans, TOT & assembly language histogramming,
+ *                                 and fitting.
+ *   - Rod-Sct-1-10    30 Sept 04  Initial Sct CVS release.
+ *   - Rod-Pixel-1-40  30 Sept 04  New format for primParams.h, primParams_pxl.h + misc. updates.
+ *   - Pixel-1-32      16 July 04  No changes in these files.
+ *   - Pixel-1-31      16 July 04  Added new EFB registers +minor updates.
+ *   - Pixel-1-30      03 June 04  Updated the memory map & fixed a buglet.
+ *   - Pixel-1-20      21 Apr 04   Added new primitives and re-organized the primitive IDs
+ *                                 (primParams*.h), dynamic DSP memory maps (rodMemoryMap.h,
+ *        replacing memoryPartitions.h) and new primitive list definitions (primList.h,
+ *        which will replace msgBuff.h). FE-I2 support in pixelCommands.h and
+ *        pixelConfigStructures.h.
+ *   - Cleaned up prior to Pixel-00-01 release (5 Mar 04)
+ *   - Pixel-1-10      04 Mar 04   Detector specific code separated into different directories;
+ *                                 this is for Pixels. 
+ *   - Pixel-1-00      17 Jan 04   Pixel initial CVS release.
+ *   - 0.1.            17 Mar 03.  Initial documented release.
+ */

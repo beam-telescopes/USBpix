@@ -1,0 +1,19 @@
+/* Common Header */
+
+#ifndef SYSPARAMS_SPECIFIC_H
+#define SYSPARAMS_SPECIFIC_H
+
+#define NMODULES_PER_SLAVE 7
+#define NMODULES_PER_ROD 26
+
+#define SIZEOF_NAME 32
+
+#define N_ROWS 160
+#define N_COLS 18
+#define N_CHIPS 16
+#define N_PIXELS_PER_CHIP (N_ROWS*N_COLS)
+#define N_PIXELS (N_PIXELS_PER_CHIP*N_CHIPS)
+#define N_PIXEL_REGISTER_BITS 14
+#define N_MODULES 32
+
+#endif
