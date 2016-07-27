@@ -12,11 +12,11 @@ SUBDIRS += VmeInterface
 SUBDIRS += USBpix2I3
 SUBDIRS += USBpix2I4
 SUBDIRS += USBpix3I4
-#tdaq {
-#  SUBDIRS += RodDaq/RodCrate
-#} else {
-#  message("Skipping RodDaq/RodCrate")
-#}
+tdaq {
+  SUBDIRS += RodDaq/RodCrate
+} else {
+  message("Skipping RodDaq/RodCrate")
+}
 
 # misc. peripheral interfaces
 gpib {

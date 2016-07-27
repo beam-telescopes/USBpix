@@ -22,6 +22,7 @@ unix{
   count(TDAQ_FLAG,0){
     HEADERS += BocAnalysis/BocScanAnalysis.h
     SOURCES += BocAnalysis/BocScanAnalysis.cxx
+    INCLUDEPATH += $(ROD_DAQ)/CommonWithDsp
   }
 }
 
