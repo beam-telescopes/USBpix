@@ -13,6 +13,6 @@ To retrieve the code, run:
 
 git clone https://[your CERN username]@gitlab.cern.ch/jgrosse/USBpix.git
 
-which delivers the master branch (trunk). For another branch, got to the cloned version and use
+which delivers the master branch (trunk). For another branch, go to the cloned version and use
 
 git checkout [branch name]
