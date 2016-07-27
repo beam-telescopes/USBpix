@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RegisterPanel</class>
+ <widget class="QWidget" name="RegisterPanel">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>533</width>
+    <height>566</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>200</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Register Panel</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QMenuBar" name="menubar">
+     <widget class="QMenu" name="fileMenu">
+      <property name="title">
+       <string>&amp;Action</string>
+      </property>
+      <widget class="QMenu" name="popupMenu">
+       <property name="title">
+        <string>Test &amp;all modules</string>
+       </property>
+       <addaction name="actionPerform_all_tests"/>
+      </widget>
+      <widget class="QMenu" name="popupMenu_8">
+       <property name="title">
+        <string>Test &amp;current module</string>
+       </property>
+       <addaction name="actionPerform_all_tests_current"/>
+      </widget>
+      <addaction name="popupMenu"/>
+      <addaction name="popupMenu_8"/>
+      <addaction name="separator"/>
+      <addaction name="clearAction"/>
+      <addaction name="separator"/>
+     </widget>
+     <addaction name="fileMenu"/>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_6">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <layout class="QVBoxLayout">
+         <item>
+          <widget class="QLabel" name="TextLabel5">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Module Test panel</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="moduleLabel">
+           <property name="text">
+            <string>no module selected</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QTabWidget" name="mainTabs">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="tab1">
+          <attribute name="title">
+           <string>Chip Tests</string>
+          </attribute>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line1">
+         <property name="frameShape">
+          <enum>QFrame::HLine</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="m_messageBox"/>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <action name="testAllAction">
+   <property name="text">
+    <string>Test &amp;all modules</string>
+   </property>
+   <property name="iconText">
+    <string>Test all modules</string>
+   </property>
+   <property name="toolTip">
+    <string>perform register test on all modules</string>
+   </property>
+   <property name="shortcut">
+    <string/>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testAllAction</cstring>
+   </property>
+  </action>
+  <action name="clearAction">
+   <property name="text">
+    <string>&amp;Clear</string>
+   </property>
+   <property name="iconText">
+    <string>Clear</string>
+   </property>
+   <property name="toolTip">
+    <string>clear colour-coded results and text buffers</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>clearAction</cstring>
+   </property>
+  </action>
+  <action name="testCurrAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Test &amp;current module</string>
+   </property>
+   <property name="iconText">
+    <string>Test current module</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testCurrAction</cstring>
+   </property>
+  </action>
+  <action name="testAllPerform_all_testsAction">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Perform all tests</string>
+   </property>
+   <property name="iconText">
+    <string>Perform all tests</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testAllPerform_all_testsAction</cstring>
+   </property>
+  </action>
+  <action name="testAllGlobal_register_testAction">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Global register test</string>
+   </property>
+   <property name="iconText">
+    <string>Global register test</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testAllGlobal_register_testAction</cstring>
+   </property>
+  </action>
+  <action name="testCurrPerform_all_testsAction">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Perform all tests</string>
+   </property>
+   <property name="iconText">
+    <string>Perform all tests</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testCurrPerform_all_testsAction</cstring>
+   </property>
+  </action>
+  <action name="testCurrGlobal_register_testAction">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Global register test</string>
+   </property>
+   <property name="iconText">
+    <string>Global register test</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testCurrGlobal_register_testAction</cstring>
+   </property>
+  </action>
+  <action name="testAllLink_testAction">
+   <property name="text">
+    <string>Link test</string>
+   </property>
+   <property name="iconText">
+    <string>Link test</string>
+   </property>
+   <property name="toolTip">
+    <string>test pattern returned by MCC to check output link</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testAllLink_testAction</cstring>
+   </property>
+  </action>
+  <action name="testCurrLink_testAction">
+   <property name="text">
+    <string>Link test</string>
+   </property>
+   <property name="iconText">
+    <string>Link test</string>
+   </property>
+   <property name="toolTip">
+    <string>test pattern returned by MCC to check output link</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testCurrLink_testAction</cstring>
+   </property>
+  </action>
+  <action name="testAllDigitalAction">
+   <property name="text">
+    <string>Digital scan (mod. by mod.)</string>
+   </property>
+   <property name="iconText">
+    <string>Digital scan (mod. by mod.)</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testAllDigitalAction</cstring>
+   </property>
+  </action>
+  <action name="testCurrDigitalAction">
+   <property name="text">
+    <string>Digital scan</string>
+   </property>
+   <property name="iconText">
+    <string>Digital scan</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testCurrDigitalAction</cstring>
+   </property>
+  </action>
+  <action name="testAllConnectivityAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Connectivity</string>
+   </property>
+   <property name="iconText">
+    <string>Connectivity</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testAllConnectivityAction</cstring>
+   </property>
+  </action>
+  <action name="testCurrConnectivityAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Connectivity</string>
+   </property>
+   <property name="iconText">
+    <string>Connectivity</string>
+   </property>
+   <property name="name" stdset="0">
+    <cstring>testCurrConnectivityAction</cstring>
+   </property>
+  </action>
+  <action name="testAllPixel_register_testAction">
+   <property name="text">
+    <string>Pixel register test</string>
+   </property>
+  </action>
+  <action name="testCurrPixel_register_testAction">
+   <property name="text">
+    <string>Pixel register test</string>
+   </property>
+  </action>
+  <action name="actionEdit_configuration">
+   <property name="text">
+    <string>Edit configuration</string>
+   </property>
+  </action>
+  <action name="actionPerform_all_tests">
+   <property name="text">
+    <string>Perform all tests</string>
+   </property>
+  </action>
+  <action name="actionPerform_all_tests_current">
+   <property name="text">
+    <string>Perform all tests</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+ <resources/>
+ <connections/>
+</ui>

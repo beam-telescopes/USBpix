@@ -1,0 +1,1456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>USBCtrlEdit</class>
+ <widget class="QDialog" name="USBCtrlEdit">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>887</width>
+    <height>818</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>USB Controller Editor</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>ID of USB board (set to -1 if you want to take any during hardware init.)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_1">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="boardID">
+         <property name="minimum">
+          <number>-1</number>
+         </property>
+         <property name="maximum">
+          <number>255</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_12">
+       <item>
+        <widget class="QLabel" name="board2Label">
+         <property name="text">
+          <string>ID of 2nd USB board (both board IDs must be &gt;=0!)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer2b">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="board2ID">
+         <property name="minimum">
+          <number>-1</number>
+         </property>
+         <property name="maximum">
+          <number>255</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Path to FPGA firmware file</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="FPGA_File">
+         <property name="minimumSize">
+          <size>
+           <width>350</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="browseButton">
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Path to µC firmware file (empty: not loaded)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="uC_File">
+         <property name="minimumSize">
+          <size>
+           <width>350</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="browseButtonUC">
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_16">
+       <item>
+        <widget class="QLabel" name="label_22">
+         <property name="text">
+          <string>TX[2] Signal</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_17">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QComboBox" name="TX2Signal">
+         <item>
+          <property name="text">
+           <string>MONHIT (Hitbus)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Strobe (+ Fine Delay)</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <item>
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Cable delay</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_7">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="CableDelSB">
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>2</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Trigger replication role</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QComboBox" name="trModeBox"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="QCheckBox" name="SetSelCMDBox">
+         <property name="text">
+          <string>Set SelCMD</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <item>
+        <widget class="QCheckBox" name="SetSelSlowCtrlBox">
+         <property name="text">
+          <string>Set Slow-control mode</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_8">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <item>
+        <widget class="QCheckBox" name="enCMDLvl1Box">
+         <property name="text">
+          <string>enable trigger/strobe via CMD</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="enSCAStrobePin">
+         <property name="text">
+          <string>enable strobe via SCA pin</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="enGPACStrobePin">
+         <property name="text">
+          <string>enable strobe via GPAC pin</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="enableRJ45">
+       <property name="text">
+        <string>Enable RJ45 input during scans</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <item>
+        <widget class="QLabel" name="muxselLabel">
+         <property name="text">
+          <string>IoMuxSel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_9">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="IoMuxSel2">
+         <property name="text">
+          <string>2</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="IoMuxSel1">
+         <property name="text">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="IoMuxSel0">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_11">
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>IoMuxIn</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_10">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="IoMuxIn3">
+         <property name="text">
+          <string>3</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="IoMuxIn2">
+         <property name="text">
+          <string>2</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="IoMuxIn1">
+         <property name="text">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="IoMuxIn0">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_13">
+       <item>
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Aux clock frequency = 40MHz / </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="auxClkDiv">
+         <property name="prefix">
+          <string>2^</string>
+         </property>
+         <property name="minimum">
+          <number>7</number>
+         </property>
+         <property name="maximum">
+          <number>15</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>7</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="actAuxFreq">
+         <property name="text">
+          <string>(i.e. freq. =312.500 kHz)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_11">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_14">
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Iref pads</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_12">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="irefPadsBox">
+         <property name="maximum">
+          <number>15</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_16">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>30</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="invIrefPadsBox">
+         <property name="text">
+          <string>invert</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_17">
+       <item>
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Manchester encoding</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_15">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>clock phase</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="ManPhaseBox">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="maximum">
+          <number>3</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="ManCodeEna">
+         <property name="text">
+          <string>enabled</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_15">
+       <item>
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>Adapter Card Flavour</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_13">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>298</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QComboBox" name="AdapterCardFlavourComboBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>500</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="palette">
+          <palette>
+           <active>
+            <colorrole role="Text">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>20</red>
+               <green>19</green>
+               <blue>18</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </active>
+           <inactive>
+            <colorrole role="Text">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>20</red>
+               <green>19</green>
+               <blue>18</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </inactive>
+           <disabled>
+            <colorrole role="Text">
+             <brush brushstyle="SolidPattern">
+              <color alpha="255">
+               <red>90</red>
+               <green>90</green>
+               <blue>90</blue>
+              </color>
+             </brush>
+            </colorrole>
+           </disabled>
+          </palette>
+         </property>
+         <item>
+          <property name="text">
+           <string>Std. Adapter Card</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>BURN-IN Adapter Card</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>General Purpose Adapter Card</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="biGroupBox">
+       <property name="title">
+        <string>BURN-IN Adapter Card</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QRadioButton" name="biMultiRadioButton">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>20</red>
+                <green>19</green>
+                <blue>18</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>20</red>
+                <green>19</green>
+                <blue>18</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>20</red>
+                <green>19</green>
+                <blue>18</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>20</red>
+                <green>19</green>
+                <blue>18</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>90</red>
+                <green>90</green>
+                <blue>90</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>90</red>
+                <green>90</green>
+                <blue>90</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </disabled>
+           </palette>
+          </property>
+          <property name="text">
+           <string>Mode &quot;1...4 parallel channels&quot;.</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_14">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>338</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="biSingleRadioButton">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>20</red>
+                <green>19</green>
+                <blue>18</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>20</red>
+                <green>19</green>
+                <blue>18</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>20</red>
+                <green>19</green>
+                <blue>18</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>20</red>
+                <green>19</green>
+                <blue>18</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>90</red>
+                <green>90</green>
+                <blue>90</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>90</red>
+                <green>90</green>
+                <blue>90</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </disabled>
+           </palette>
+          </property>
+          <property name="text">
+           <string>Mode &quot;1 channel at a time&quot;:</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>FE Number to read</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="ReadFENumberSpinBox">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>4</number>
+          </property>
+          <property name="value">
+           <number>4</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string>Readout Configuration</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="1" column="1">
+           <widget class="QComboBox" name="inp0div">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Input Divider Settings&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The input divider of each port should be set to the data rate you expect from the FE connected to that port. In general, this should be set to 1:1, enabling 160 MBit/s transmission. If your chips are transmitting at different data rates, for example for multiplexing applications, configure the input divider to use that value.&lt;/p&gt;&lt;p&gt;For example, if you receive the data of four chips, each transmitting at 40 Mbit/s, multiplexed and sent to port 1 only, set the input divider to 1:4 (40 MBit/s).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>1:1 (160 MBit/s)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1:2 (80 MBit/s)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1:4 (40 MBit/s)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QComboBox" name="inp1div">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Input Divider Settings&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The input divider of each port should be set to the data rate you expect from the FE connected to that port. In general, this should be set to 1:1, enabling 160 MBit/s transmission. If your chips are transmitting at different data rates, for example for multiplexing applications, configure the input divider to use that value.&lt;/p&gt;&lt;p&gt;For example, if you receive the data of four chips, each transmitting at 40 Mbit/s, multiplexed and sent to port 1 only, set the input divider to 1:4 (40 MBit/s).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>1:1 (160 MBit/s)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1:2 (80 MBit/s)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1:4 (40 MBit/s)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QComboBox" name="inp2div">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Input Divider Settings&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The input divider of each port should be set to the data rate you expect from the FE connected to that port. In general, this should be set to 1:1, enabling 160 MBit/s transmission. If your chips are transmitting at different data rates, for example for multiplexing applications, configure the input divider to use that value.&lt;/p&gt;&lt;p&gt;For example, if you receive the data of four chips, each transmitting at 40 Mbit/s, multiplexed and sent to port 1 only, set the input divider to 1:4 (40 MBit/s).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>1:1 (160 MBit/s)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1:2 (80 MBit/s)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1:4 (40 MBit/s)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QComboBox" name="inp3div">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Input Divider Settings&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The input divider of each port should be set to the data rate you expect from the FE connected to that port. In general, this should be set to 1:1, enabling 160 MBit/s transmission. If your chips are transmitting at different data rates, for example for multiplexing applications, configure the input divider to use that value.&lt;/p&gt;&lt;p&gt;For example, if you receive the data of four chips, each transmitting at 40 Mbit/s, multiplexed and sent to port 1 only, set the input divider to 1:4 (40 MBit/s).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>1:1 (160 MBit/s)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1:2 (80 MBit/s)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1:4 (40 MBit/s)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_ch1">
+            <property name="text">
+             <string>Port 1 (BIC + SCA)</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_ch2">
+            <property name="text">
+             <string>Port 2 (BIC)</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="label_ch3">
+            <property name="text">
+             <string>Port 3 (BIC)</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="label_ch4">
+            <property name="text">
+             <string>Port 4 (BIC)</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Input Port:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>Input Divider:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="1" column="1">
+           <widget class="QComboBox" name="roch0inp">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Readout Channel Input&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The readout channel input selector is used to enable or disable channels and to configure demultiplexing. For normal operation, all channels should be set to '&amp;lt;channel number&amp;gt; (direct)'. If channels are not in used, they can be explicitly disabled, which disables some features of this channels, which may otherwise result in error reports, as data is expected on these channels, but none was received.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="currentIndex">
+             <number>1</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>disabled</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1 (direct)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QComboBox" name="roch1inp">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Readout Channel Input&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The readout channel input selector is used to enable or disable channels and to configure demultiplexing. For normal operation, all channels should be set to '&amp;lt;channel number&amp;gt; (direct)'. If channels are not in used, they can be explicitly disabled, which disables some features of this channels, which may otherwise result in error reports, as data is expected on these channels, but none was received.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>disabled</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2 (direct)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1 (1:2, 1:4 demux @ 160 Mbit/s in)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1 (1:2 demux @ 80 Mbit/s in)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QComboBox" name="roch2inp">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Readout Channel Input&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The readout channel input selector is used to enable or disable channels and to configure demultiplexing. For normal operation, all channels should be set to '&amp;lt;channel number&amp;gt; (direct)'. If channels are not in used, they can be explicitly disabled, which disables some features of this channels, which may otherwise result in error reports, as data is expected on these channels, but none was received.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="currentIndex">
+             <number>1</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>disabled</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3 (direct)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1 (1:4 demux)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QComboBox" name="roch3inp">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Readout Channel Input&lt;/span&gt;&lt;/p&gt;&lt;p&gt;The readout channel input selector is used to enable or disable channels and to configure demultiplexing. For normal operation, all channels should be set to '&amp;lt;channel number&amp;gt; (direct)'. If channels are not in used, they can be explicitly disabled, which disables some features of this channels, which may otherwise result in error reports, as data is expected on these channels, but none was received.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>disabled</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4 (direct)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3 (1:2 demux @ 160 Mbit/s in)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1 (1:4 demux)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3 (1:2 demux @ 80 Mbit/s in)</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="roch0assoc">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Read Chip Index Setting&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This setting contains the information, which FE is connected to which BIC Port / Demux timeslot. Setting read chip index to 'Auto' makes USBpix automatically detect the correct association between the ports of the BIC or the time slot when using multiplexing and the readout channel, when using the PixScan panel. This way, during normal operation, it is not necessary to connect each FE in order to the correct BIC port. If it is set to 'Auto -&amp;gt; Save' the chip indices that were detected are statically configured after the first autodetection run.&lt;/p&gt;&lt;p&gt;When using the single-chip adapter card, this setting is disabled as only channel 1 is in use.&lt;/p&gt;&lt;p&gt;When using the burn-in adapter card, this defaults to Auto on all channels. If you wish to get the same behaviour as in previous versions, simply configure the chip indices in ascending order from left to right.&lt;/p&gt;&lt;p&gt;When using demultiplexing, setting this to 'Auto' as opposed to any other mode is highly recommended. Otherwise, tunings may fail if for some reasons the time slot association changes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Auto</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Auto -&gt; Save</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 0</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 3</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QComboBox" name="roch1assoc">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Read Chip Index Setting&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This setting contains the information, which FE is connected to which BIC Port / Demux timeslot. Setting read chip index to 'Auto' makes USBpix automatically detect the correct association between the ports of the BIC or the time slot when using multiplexing and the readout channel, when using the PixScan panel. This way, during normal operation, it is not necessary to connect each FE in order to the correct BIC port. If it is set to 'Auto -&amp;gt; Save' the chip indices that were detected are statically configured after the first autodetection run.&lt;/p&gt;&lt;p&gt;When using the single-chip adapter card, this setting is disabled as only channel 1 is in use.&lt;/p&gt;&lt;p&gt;When using the burn-in adapter card, this defaults to Auto on all channels. If you wish to get the same behaviour as in previous versions, simply configure the chip indices in ascending order from left to right.&lt;/p&gt;&lt;p&gt;When using demultiplexing, setting this to 'Auto' as opposed to any other mode is highly recommended. Otherwise, tunings may fail if for some reasons the time slot association changes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>Auto</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Auto -&gt; Save</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 0</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 3</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Read Chip Index:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>Readout Channel Input:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QComboBox" name="roch2assoc">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Read Chip Index Setting&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This setting contains the information, which FE is connected to which BIC Port / Demux timeslot. Setting read chip index to 'Auto' makes USBpix automatically detect the correct association between the ports of the BIC or the time slot when using multiplexing and the readout channel, when using the PixScan panel. This way, during normal operation, it is not necessary to connect each FE in order to the correct BIC port. If it is set to 'Auto -&amp;gt; Save' the chip indices that were detected are statically configured after the first autodetection run.&lt;/p&gt;&lt;p&gt;When using the single-chip adapter card, this setting is disabled as only channel 1 is in use.&lt;/p&gt;&lt;p&gt;When using the burn-in adapter card, this defaults to Auto on all channels. If you wish to get the same behaviour as in previous versions, simply configure the chip indices in ascending order from left to right.&lt;/p&gt;&lt;p&gt;When using demultiplexing, setting this to 'Auto' as opposed to any other mode is highly recommended. Otherwise, tunings may fail if for some reasons the time slot association changes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>Auto</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Auto -&gt; Save</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 0</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 3</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QComboBox" name="roch3assoc">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Read Chip Index Setting&lt;/span&gt;&lt;/p&gt;&lt;p&gt;This setting contains the information, which FE is connected to which BIC Port / Demux timeslot. Setting read chip index to 'Auto' makes USBpix automatically detect the correct association between the ports of the BIC or the time slot when using multiplexing and the readout channel, when using the PixScan panel. This way, during normal operation, it is not necessary to connect each FE in order to the correct BIC port. If it is set to 'Auto -&amp;gt; Save' the chip indices that were detected are statically configured after the first autodetection run.&lt;/p&gt;&lt;p&gt;When using the single-chip adapter card, this setting is disabled as only channel 1 is in use.&lt;/p&gt;&lt;p&gt;When using the burn-in adapter card, this defaults to Auto on all channels. If you wish to get the same behaviour as in previous versions, simply configure the chip indices in ascending order from left to right.&lt;/p&gt;&lt;p&gt;When using demultiplexing, setting this to 'Auto' as opposed to any other mode is highly recommended. Otherwise, tunings may fail if for some reasons the time slot association changes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>Auto</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Auto -&gt; Save</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 0</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FE 3</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Readout Channel:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="label_20">
+            <property name="text">
+             <string>Channel 2</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Channel 0</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Channel 1</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>Channel 3</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>USBCtrlEdit</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>346</x>
+     <y>759</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

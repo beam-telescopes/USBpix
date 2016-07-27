@@ -1,0 +1,1 @@
+This folder contains external classes and libraries that are used by WaferAnalysis.
