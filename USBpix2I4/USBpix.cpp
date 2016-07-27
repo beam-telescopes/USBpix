@@ -159,9 +159,15 @@ bool USBpix::FEisFEI4B()
 	return FEI4B;
 }
 
+void USBpix::StartReadout(bool enableDaq)
+{
+  confReg1->SetTot14Suppression(isTot14SuppressionRequired());
+  confReg1->StartReadout(enableDaq);
+}
+
 void USBpix::StartReadout()
 {
-  confReg1->StartReadout(); // Needed for both boards, as needed for histogramming
+  StartReadout(false);
 }
 
 void USBpix::StopReadout()
@@ -193,16 +199,25 @@ void USBpix::SetAndWriteCOLPRReg(int colpr_mode, int colpr_addr)
 
 bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int ScanValStepSize, int InjCount, int MaskStepSize, int MaskStepCount, int ShiftMask, bool all_DCs, bool special_dc_loop, bool singleDCloop)
 {
+    // Print scan parameters
+    std::cout << " \tScanVarIndex " << ScanVarIndex <<
+    "\n\tScanStartVal " << ScanStartVal << "\n\tScanStopVal " << ScanStopVal
+    << "\n\tScanValStepSize " << ScanValStepSize << "\n\tInjCount " <<
+    InjCount << "\n\tMaskStepSize " << MaskStepSize << "\n\tMaskStepCount "
+    << MaskStepCount << "\n\tShiftMask " << ShiftMask << "\n\tall_DCs " <<
+    all_DCs << "\n\tspecial_dc_loop " << special_dc_loop << "\n\tsingleDCloop "
+    << singleDCloop << std::endl; 
+
   for(auto it : readoutStatusRegisters) {
     it->reset();
   }
 
   this->memoryArbiterStatusRegister->reset();
 
-  StartReadout();
   // check for inconsistencies, if not true then scan error flag is set
   if ((ScanVarIndex >= 0) && /*(ScanVarIndex < GLOBAL_REG_ITEMS) && */(ScanStartVal >= 0) && (ScanStopVal >= 0) && (ScanValStepSize >= 0) && (ScanStartVal <= ScanStopVal) && (((ScanStopVal - ScanStartVal) == 0) || (((ScanStopVal - ScanStartVal)%ScanValStepSize) == 0)) && ((ScanValStepSize == 0) || (((ScanStopVal - ScanStartVal)/ScanValStepSize) < 1024)) && (InjCount >= 0) && (InjCount < 256) && (MaskStepSize >= 0) && (MaskStepCount >= 0) && (ShiftMask >= 0) && (ShiftMask < 16))
   {
+  StartReadout(true);
     // turn on scan LED (LED 3)
     WriteRegister(CS_SCAN_LED, 1);
 
@@ -254,18 +269,11 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
     //WriteRegister(CS_QUANTITY, 1);
     WriteRegister(CS_QUANTITY, InjCount);
 
-    // set scanStep to zero
-    confReg1->m_scanStep = 0;
-    WriteRegister(CS_CONFIGURATION_NR, confReg1->m_scanStep); // automatically sets the same for slave board...
 
     // configuration parameter loop
     // total number of steps is ((ScanStopVal - ScanStartVal) / ScanValStepSize) + 1
-    for (int ScanVal = ScanStartVal; (ScanVal <= ScanStopVal) && (confReg1->m_scanCancelled == false) && (confReg1->m_scanError == false); ScanVal += ScanValStepSize, confReg1->m_scanStep++)
+    for (int ScanVal = ScanStartVal; (ScanVal <= ScanStopVal) && (confReg1->m_scanCancelled == false) && (confReg1->m_scanError == false); ScanVal += ScanValStepSize)
     {
-      StartReadout();
-      WriteRegister(CS_CONFIGURATION_NR, (confReg1->m_scanStep%32)); // set configuration step in FPGA, do not crop to 5 bit value for interrupt readout
-
-      // set scan variable to start value
 
       for(auto it : confFEMem) {
         it->SetGlobalVal(ScanVarIndex, ScanVal);
@@ -495,16 +503,7 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
         //	;
         //}
 
-        confReg1->ReadSRAM(confReg1->m_scanStep);
-        confReg1->ClearSRAM();
-      }
-
-      // this is needed to avoid wrong m_scanStep value that is read out by GetScanStatus()
-      // expression m_scanStep is updated before tested by for loop entry condition
-      // so GetScanStatus() will read wrong value for the last step (increased by one which is not the case)
-      if (confReg1->m_scanStep  == ((ScanStopVal - ScanStartVal) / ScanValStepSize))
-      {
-        break;
+        StopReadout();
       }
     } // end for scanstep
 
@@ -612,6 +611,7 @@ void USBpix::StartHitORScan()
   //WriteRegister(CS_QUANTITY, 1);
   WriteRegister(CS_QUANTITY, 10);
 
+  StartReadout(true);
   for (int DC = 0; (DC < 40) && (confReg1->m_scanCancelled == false); DC++)
   {
     for (int pixel = PIXEL26880; (pixel <= PIXEL26240) && (confReg1->m_scanCancelled == false); pixel++)
@@ -658,8 +658,7 @@ void USBpix::StartHitORScan()
   //	;
   //}
 
-  ReadSRAM(myChipAdd.at(0));
-  ClearSRAM(myChipAdd.at(0));
+  StopReadout();
 
   SetChipAdd(old_chip_add0, (int)8);	// scans all FEs at the same time...
 
@@ -1276,20 +1275,17 @@ void USBpix::SetSRAMCounter(int startadd, int chip_addr) // set RAM address to a
 
 void USBpix::ReadSRAM(int chip_addr) // reads complete SRAM, further data handling dependent on system mode
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ReadSRAM();
+  cout << "USBpix::ReadSRAM(int) called, this should not happen!" << endl;
 }
 
 void USBpix::ReadSRAM(int scan_nr, int chip_addr) // reads complete SRAM, further data handling dependent on system mode and fills correct scansteps of ConfData
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ReadSRAM(scan_nr);
+  cout << "USBpix::ReadSRAM(int, int) called, this should not happen!" << endl;
 }
 
 void USBpix::ReadSRAM(int StartAdd, int NumberOfWords, int chip_addr) // reads SRAM partially
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ReadSRAM(StartAdd, NumberOfWords);
+  cout << "USBpix::ReadSRAM(int, int, int) called, this should not happen!" << endl;
 }
 
 void USBpix::ClearSRAM(int chip_addr) // clears SRAM
@@ -1304,15 +1300,15 @@ void USBpix::WriteSRAM(int StartAdd, int NumberOfWords, int chip_addr) // writes
     confReg1->WriteSRAM(StartAdd, NumberOfWords);
 }
 
-void USBpix::GetConfHisto(int col, int row, int confstep, int &Value, int chip_addr) // writes histogram-value for col, row, step to &Value (needs calibration mode)
+void USBpix::GetConfHisto(int col, int row, int &Value, int chip_addr) // writes histogram-value for col, row, step to &Value (needs calibration mode)
 {
   if (MultiChipWithSingleBoard)
   {
     int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
-    confReg1->GetConfHisto(col, row, confstep, roch, Value);
+    confReg1->GetConfHisto(col, row, roch, Value);
   }
   else if (chip_addr == myChipAdd.at(0))		// needs to be called for both boards independently for sure!!!
-    confReg1->GetConfHisto(col, row, confstep, 0, Value);
+    confReg1->GetConfHisto(col, row, 0, Value);
 }
 
 void USBpix::GetTOTHisto(int col, int row, int tot, int& Value, int chip_addr)
@@ -1435,6 +1431,11 @@ void USBpix::GetClusterPositionHistoFromRawData(int pX, int pY, int& rValue, int
     confReg1->GetClusterPositionHistoFromRawData(pX, pY, rValue);
 }
 
+void USBpix::SetRawDataFileName(std::string filename)
+{
+    confReg1->SetRawDataFileName(filename);
+}
+
 bool USBpix::WriteFileFromRawData(std::string filename, int chip_addr, bool new_file, bool close_file) // new raw data format, human & machine readable file format
 {
   if (MultiChipWithSingleBoard)
@@ -1452,7 +1453,7 @@ void USBpix::FinishFileFromRawData(std::string filename)
 	confReg1->FinishFileFromRawData(filename);
 }
   
-bool USBpix::isTot14SuppressionRequired()
+bool USBpix::isTot14SuppressionRequired()   // TODO: move to config register
 {
   bool suppress_tot_14 = false;
   int addr = 0; 
@@ -1540,17 +1541,17 @@ bool USBpix::WriteConfHisto(const char *filename, int chip_addr)
 	return false;
 }
 
-void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, int chip_addr)
+void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &roFifoStatus, int &CollectedEvents, int &TriggerRate, int &EventRate, int chip_addr)
 {
   if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->GetSourceScanStatus(SRAMFull, MeasurementRunning, SRAMFillLevel, CollectedEvents, TriggerRate, EventRate);
+    confReg1->GetSourceScanStatus(SRAMFull, MeasurementRunning, roFifoStatus, CollectedEvents, TriggerRate, EventRate);
 }
 
 // overloaded to add TLU veto flag while keeping compatability
-void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto, int chip_addr)
+void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &roFifoStatus, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto, int chip_addr)
 {
   if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->GetSourceScanStatus(SRAMFull, MeasurementRunning, SRAMFillLevel, CollectedEvents,
+    confReg1->GetSourceScanStatus(SRAMFull, MeasurementRunning, roFifoStatus, CollectedEvents,
                 TriggerRate, EventRate, TluVeto);
 }
 

@@ -15,6 +15,13 @@
 #include "HistogramTypes.h"
 
 #include "RawDataHistogrammer.h"
+#include "RawFileWriter.h"
+
+#include <thread>
+#include <atomic>
+#include <fstream>
+
+#define CIRC_BUFFER_SIZE (80*(SRAM_BYTESIZE))
 
 struct DllExport StrbOutputGate {
   bool m_disable_sca_strb;
@@ -93,12 +100,27 @@ public:
 	void ResetSyncCheckPattern(); // resets SyncCheckPattern
 	void ResetSRAMCounter(); // set SRAM address to 0
 	void SetSRAMCounter(int startadd); // set RAM address to any value
+    void SetTot14Suppression(bool tot14Sup);
+
+    // TODO:obsolete read out functions:
 	void ReadSRAM(); // reads complete SRAM, further data handling dependent on system mode
 	void ReadSRAM(int scan_nr); // reads complete SRAM, further data handling dependent on system mode and fills correct scansteps of ConfData
 	void ReadSRAM(int StartAdd, int NumberOfWords); // reads SRAM partially
+
+    // new read out functions:
+    void DataRoThread();            // Calls PollFeData() every 5ms
+    bool PollFeData();              // Gets all available data from the board
+    int  GetRoFifoFillLevel();      // Get the amount of data which can be fetched from the board
+    void DataProcessThread();       // Calls ConstructRecordStreams() and ProcessReceivedData() every 5ms
+    bool ConstructRecordStreams();  // Extracts the FE and trigger data from the fetched data streams
+    void ProcessReceivedData();     // Determines what to do with the data in the record streams
+    bool InitFileForRawData();      // Open the raw data file and add the header
+    void AppendRawDataFile();       // Add data to the raw data file
+    void CloseRawDataFile();        // Add the epilogue and close the raw data file
+
 	void ClearSRAM(); // clears SRAM
 	void WriteSRAM(int StartAdd, int NumberOfWords); // writes SRAM, only for debugging purposes needed
-  void GetConfHisto(int col, int row, int confStep, int readout_channel, int &Value);
+  void GetConfHisto(int col, int row, int readout_channel, int &Value);
   void GetTOTHisto(int col, int row, int tot, int &Value, int readout_channel);
   void GetTOTHisto(int col, int row, int tot, int &Value);
 	void ClearTOTHisto();
@@ -122,14 +144,15 @@ public:
 	void SetChargeCalib(unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge);
 	void ResetClusterCounters();
 
+    void SetRawDataFileName(std::string filename);
 	bool WriteFileFromRawData(std::string filename, bool new_file, bool close_file, int readout_channel); // new raw data format, human & machine readable file format
 	bool FinishFileFromRawData(std::string filename);
 	bool FileSaveRB(const char *filename, int event_quant, bool attach_data); // old raw data format
 	bool CheckDataConsisty(const char * filename, bool attach_data, bool write_summary);
 	bool WriteToTHisto(const char *filename);
 	bool WriteConfHisto(const char *filename);
-	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate);
-	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto);	// added TLU veto flag
+	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &roFifoStatus, int &CollectedEvents, int &TriggerRate, int &EventRate);
+	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &roFifoStatus, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto);	// added TLU veto flag
 	void BuildWords(); // in run mode: makes array of words out of character array
 	bool WriteSRAMWords(char* filename);
 	bool WriteSRAMBitsFromWords(char *filename);
@@ -159,6 +182,7 @@ public:
 	void EnableManEnc(bool on_off);
 	void SetManEncPhase(int phase);
   void StopReadout();
+  void StartReadout(bool enableDaq);
   void StartReadout();
   bool ReadoutStopped();
   void SetAdapterCardFlavor(int flavor);
@@ -182,14 +206,44 @@ private:
 
 	int current_phaseshift;
 
+    // Arrays to send/receive data to/from the board
 	unsigned char SRAMdata[SRAM_BYTESIZE]; // write buffer
 	unsigned char SRAMdataRB[SRAM_BYTESIZE]; // read buffer
+	unsigned char tempDataRB[SRAM_BYTESIZE];    // get data from the board
+	unsigned char circDataRB[CIRC_BUFFER_SIZE][4];  // buffer data from the board
+    std::atomic<int> cb_write;                  // write pointer for the circ buffer
+    std::atomic<int> cb_read;                   // read pointer for the circ buffer
+    unsigned long total_fetched;
+    unsigned long total_processed;
+    unsigned long total_processed_dh;
+    unsigned long total_processed_dr;
+    unsigned long total_processed_sr;
+    unsigned long total_processed_ar;
+    unsigned long total_processed_vr;
+    unsigned long num_fetched_bytes;
+    int test_histo[80][336];
 
-	void MakeConfHisto(int scan_nr); // makes hit histogram in scan mode / calib mode
+    // read out and process data threads
+    std::thread ro_thread;
+    std::thread pd_thread;
+
+    // Status and control of the read out and process data threads
+    std::atomic<bool> threads_running;
+    std::atomic<bool> threads_stop;
+    std::atomic<bool> ro_thread_stopped;
+
+    // Global file writing objects, for easyly writing the same file from
+    // different functions multiple times
+    RawFileWriter* rfw;
+    std::string   rawDataFileName;
+    std::ofstream rawDataOfStream;
+
+	void MakeConfHisto(); // makes hit histogram in scan mode / calib mode
 	void MakeTOTHisto(); // makes TOT histogram in TOT mode
 
 	bool isCalMode;
 	bool isTOTMode;
+    bool isTot14Suppressed;
 
 	unsigned int SRAMwordsRB[SRAM_WORDSIZE]; // read buffer, 32-bit words
 

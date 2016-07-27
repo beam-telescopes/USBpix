@@ -29,9 +29,9 @@ enum {CH1, CH2, CH3, CH4, MAX_BI_CHANNEL};
 #define CS_START_SYNC					14
 #define CS_INJECTION_NR					15
 #define CS_CONFIGURATION_NR				16
-#define CS_SELADD0						17
-#define CS_SELADD1						18
-#define CS_SELADD2						19
+#define CS_SRAM_FIFO_SIZE_LOW			17
+#define CS_SRAM_FIFO_SIZE_MID			18
+#define CS_SRAM_FIFO_SIZE_HIGH          19
 #define CS_STATUS_REG					20
 #define CS_RESET_SCAN					21
 #define CS_SCAN_LED						22
@@ -46,7 +46,7 @@ enum {CH1, CH2, CH3, CH4, MAX_BI_CHANNEL};
 //#define CS_ENABLE_CMD_LV1				31
 //#define CS_SYSTEM_CONF				12
 #define CS_RESET_ADD					31
-#define CS_SRAM_STATUS					32
+#define CS_SRAM_FIFO_STATUS				32
 #define CS_MEAS_STATUS					33
 #define CS_QTY_EVENTS_0					34
 #define CS_QTY_EVENTS_1					35

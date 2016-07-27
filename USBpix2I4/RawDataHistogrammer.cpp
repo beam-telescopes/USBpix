@@ -89,7 +89,7 @@ void RawDataHistogrammer::add(int col, int row, int tot)
 {
   if ((tot != 15) && (!m_suppress_tot_14 || (tot != 14)))
   {
-    ConfHisto.at(chip).at(col).at(row).at(0) += 1;
+    ConfHisto.at(chip).at(col).at(row) += 1;
     TOTHisto.at(chip).at(col).at(row).at(tot) += 1;
     count_hits++;
   }

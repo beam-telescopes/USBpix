@@ -2162,7 +2162,6 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 								  scn.getHistogramFilled(PixScan::CLSIZE_CHARGE) || scn.getHistogramFilled(PixScan::SEED_TOT) || 
 								  scn.getHistogramFilled(PixScan::SEED_LVL1) || scn.getHistogramFilled(PixScan::NSEEDS));
 		// set FPGA register
-		m_USBpix->SetSramReadoutThreshold(scn.getSramReadoutAt()); // send the SRAM ro threshold to the fpga
 		m_USBpix->WriteRegister(CS_TLU_TRIGGER_DATA_LENGTH, 15); // set TLU trigger data length (depends on TLU bit-file)
 		m_USBpix->WriteRegister(CS_TLU_TRIGGER_DATA_DELAY, scn.getTLUTriggerDataDelay()); // set additional wait cycles (5)
 		m_USBpix->SetNumberOfEvents(scn.getRepetitions()); // write #hits to FPGA register
@@ -2386,6 +2385,7 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
     }
 
     {
+        // TODO: update according to new fpga config
       if (m_USBpix->memoryArbiterStatusRegister
           ->get_fetched_cmd_fifo_overflow())
       {
@@ -2420,6 +2420,8 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
 		// store raw data in SRAM
 		//m_USBpix->SetRunMode();
 		// write new raw file
+        // The dll writes the file continuously during read-out, so it needs to know the name
+        m_USBpix->SetRawDataFileName(m_rawDataFilename);
 		m_newRawDataFile = true;
 
 		// clear SRAM
@@ -2436,8 +2438,8 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
 		m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
 		setRunMode();
 		setFERunMode();
- 		m_USBpix->StartMeasurement(); // 
-		m_USBpix->StartReadout();
+ 		m_USBpix->StartMeasurement();
+		m_USBpix->StartReadout(true);
 		m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
 		m_srcSecStart = clock()/CLOCKS_PER_SEC;  
 		m_sramReadoutReady = false;
@@ -2837,11 +2839,8 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 				unsigned int rowm = pm->iRowMod(nFe, row);
             
 				if(!TOTmode) {
-				  if(MadeHitHisto){
-				    if(type == OCCUPANCY)
-				      m_USBpix->GetConfHisto(col, row, 0, nr_hits, *it); // source scan
-				  }else 
-				    m_USBpix->GetConfHisto(col, row, i, nr_hits, *it); // normal scan, configuration parameter i starts from 0
+                    if( !( MadeHitHisto && !(type == OCCUPANCY) ) )
+                        m_USBpix->GetConfHisto(col, row, nr_hits, *it);
 				  h->set(colm, rowm, nr_hits);
 				} else {
 				  TOTsumsqr=0;
@@ -3175,6 +3174,7 @@ int USBPixController::nTrigger() {                 //! Returns the number of tri
 				if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->GetSourceScanStatus() board with chip ID "<< (*it) << endl;
 				bool measurementRunning=true; //, sramFull;
 				int sramFillLevel=0, collectedTriggers=0, triggerRate=0, eventRate=0;
+                // TODO: update with new flags and parameters
 				m_USBpix->GetSourceScanStatus(m_sramFull, measurementRunning, sramFillLevel, collectedTriggers, triggerRate, eventRate, m_tluVeto, *it);		// added m_tluVeto
 
 				m_measurementRunning |= measurementRunning;
@@ -3182,68 +3182,18 @@ int USBPixController::nTrigger() {                 //! Returns the number of tri
 				if(m_triggerRate < triggerRate) m_triggerRate = triggerRate;
 				if(m_eventRate < eventRate) m_eventRate = eventRate;
 				collectedTriggersTotal += collectedTriggers;
-				if(!measurementRunning && !m_testBeamFlag /* && m_sramReadoutReady*/) { // TODO
+				if(!measurementRunning && !m_testBeamFlag) {
 				        if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: MeasRunning(" << (*it) << ") = false => reading SRAM..."<<endl;
 					m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
 					m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
 					m_SourceScanEventQuantity = 0;
-					m_USBpix->ReadSRAM(*it);
-					if (m_MultiChipWithSingleBoard)
-					{
-						if(m_fillSrcHistos)
-						  m_USBpix->FillHistosFromRawData(*it);
-						for (std::vector<int>::iterator it2 = m_chipIds.begin(); it2 != m_chipIds.end(); it2++)
-						{
-							writeRawDataFile(false, *it2);
-						}
-						// USBpix somehow doesn't make use of chipID in MutliChip mode
-						if(m_fillClusterHistos)
-						  ClusterRawData(*it);
-					}
-					else
-					{
-						if(m_fillSrcHistos)
-							m_USBpix->FillHistosFromRawData(*it);
-						writeRawDataFile(false, *it);
-						if(m_fillClusterHistos)//DLP
-							ClusterRawData(*it);
-					}
-					m_USBpix->ClearSRAM(*it);
-				} else if(measurementRunning  && !m_testBeamFlag && (m_sramFull || m_tluVeto) ){ // when using TLU, TLU veto seems to be raised before SRAM full flag, so must trigger on the former
-				        if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: SRAMFull(" << (*it) << ") => reading SRAM..."<<endl;
-					int tbefore = clock()/CLOCKS_PER_SEC;
-					int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
-					m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
-					m_USBpix->PauseMeasurement();
-					m_USBpix->ReadSRAM(*it);
-					int tafter = clock()/CLOCKS_PER_SEC;
-					m_srcSecStart += tafter-tbefore;
-					if (m_MultiChipWithSingleBoard)
-					{
-						if(m_fillSrcHistos)
-						  m_USBpix->FillHistosFromRawData(*it);
-						for (std::vector<int>::iterator it2 = m_chipIds.begin(); it2 != m_chipIds.end(); it2++)
-						{
-							writeRawDataFile(false, *it2);
-						}
-						// USBpix somehow doesn't make use of chipID in MutliChip mode
-						if(m_fillClusterHistos)
-						  ClusterRawData(*it);
-					}
-					else
-					{
-						if(m_fillSrcHistos)
-							m_USBpix->FillHistosFromRawData(*it);
-						writeRawDataFile(false, *it);
-						if(m_fillClusterHistos)//DLP
-							ClusterRawData(*it);
-					}
-					m_USBpix->ClearSRAM(*it);
-					m_USBpix->ResumeMeasurement();
-					m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
-					//m_USBpix->StartReadout();
-				}
-			}
+
+                    // TODO: handle clustering in dll
+                    // USBpix somehow doesn't make use of chipID in MutliChip mode
+                    // if(m_fillClusterHistos)
+                    //     ClusterRawData(*it);
+			    }
+            }
 			if ((m_SourceScanEventQuantity != 0) && (collectedTriggersTotal >= m_SourceScanEventQuantity)){
 			  if(UPC_DEBUG_GEN) cout<<"DEBUG: reached event limit, stopping scan" << std::endl;
 				stopScan();
@@ -3286,79 +3236,81 @@ int USBPixController::nTrigger() {                 //! Returns the number of tri
 	}
 }
 
+// TODO: No longer working, needs continuous readout updates
 bool USBPixController::getSourceScanData(std::vector<unsigned int *>* data, bool forceReadSram) 
 {	
-	const int data_size = SRAM_WORDSIZE/MAX_CHIP_COUNT;
-
-	if(m_sourceScanBusy && !m_upcScanInit) 
-	{
-    		bool caseA = (m_measurementRunning && m_sramFull) || (!m_measurementRunning && forceReadSram)/* && m_sramReadoutReady*/;  // TODO
-		bool caseB = !m_measurementRunning/* && m_sramReadoutReady*/ && !caseA; // TODO
-
-		if(caseA || caseB)
-		{
-			if(UPC_DEBUG_GEN && caseA) std::cout << "DEBUG USBPixController::getSourceScanData : m_sramFull=" << (m_sramFull?"true":"false") <<
-			" || "<<"forceReadSram=" << (forceReadSram?"true":"false") << " => reading SRAM..." << std::endl;
-			if(UPC_DEBUG_GEN && caseB) std::cout << "DEBUG USBPixController::getSourceScanData : m_measurementRunning=false => reading SRAM..." << std::endl;
-
-			std::vector<int> ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
-
-			for(std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++)
-			{
-				// stop loop if no more meaningful chip IDs
-				if(*it==999)
-				{	
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
-					break;
-				}
-
-				m_USBpix->ReadSRAM(*it);
-				// copy sram-data to array in testbeam mode
-
-				if(m_testBeamFlag)
-				{
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Copying data"<<std::endl;
-					unsigned int* di = new unsigned int[data_size];
-					m_USBpix->GetSRAMWordsRB(di, data_size, it - m_chipIds.begin());
-
-        	  			data->push_back(di);
-       				}
-        			if(m_fillSrcHistos)
-				{
-        	  			m_USBpix->FillHistosFromRawData(*it);
-				}
-
-				writeRawDataFile(false, *it);
-
-				if(m_fillClusterHistos)
-				{
-					ClusterRawData(*it);
-				}
-      			}
-
-			//clear SRAM loop
-			for(std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++)
-			{
-        			// stop loop if no more meaningful chip IDs
-				if(*it==999)
-				{	
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
-					break;
-				}
-				m_USBpix->ClearSRAM(*it);
-			}
-			if(caseB) m_sourceScanDone=true;
-      			return true;
-		} 
-		else //not (caseA || caseB) 
-		{
-			return false;
-    		}
-  	}
-	else //not (m_sourceScanBusy && !m_upcScanInit) 
-	{
+    std::cout << "USBPixController::getSourceScanData() called, could lead to strange behaviour" << std::endl;
+//	const int data_size = SRAM_WORDSIZE/MAX_CHIP_COUNT;
+//
+//	if(m_sourceScanBusy && !m_upcScanInit) 
+//	{
+//    		bool caseA = (m_measurementRunning && m_sramFull) || (!m_measurementRunning && forceReadSram)/* && m_sramReadoutReady*/;  // TODO
+//		bool caseB = !m_measurementRunning/* && m_sramReadoutReady*/ && !caseA; // TODO
+//
+//		if(caseA || caseB)
+//		{
+//			if(UPC_DEBUG_GEN && caseA) std::cout << "DEBUG USBPixController::getSourceScanData : m_sramFull=" << (m_sramFull?"true":"false") <<
+//			" || "<<"forceReadSram=" << (forceReadSram?"true":"false") << " => reading SRAM..." << std::endl;
+//			if(UPC_DEBUG_GEN && caseB) std::cout << "DEBUG USBPixController::getSourceScanData : m_measurementRunning=false => reading SRAM..." << std::endl;
+//
+//			std::vector<int> ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
+//
+//			for(std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++)
+//			{
+//				// stop loop if no more meaningful chip IDs
+//				if(*it==999)
+//				{	
+//					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
+//					break;
+//				}
+//
+//				m_USBpix->ReadSRAM(*it);
+//				// copy sram-data to array in testbeam mode
+//
+//				if(m_testBeamFlag)
+//				{
+//					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Copying data"<<std::endl;
+//					unsigned int* di = new unsigned int[data_size];
+//					m_USBpix->GetSRAMWordsRB(di, data_size, it - m_chipIds.begin());
+//
+//        	  			data->push_back(di);
+//       				}
+//        			if(m_fillSrcHistos)
+//				{
+//        	  			m_USBpix->FillHistosFromRawData(*it);
+//				}
+//
+//				writeRawDataFile(false, *it);
+//
+//				if(m_fillClusterHistos)
+//				{
+//					ClusterRawData(*it);
+//				}
+//      			}
+//
+//			//clear SRAM loop
+//			for(std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++)
+//			{
+//        			// stop loop if no more meaningful chip IDs
+//				if(*it==999)
+//				{	
+//					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
+//					break;
+//				}
+//				m_USBpix->ClearSRAM(*it);
+//			}
+//			if(caseB) m_sourceScanDone=true;
+//      			return true;
+//		} 
+//		else //not (caseA || caseB) 
+//		{
+//			return false;
+//    		}
+//  	}
+//	else //not (m_sourceScanBusy && !m_upcScanInit) 
+//	{
 		return false;
-  	}
+//  	}
 }
 
 void USBPixController::hwInfo(string &txt){

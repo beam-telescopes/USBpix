@@ -141,7 +141,7 @@ public:
 	void ReadSRAM(int StartAdd, int NumberOfWords, int chip_addr); // reads SRAM partially
 	void ClearSRAM(int chip_addr); // clears SRAM
 	void WriteSRAM(int StartAdd, int NumberOfWords, int chip_addr); // writes SRAM, only for debugging purposes needed
-	void GetConfHisto(int col, int row, int confstep, int &Value, int chip_addr); // writes histogram-value for col, row, step to &Value (needs calibration mode)
+	void GetConfHisto(int col, int row, int &Value, int chip_addr); // writes histogram-value for col, row, step to &Value (needs calibration mode)
 	void GetTOTHisto(int col, int row, int tot, int& Value, int chip_addr);
 	void ClearTOTHisto(int chip_addr);
 	void ClearConfHisto(int chip_addr);
@@ -166,14 +166,15 @@ public:
 	void ResetClusterCounters(int pChipAddress);	//resets the trigger counter, set at the beginning of a source scan DLP
 	void SetChargeCalib(int pChipAddress, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge);	//sets the charge calibration for the clusterizer DLP
 
+    void SetRawDataFileName(std::string filename);
 	bool WriteFileFromRawData(std::string filename, int chip_addr, bool new_file, bool close_file); // new raw data format, human & machine readable file format
   void FinishFileFromRawData(std::string filename);
 	bool FileSaveRB(const char *filename, int event_quant, bool attach_data, int chip_addr); // old raw data format
 	bool CheckDataConsisty(const char * filename, bool attach_data, bool write_summary, int chip_addr);
 	bool WriteToTHisto(const char *filename, int chip_addr);
 	bool WriteConfHisto(const char *filename, int chip_addr);
-	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, int chip_addr);
-	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto, int chip_addr);	// Overloaded to add TLU veto flag
+	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &roFifoStatus, int &CollectedEvents, int &TriggerRate, int &EventRate, int chip_addr);
+	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &roFifoStatus, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto, int chip_addr);	// Overloaded to add TLU veto flag
 	void BuildWords(int chip_addr); // in run mode: makes array of words out of character array
 	bool WriteSRAMWords(char* filename, int chip_addr);
 	bool WriteSRAMBitsFromWords(char *filename, int chip_addr);
@@ -205,6 +206,7 @@ public:
 	void EnableManEnc(bool on_off);
 	void SetManEncPhase(int phase);
   size_t ConvertChipAddrToIndex(int chip_addr);
+  void StartReadout(bool enableDaq);
   void StartReadout();
   void StopReadout();
   void SetAdapterCardFlavor(int flavor);

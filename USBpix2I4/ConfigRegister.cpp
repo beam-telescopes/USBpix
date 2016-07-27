@@ -13,17 +13,27 @@
 #include "RawFileWriter.h"
 #include "defines.h"
 
+#include <iomanip>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <math.h>
 #include <string.h>
 #include <upsleep.h>
+#include <bitset>
+#include <thread>
+#include <chrono>
+#include <atomic>
 
 //#include <QMutexLocker>
 
 #define CR_DEBUG false
 #define USBPIX_SRAM_CHECK
+#define DATA_DEBUG true
+#define RO_DEBUG true
+#define THREAD_DEBUG false
+#define HEX( x ) setw(2) << setfill('0') << hex << (int)( x )
+#define DEC( x )                            dec << (int)( x )
 
 using namespace std;
 
@@ -39,10 +49,8 @@ struct sp {
 ConfigRegister::ConfigRegister(SiUSBDevice * Handle, bool isFEI4B, 
     bool MultiChipWithSingleBoard):
   ConfHisto(MultiChipWithSingleBoard?MAX_CHIP_COUNT:1, 
-    std::vector<std::vector<std::vector<int> > > (80,
-      std::vector<std::vector<int> > (336,
-        std::vector<int> (1024)
-      )
+          std::vector<std::vector<int> > (80,
+              std::vector<int> (336)
     )
   ),
   TOTHisto(MultiChipWithSingleBoard?MAX_CHIP_COUNT:1, 
@@ -70,9 +78,17 @@ ConfigRegister::ConfigRegister(SiUSBDevice * Handle, bool isFEI4B,
 	this->FEI4B = isFEI4B;
   this->MultiChipWithSingleBoard = MultiChipWithSingleBoard;
 
+    threads_running   = false;
+    threads_stop      = false;
+    ro_thread_stopped = false;
+    cb_read           = 0;
+    cb_write          = 0;
+
 	isCalMode = 0;
 	isTOTMode = 0;
+    isTot14Suppressed = false;
 
+    rawDataFileName = "rawDataFile.raw";
 	m_lengthLVL1 = 0;
 
 	current_phaseshift = 0;
@@ -197,34 +213,34 @@ bool ConfigRegister::GetTluVetoFlag()
 
 void ConfigRegister::SetCalibrationMode()
 {
-	int temp;
-	temp = ReadRegister(CS_SYSTEM_CONF);
+    int temp;
+    temp = ReadRegister(CS_SYSTEM_CONF);
 
-	if (temp == -1)
-		return;
+    if (temp == -1)
+        return;
 
-	temp &= ~0x03; // clear bits
-	temp |= 0x01; // set bits
+    temp &= ~0x03;  // clear bits
+    temp |= 0x01;   // set bits
 
-	WriteRegister(CS_SYSTEM_CONF, temp);
+    WriteRegister(CS_SYSTEM_CONF, temp);
 
-	isCalMode = 1;
-	isTOTMode = 0;
+    isCalMode = 1;
+    isTOTMode = 0;
   StartReadout();
 }
 
 void ConfigRegister::SetTOTMode()
 {
-	int temp;
-	temp = ReadRegister(CS_SYSTEM_CONF);
+    int temp;
+    temp = ReadRegister(CS_SYSTEM_CONF);
 
-	if (temp == -1)
-		return;
+    if (temp == -1)
+        return;
 
-	temp &= ~0x03; // clear bits
-	temp |= 0x02; // set bits
+    temp &= ~0x03;  // clear bits
+    temp |= 0x02;   // set bits
 
-	WriteRegister(CS_SYSTEM_CONF, temp);
+    WriteRegister(CS_SYSTEM_CONF, temp);
 
 	isCalMode = 0;
 	isTOTMode = 1;
@@ -233,15 +249,15 @@ void ConfigRegister::SetTOTMode()
 
 void ConfigRegister::SetRunMode()
 {
-	int temp;
-	temp = ReadRegister(CS_SYSTEM_CONF);
+    int temp;
+    temp = ReadRegister(CS_SYSTEM_CONF);
 
-	if (temp == -1)
-		return;
+    if (temp == -1)
+        return;
 
-	temp &= ~0x03; // clear bits
+    temp &= ~0x03;  // clear bits
 
-	WriteRegister(CS_SYSTEM_CONF, temp);
+    WriteRegister(CS_SYSTEM_CONF, temp);
 
 	isCalMode = 0;
 	isTOTMode = 0;
@@ -250,25 +266,24 @@ void ConfigRegister::SetRunMode()
 
 void ConfigRegister::SetTLUMode()
 {
-	int temp;
-	temp = ReadRegister(CS_SYSTEM_CONF);
+    int temp;
+    temp = ReadRegister(CS_SYSTEM_CONF);
 
-	if (temp == -1)
-		return;
+    if (temp == -1)
+        return;
 
-	temp |= 0x03; // set bits
+    temp |= 0x03;   // set bits
 
-	WriteRegister(CS_SYSTEM_CONF, temp);
+    WriteRegister(CS_SYSTEM_CONF, temp);
 
 	isCalMode = 1;
 	isTOTMode = 1;
   StartReadout();
 }
 
-void ConfigRegister::AutoSRAMErase()
+void ConfigRegister::AutoSRAMErase()    // TODO: modify to reset the sram fifo and buffers
 {
 	int temp, bak, rocontrol;
-  StartReadout();
 
 	bak = temp = ReadRegister(CS_SYSTEM_CONF);
 	rocontrol = ReadRegister(CS_RO_CONTROL);
@@ -291,6 +306,7 @@ void ConfigRegister::AutoSRAMErase()
 
 void ConfigRegister::StopReadout()
 {
+    if(RO_DEBUG) std::cout << "ConfigRegister::StopReadout() called" << endl;
 	int rocontrol;
 	rocontrol = ReadRegister(CS_RO_CONTROL);
 
@@ -300,9 +316,60 @@ void ConfigRegister::StopReadout()
   rocontrol &= ~(CS_RO_CONTROL_ERASE_SRAM);
   rocontrol |= CS_RO_CONTROL_STOP_READOUT;
 	WriteRegister(CS_RO_CONTROL, rocontrol);
+
+    // The read out thread stops once the board is fully read out,
+    // then the process data thread stops once all raw bit stream data is
+    // converted to record streams and processed
+    threads_stop = true;
+    if(ro_thread.joinable())
+    {
+        ro_thread.join();
+        ro_thread_stopped = true;
+        if(THREAD_DEBUG) cout << "Polling thread stopped, starting processing thread..." << endl;
+        if(THREAD_DEBUG) pd_thread = std::thread( &ConfigRegister::DataProcessThread, this );
+    }
+    if(pd_thread.joinable())
+    {
+        pd_thread.join();
+        if(RO_DEBUG) std::cout << "ConfigRegister::StopReadout() stopped threads" << endl;
+        if(DATA_DEBUG){
+            int number_of_hits = 0;
+            for (int i = 0; i < 80; i++)
+                for (int j = 0; j < 336; j++)
+                    number_of_hits += test_histo[i][j];
+            cout << "\nFinal results:\n\tFetched words:\t\t" << DEC(total_fetched)
+                << "\n\tProcessed words:\t\t"       << DEC(total_processed)
+                << "\n\tProcessed DH:\t\t\t"        << DEC(total_processed_dh)
+                << "\n\tProcessed DR:\t\t\t"        << DEC(total_processed_dr)
+                << "\n\tProcessed SR:\t\t\t"        << DEC(total_processed_sr)
+                << "\n\tProcessed AR:\t\t\t"        << DEC(total_processed_ar)
+                << "\n\tProcessed VR:\t\t\t"        << DEC(total_processed_vr)
+                << "\n\twrite pointer:\t\t\t"       << DEC(cb_write)
+                << "\n\tread pointer:\t\t\t"        << DEC(cb_read)
+                << "\n\tTotal hits:\t\t\t\t"        << DEC(number_of_hits)
+                << "\t(an average of "              << (number_of_hits/(double)(77*336)) << " per pixel)"
+                << "\n\tTotal read errors:\t\t"     << (int) (ReadRegister(CS_SRAM_FIFO_STATUS) & 0x0F)
+                << "\n\tSize of largest package:\t" << num_fetched_bytes << " bytes";
+            cout << endl;
+
+            for (int i = 0; i < 80; i++) {
+                for (int j = 0; j < 336; j++) {
+                    cout << test_histo[i][j] << " ";
+                }
+                cout << endl;
+            }
+            cout << endl;
+        }
+    }
+    threads_running = false;
 }
 
 void ConfigRegister::StartReadout()
+{
+    StartReadout(false);
+}
+
+void ConfigRegister::StartReadout(bool enableDaq)
 {
 	int rocontrol;
 	rocontrol = ReadRegister(CS_RO_CONTROL);
@@ -310,10 +377,38 @@ void ConfigRegister::StartReadout()
 	if (rocontrol == -1)
 		return;
   
-  sram_cleared = 0;
-
   rocontrol &= ~(CS_RO_CONTROL_STOP_READOUT);
 	WriteRegister(CS_RO_CONTROL, rocontrol);
+
+    // Start the threads to fetch the collected data from the board
+    if( enableDaq && !threads_running )
+    {
+        ClearSRAM();    // reset everything before starting a new run
+        sram_cleared = 0;
+
+        if(DATA_DEBUG){
+            num_fetched_bytes = 0;
+            total_fetched = 0;
+            total_processed = 0;
+            total_processed_dh = 0;
+            total_processed_dr = 0;
+            total_processed_sr = 0;
+            total_processed_ar = 0;
+            total_processed_vr = 0;
+            for (int i = 0; i < 80; i++) {
+                for (int j = 0; j < 336; j++) {
+                    test_histo[i][j] = 0;
+                }
+            }
+        }
+
+        if(RO_DEBUG) std::cout << "ConfigRegister::StartReadout() starting daq threads." << endl;
+        threads_stop      = false;
+        ro_thread_stopped = false;
+        ro_thread = std::thread( &ConfigRegister::DataRoThread,      this );
+        if(!THREAD_DEBUG) pd_thread = std::thread( &ConfigRegister::DataProcessThread, this );
+        threads_running = true;
+    }
 }
 
 bool ConfigRegister::ReadoutStopped()
@@ -790,171 +885,283 @@ void ConfigRegister::ResetSyncCheckPattern()
 
 void ConfigRegister::ResetSRAMCounter()
 {
-	WriteRegister(CS_SELADD0, 0);
-	WriteRegister(CS_SELADD1, 0);
-	WriteRegister(CS_SELADD2, 0);
+    cout << "ConfigRegister::ResetSRAMCounter() called, this should not happen!" << endl;
 }
 
 void ConfigRegister::SetSRAMCounter(int StartAdd)
 {
-	if (StartAdd >= 0)
-	{
-		WriteRegister(CS_SELADD0, (0xff & StartAdd));
-		WriteRegister(CS_SELADD1, (0xff & (StartAdd >> 8)));
-		WriteRegister(CS_SELADD2, (0xff & (StartAdd >> 16)));
-	}
+    cout << "ConfigRegister::ResetSRAMCounter(int) called, this should not happen!" << endl;
 }
 
 void ConfigRegister::ReadSRAM()
 {
-	// set address for high-speed interface
-	ResetSRAMCounter();
-
-	// clear SRAMdataRB[i]
-	for (int i = 0; i < SRAM_BYTESIZE; i++)
-		SRAMdataRB[i] = 0x00;
-
-	//QMutexLocker locker(myUSB->getMutex());
-	// high-speed read
-	myUSB->ReadBlock(SRAMdataRB, SRAM_BYTESIZE);
-	//locker.unlock();
-	ResetSRAMCounter();
-#if defined(USBPIX_SRAM_CHECK)
-	if(CR_DEBUG) {
-	  std::cout << __FILE__ << ":" << __LINE__ << ": Performing SRAM check." << std::endl;
-	}
-	unsigned char *SRAMdataRBcheck = new unsigned char[SRAM_BYTESIZE]; // read buffer
-  sp SRAMdataRBchecksp(SRAMdataRBcheck);
-	// clear SRAMdataRB[i]
-  for (int j = 0; j < 2; j++)
-  {
-    for (int i = 0; i < SRAM_BYTESIZE; i++)
-      SRAMdataRBcheck[i] = 0x00;
-    myUSB->ReadBlock(SRAMdataRBcheck, SRAM_BYTESIZE);
-    for (int i = 0; i < SRAM_BYTESIZE; i++)
-    {
-      if (SRAMdataRB[i] != SRAMdataRBcheck[i])
-      {
-	if(CR_DEBUG) {
-	  std::cout << __FILE__ << ":" << __LINE__ << ": Error @" 
-		    << std::hex << i << std::dec << " First == " 
-		    << std::hex << ((int) SRAMdataRB[i]) << std::dec 
-		    << " != " 
-		    << std::hex << ((int) SRAMdataRBcheck[i]) << std::dec 
-		    << " == Reread :(" << std::endl;
-	}
-      }
-    }
-  }
-#endif
-
-	if (isCalMode == true && isTOTMode == false) // calib mode
-	{
-		MakeConfHisto(0);
-	}
-	else if (isTOTMode == true && isCalMode == false) // ToT mode
-	{
-		MakeTOTHisto();
-	}
-	else // run mode
-	{
-
-		BuildWords();
-
-		// debugging
-		//WriteSRAMBitsFromWords("SRAMwords.raw");
-		//WriteSRAMWords("SRAMbits.raw");
-	}
+    cout << "ConfigRegister::ReadSRAM() called, this should not happen!" << endl;
 }
 
 void ConfigRegister::ReadSRAM(int scan_nr)
 {
-	// set address for high-speed interface
-	ResetSRAMCounter();
-
-	// clear SRAMdataRB[i]
-	for (int i = 0; i < SRAM_BYTESIZE; i++)
-		SRAMdataRB[i] = 0x00;
-
-	//QMutexLocker locker(myUSB->getMutex());
-	// high-speed read
-	myUSB->ReadBlock(SRAMdataRB, SRAM_BYTESIZE);
-	//locker.unlock();
-
-	if (isCalMode == true && isTOTMode == false) // calib mode
-	{
-	  //if (scan_nr == 0)
-	  //	ClearConfHisto();
-		MakeConfHisto(scan_nr);
-
-		// debugging
-		//WriteSRAMBytes("ConfHisto.raw");
-	}
-	else if (isTOTMode == true && isCalMode == false) // ToT mode
-	{
-		MakeTOTHisto();
-
-		// debugging
-		//WriteSRAMBytes("ToTHisto.raw");
-	}
-	else // run mode
-	{
-		BuildWords();
-
-		// debugging
-		//WriteSRAMBitsFromWords("SRAMwords.raw");
-		//WriteSRAMWords("SRAMbits.raw");
-
-	}
+    cout << "ConfigRegister::ReadSRAM(int) called, this should not happen!" << endl;
 }
 
 void ConfigRegister::ReadSRAM(int StartAdd, int NumberOfWords)
 {
-	if ((StartAdd >= 0) && (StartAdd < SRAM_BYTESIZE) && (StartAdd%WORDSIZE == 0) && (NumberOfWords > 0) && (NumberOfWords <= ((SRAM_WORDSIZE) - (StartAdd/WORDSIZE))))
-	{
-		// set address for high-speed interface
-		SetSRAMCounter(StartAdd);
+    cout << "ConfigRegister::ReadSRAM(int, int) called, this should not happen!" << endl;
+}
 
-		// clear SRAMdataRB[i]
-		for (int i = 0; i < SRAM_BYTESIZE; i++)
-			SRAMdataRB[i] = 0x00;
+/*
+ * Continuously get data from the board using the PollFeData() function.
+ * Polling stops when all data has been gathered and the scan has been stopped.
+ */
+void ConfigRegister::DataRoThread()
+{
+    while( true )
+        if( !PollFeData() && threads_stop )
+            return;
+        else
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
 
-		//QMutexLocker locker(myUSB->getMutex());
-		// high-speed read
-		myUSB->ReadBlock(SRAMdataRB, (NumberOfWords * WORDSIZE));
-		//locker.unlock();
+/*
+ * Construct record streams if new data is available and process the record
+ * streams (write to file or histogram). Stops if all data has been processed
+ * and the DataRoThread has stopped.
+ */
+void ConfigRegister::DataProcessThread()
+{
+    // Set up the file writer and clear histos? TODO: ugly...
+    if ( !( (!isCalMode && isTOTMode) || (isCalMode && !isTOTMode) )
+            && ( m_lengthLVL1 > 0 || m_lengthLVL1 <= 16 ) )
+        if( InitFileForRawData() )
+            rfw = new RawFileWriter(rawDataOfStream);
 
-		if (isCalMode == true && isTOTMode == false) // calib mode
-		{
-			MakeConfHisto(0);
-		}
-		else if (isTOTMode == true && isCalMode == false) // ToT mode
-		{
-			MakeTOTHisto();
-		}
-		else // run mode
-		{
-			BuildWords();
-		}
-	}
+
+    if(RO_DEBUG) cout << "Mode: CalMode: " << isCalMode << ", ToTMode: " << isTOTMode << endl;
+    while( true ) {
+        if( ConstructRecordStreams() )
+            ProcessReceivedData();
+        else if( threads_stop && ro_thread_stopped )
+            break;
+        else
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    if( !((!isCalMode && isTOTMode) || (isCalMode && !isTOTMode) ) )
+        CloseRawDataFile();
+}
+
+bool ConfigRegister::PollFeData()
+{
+    int fillLevel = GetRoFifoFillLevel();
+    fillLevel = fillLevel - ( fillLevel % 4 );  // make sure to only get complete words
+
+    if( !fillLevel )    // no new data -> nothing to do
+        return false;
+
+    // temp storage needed, since the USB driver doesn't know when the end of
+    // the array is reached TODO: implement circ buffer properly, to handle
+    // this automatically
+    myUSB->ReadBlock(tempDataRB, fillLevel);     // empty the fpga ro fifo
+    if(DATA_DEBUG) total_fetched += fillLevel/4;
+    if(DATA_DEBUG)
+		if(num_fetched_bytes < fillLevel)
+			num_fetched_bytes = fillLevel;
+
+    // transfer the data to the circular buffer TODO: ensure its threadsafe!
+    for( int i = 0; i < fillLevel/4; i++ ) {
+        for( int j = 0; j < 4; j++ ) {
+            circDataRB[cb_write][j] = tempDataRB[i*4+j];
+        }
+        if( cb_write < (CIRC_BUFFER_SIZE-1) )    // TODO: should be automatic
+            cb_write++;
+        else
+            cb_write = 0;
+    }
+    return true;
+}
+
+bool ConfigRegister::ConstructRecordStreams()
+{
+    // determine how much data there is to process
+    int unprocessed_words;   // TODO: while cb_read != cb_write ?
+    if( cb_write >= cb_read )
+        unprocessed_words = cb_write - cb_read;
+    else
+        unprocessed_words = cb_write - (cb_read - (CIRC_BUFFER_SIZE-1));
+    if( !unprocessed_words )
+        return false;
+
+    // prepare a record stream for each chip
+    int chipNo = record_streams.size();
+    for( int i = 0; i < chipNo; i++ ) {
+        delete record_streams.at(i);
+        record_streams.at(i) = new RecordStream(FEI4B);
+    }
+
+    int word = 0;
+    int chip = 0;
+    for (int word_i = 0; word_i < unprocessed_words; word_i++ ) {
+        // Build word
+        word = 0;
+        for (int byte = 0; byte < 4; byte++)
+            word = word | (circDataRB[cb_read][byte] << (byte*8));
+
+        // update cb read pointer
+        if( cb_read < (CIRC_BUFFER_SIZE-1) )
+            cb_read++;
+        else
+            cb_read = 0;
+
+        // identify word and add to record streams
+        if( word & 0x80000000 ) {               // Trigger Number
+            word = word & 0x00F8FFFF;           // set identifier
+            word = word | 0x00F80000;           // set identifier
+            for( int i = 0; i < chipNo; i++ )   // add trigger no to all streams
+                record_streams.at(i)->append(word);
+
+        } else if( (word & 0x0F000000) >> 24 < 5) {        // FE word TODO: base chip id 0 or 1?
+            chip = (word >> 24) & 0x0000000F;
+            word = word & 0x00FFFFFF;
+            if( chipNo == 1 )                       // in case the option only channel 4 is chosen
+                record_streams.at(0)->append(word); // add word to chip's stream
+            else
+                record_streams.at(chip-1)->append(word);// add word to chip's stream
+
+            // debugging
+            if(DATA_DEBUG){
+                if        (word >> 16 == 0x00e9) {
+                    total_processed_dh++;
+                    if(cb_read < 25)
+                        cout << HEX(word) << " DH: LV1ID: " << DEC((word & 0x0000BC00) >> 10)
+                            << " BCID: "  << DEC((word & 0x000003FF)      ) << endl;
+                } else if (word >> 16 == 0x00ef) {
+                    total_processed_sr++;
+                    if(cb_read < 25)
+                        cout << HEX(word) << " SR: " << HEX((word & 0x0000FFFF)) << endl;
+                } else if (word >> 16 == 0x00ea) {
+                    total_processed_ar++;
+                    if(cb_read < 25)
+                        cout << HEX(word) << " AR: " << HEX((word & 0x0000FFFF)) << endl;
+                } else if (word >> 16 == 0x00ec) {
+                    total_processed_vr++;
+                    if(cb_read < 25)
+                        cout << HEX(word) << " VR: " << HEX((word & 0x0000FFFF)) << endl;
+                } else {
+                    total_processed_dr++;
+                    if(((word & 0x000000F0) >> 4) < 14)
+                        test_histo[((word & 0x00FE0000) >> 17)-1][((word & 0x0001FF00) >>  8)-1]++;
+                    if((word & 0x0000000F) < 14)
+                        test_histo[((word & 0x00FE0000) >> 17)-1][((word & 0x0001FF00) >>  8)]++;
+                    if(cb_read < 25)
+                        cout << HEX(word) << " DR: Row: " << DEC((word & 0x00FE0000) >> 17)
+                            << " Col: " << DEC((word & 0x0001FF00) >>  8)
+                            << " TOT: " << DEC((word & 0x000000F0) >>  4)
+                            << " TOT: " << DEC((word & 0x0000000F)      )
+                            << endl;
+                }
+            }
+        } else                                  // unknown
+            std::cout << "\t\tError, unknown word: " << HEX(word) << endl;
+
+    }
+    if(DATA_DEBUG) total_processed += unprocessed_words;
+    return true;
+}
+
+void ConfigRegister::ProcessReceivedData()
+{
+    if (isCalMode == true && isTOTMode == false) {// calib mode
+        FillHistosFromRawData(true);
+    } else if (isTOTMode == true && isCalMode == false) { // ToT mode
+        FillHistosFromRawData(true);
+    } else { // run mode
+        FillHistosFromRawData(isTot14Suppressed);
+        AppendRawDataFile();
+    }
+}
+
+bool ConfigRegister::InitFileForRawData()
+{
+    if (rawDataFileName.empty())
+        return false;
+
+    rawDataOfStream.open(rawDataFileName.c_str(), ios::out);  // overwrite existing file
+    if (!rawDataOfStream.is_open())                           // fails to open file
+        return false;
+
+#ifdef __VISUALC__
+    long int start = 0;
+#endif
+
+#ifdef CF__LINUX
+    timeval start;
+    start.tv_sec=0;
+    start.tv_usec=0;
+#endif
+
+    // measure execution time
+#ifdef __VISUALC__
+    start = GetTickCount();
+#endif
+#ifdef CF__LINUX
+    gettimeofday(&start, 0);
+#endif
+
+    // create timestamp at begin of measurement
+    char timebuf[26];
+#ifdef __VISUALC__
+    ctime_s(timebuf, 26, &start_time);
+#else // CF__LINUX
+    ctime_r(&start_time, timebuf);
+#endif // __VISUALC__
+    rawDataOfStream << "#" << endl << "# " << string(timebuf) << "#" << endl;
+
+    return true;
+}
+
+void ConfigRegister::AppendRawDataFile()
+{
+    for( int rs = 0; rs < record_streams.size(); rs++ ) {
+        rawDataOfStream << "CHANNEL " << rs << std::endl;
+        rfw->digest(record_streams.at(rs));
+        rawDataOfStream.flush();
+    }
+}
+
+void ConfigRegister::CloseRawDataFile()
+{
+    if (!rawDataOfStream.is_open())
+        return;
+    rfw->epilogue(rawDataHistogrammers);
+//    char roStatus = ReadRegister(CS_SRAM_FIFO_STATUS);
+//    bool readError = roStatus & 0x01;
+//    rawDataOfStream << "Read errors: " << readError  << std::endl;
+    rawDataOfStream.close();
+}
+
+void ConfigRegister::BuildWords()
+{
+    // TODO: arrays are still needed for clustering etc, so fill them
+//    SRAMwordsRB[GetSRAMWordDataOffset(chip) + recByte/4] = word[chip]; 
+
 }
 
 void ConfigRegister::ClearSRAM()
 {
-	// set address for high-speed interface
-	ResetSRAMCounter();
+	// clear data buffers
+    for (int i = 0; i < CIRC_BUFFER_SIZE; i++)
+        for (int j = 0; j < 4; j++)
+            circDataRB[i][j] = 0x00;
+    cb_read  = 0;
+    cb_write = 0;
 
-	// clear SRAMdataRB[i]
-	for (int i = 0; i < SRAM_BYTESIZE; i++)
-		SRAMdataRB[i] = 0x00;
+    for (int i = 0; i < SRAM_BYTESIZE; i++) {
+        tempDataRB[i] = 0x00;
+        SRAMdataRB[i] = 0x00;
+        SRAMdata[i]   = 0x00;
+    }
 
-	// clear SRAMwordsRB[i]
-	for (int i = 0; i < SRAM_WORDSIZE; i++)
-		SRAMwordsRB[i] = 0x00000000;
-
-	// clear SRAMdata[i]
-	for (int i = 0; i < SRAM_BYTESIZE; i++)
-		SRAMdata[i] = 0x00;
+    for (int i = 0; i < SRAM_WORDSIZE; i++)
+        SRAMwordsRB[i] = 0x00000000;
 
   if (sram_cleared)
   {
@@ -969,58 +1176,59 @@ void ConfigRegister::ClearSRAM()
 	// high-speed write
 	//myUSB->WriteBlock(SRAMdata, SRAM_BYTESIZE);
 	//locker.unlock();
+    // TODO:BK: do sram clear check properly
   AutoSRAMErase();
   // For now, also add conventional sram clear.
-	myUSB->WriteBlock(SRAMdata, SRAM_BYTESIZE);
-
-#if defined(USBPIX_SRAM_CHECK)
-	if(CR_DEBUG) {
-	  std::cout << __FILE__ << ":" << __LINE__ << ": Performing SRAM check after SRAM clear." << std::endl;
-	}
-	unsigned char *SRAMdataRBcheck = new unsigned char[SRAM_BYTESIZE]; // read buffer
-  sp SRAMdataRBchecksp(SRAMdataRBcheck);
-	// clear SRAMdataRB[i]
-  for (int i = 0; i < SRAM_BYTESIZE; i++)
-    SRAMdataRBcheck[i] = 0;
-  myUSB->ReadBlock(SRAMdataRBcheck, SRAM_BYTESIZE);
-  int successful = 0;
-  for (int j = 0; (j < 1); j++)
-  {
-    successful = 1;
-    for (int i = 0; i < SRAM_BYTESIZE; i++)
-    {
-      if (SRAMdataRB[i] != SRAMdataRBcheck[i])
-      {
-        successful = 0;
-	if(CR_DEBUG) {
-	  std::cout << __FILE__ << ":" << __LINE__ << ": Error @" 
-		    << std::hex << i << std::dec << " First == " 
-		    << std::hex << ((int) SRAMdataRB[i]) << std::dec 
-		    << " != " 
-		    << std::hex << ((int) SRAMdataRBcheck[i]) << std::dec 
-		    << " == Reread :(" << std::endl;
-	}
-      }
-    }
-    if (!successful)
-    {
-	if(CR_DEBUG) {
-	  std::cout << __FILE__ << ":" << __LINE__ 
-		    << ": Re-clearing SRAM, try " << j
-		    << std::endl;
-	}
-      AutoSRAMErase();
-      //myUSB->WriteBlock(SRAMdata, SRAM_BYTESIZE);
-    }
-    else
-    {
-      break;
-    }
-  }
-
-  if (!successful)
-    sram_cleared = 0;
-#endif
+//	myUSB->WriteBlock(SRAMdata, SRAM_BYTESIZE);
+//
+//#if defined(USBPIX_SRAM_CHECK)
+//	if(CR_DEBUG) {
+//	  std::cout << __FILE__ << ":" << __LINE__ << ": Performing SRAM check after SRAM clear." << std::endl;
+//	}
+//	unsigned char *SRAMdataRBcheck = new unsigned char[SRAM_BYTESIZE]; // read buffer
+//  sp SRAMdataRBchecksp(SRAMdataRBcheck);
+//	// clear SRAMdataRB[i]
+//  for (int i = 0; i < SRAM_BYTESIZE; i++)
+//    SRAMdataRBcheck[i] = 0;
+//  myUSB->ReadBlock(SRAMdataRBcheck, SRAM_BYTESIZE);
+//  int successful = 0;
+//  for (int j = 0; (j < 1); j++)
+//  {
+//    successful = 1;
+//    for (int i = 0; i < SRAM_BYTESIZE; i++)
+//    {
+//      if (SRAMdataRB[i] != SRAMdataRBcheck[i])
+//      {
+//        successful = 0;
+//	if(CR_DEBUG) {
+//	  std::cout << __FILE__ << ":" << __LINE__ << ": Error @" 
+//		    << std::hex << i << std::dec << " First == " 
+//		    << std::hex << ((int) SRAMdataRB[i]) << std::dec 
+//		    << " != " 
+//		    << std::hex << ((int) SRAMdataRBcheck[i]) << std::dec 
+//		    << " == Reread :(" << std::endl;
+//	}
+//      }
+//    }
+//    if (!successful)
+//    {
+//	if(CR_DEBUG) {
+//	  std::cout << __FILE__ << ":" << __LINE__ 
+//		    << ": Re-clearing SRAM, try " << j
+//		    << std::endl;
+//	}
+//      AutoSRAMErase();
+//      //myUSB->WriteBlock(SRAMdata, SRAM_BYTESIZE);
+//    }
+//    else
+//    {
+//      break;
+//    }
+//  }
+//
+//  if (!successful)
+//    sram_cleared = 0;
+//#endif
 
 	// reset SRAM address for run mode readout
 	resetRunModeAdd();
@@ -1046,6 +1254,11 @@ void ConfigRegister::WriteSRAM(int StartAdd, int NumberOfWords)
 void ConfigRegister::resetRunModeAdd()
 {
 	WriteRegister(CS_RESET_ADD, 0x01);
+}
+
+void ConfigRegister::SetRawDataFileName(std::string filename)
+{
+    rawDataFileName = filename;
 }
 
 // writing FE-I4 source scan raw data
@@ -1177,6 +1390,12 @@ void ConfigRegister::ResetClusterCounters()
 	_clusterizer.resetRawDataCounters();
 }
 
+void ConfigRegister::SetTot14Suppression(bool tot14Sup)
+{
+    if(RO_DEBUG) cout << "tot 14 suppression set to " << tot14Sup << endl;
+    isTot14Suppressed = tot14Sup;
+}
+
 void ConfigRegister::ClearHitLV1HistoFromRawData()
 {
   for (unsigned int chip = 0; chip < HitLV1Histo.size(); chip++)
@@ -1214,14 +1433,13 @@ void ConfigRegister::ClearBCIDHistoFromRawData()
   }
 }
 
-void ConfigRegister::GetConfHisto(int col, int row, int confStep, int readout_channel, int &Value)
+void ConfigRegister::GetConfHisto(int col, int row, int readout_channel, int &Value)
 {
   if ((col < 80) && (col >= 0) 
       && (row < 336) && (row >= 0) 
-      && (confStep < 1024) && (confStep >= 0)
       && (readout_channel >= 0) && (readout_channel < (int)ConfHisto.size()))
   {
-		Value = ConfHisto.at(readout_channel).at(col).at(row).at(confStep);
+		Value = ConfHisto.at(readout_channel).at(col).at(row);
   }
 	else
   {
@@ -1235,49 +1453,17 @@ void ConfigRegister::ClearConfHisto()
 	{
 		for (unsigned int row = 0; row < 336; row++)
 		{
-			for (unsigned int confStep = 0; confStep < 1024; confStep++)
-			{
 			  for (unsigned int chipid = 0; chipid < ConfHisto.size(); chipid++)
         {
-          ConfHisto.at(chipid).at(col).at(row).at(confStep) = 0;
+          ConfHisto.at(chipid).at(col).at(row) = 0;
         }
-			}
 		}
 	} 
 }
 
-void ConfigRegister::MakeConfHisto(int confStep)
+void ConfigRegister::MakeConfHisto()
 {
-  std::vector<int> totals(ConfHisto.size(), 0);
-  for (unsigned int col = 0; col < 80; col++)
-  {
-    for (unsigned int row = 0; row < 336; row++)
-    {
-      for (unsigned int chip_id = 0; chip_id < ConfHisto.size(); chip_id++)
-      {
-        int sram_addr = 0;
-        sram_addr += col;
-        sram_addr += row * 80;
-        sram_addr += chip_id << 19;
-        ConfHisto[chip_id][col][row][confStep] += SRAMdataRB[sram_addr]; 
-        if (CR_DEBUG)
-        {
-          totals.at(chip_id) += SRAMdataRB[sram_addr];
-        }
-      }
-    }
-  }
-  if (CR_DEBUG)
-  {
-    std::cerr << __FILE__ << ":" << __LINE__ << ": ConfigRegister::MakeConfHisto(), ";
-    for (std::vector<int>::iterator it = totals.begin();
-        it != totals.end();
-        it++)
-    {
-      std::cerr << *it << " ";
-    }
-    std::cerr << std::endl;
-  }
+    FillHistosFromRawData(true);
 }
 
 void ConfigRegister::GetTOTHisto(int col, int row, int tot, int &Value, int readout_channel)
@@ -1316,25 +1502,7 @@ void ConfigRegister::ClearTOTHisto()
 
 void ConfigRegister::MakeTOTHisto()
 {
-  
-  for (unsigned int col = 0; col < 80; col++)
-    {
-      for (unsigned int row = 0; row < 336; row++)
-	{
-	  for (unsigned int tot = 0; tot < 16; tot++)
-	    {
-		  for (unsigned int chip_id = 0; chip_id < TOTHisto.size(); chip_id++)
-		    {
-		      int sram_addr = 0;
-		      sram_addr += col;
-		      sram_addr += row * 80;
-		      sram_addr += tot << 15;
-		      sram_addr += chip_id << 19;
-		      TOTHisto.at(chip_id).at(col).at(row).at(tot) = SRAMdataRB[sram_addr];
-		    }
-	    }
-	}
-    }
+    FillHistosFromRawData(true);
 }
 
 void ConfigRegister::GetHitLV1HistoFromRawData(int LV1ID, int& Value, int roch) // LV1 histogram, run mode
@@ -1389,41 +1557,6 @@ int ConfigRegister::GetSRAMByteDataOffset(int readout_channel_id)
 int ConfigRegister::GetSRAMWordDataOffset(int readout_channel_id)
 {
   return SRAM_WORDSIZE_PER_CHIP * readout_channel_id;
-}
-
-void ConfigRegister::BuildWords()
-{
-  for (unsigned int chip = 0; chip < record_streams.size(); chip++)
-  {
-    delete record_streams.at(chip);
-    RecordStream *rs = record_streams.at(chip) = new RecordStream(FEI4B);
-
-    const int chip_data_offset = GetSRAMByteDataOffset(chip);
-
-    int byte = chip_data_offset;
-    for(int i = 0; i < (SRAM_WORDSIZE_PER_CHIP); i++, byte += (WORDSIZE))
-    {
-      int bytes[4];
-
-      bytes[0] = 0;
-      bytes[1] = SRAMdataRB[byte];
-      bytes[2] = SRAMdataRB[byte + 1];
-      bytes[3] = SRAMdataRB[byte + 2];
-
-      int word = 0;
-      for (int j = 0; j < 4; j++)
-      {
-        word = (word << 8) | bytes[j];
-      }
-
-      SRAMwordsRB[GetSRAMWordDataOffset(chip) + i] = word; 
-
-      if (word)
-      {
-        rs->append(word);
-      }
-    }
-  }
 }
 
 // writing SRAM words (24-bit)
@@ -1995,13 +2128,10 @@ bool ConfigRegister::WriteConfHisto(const char *filename)
 	{
 		for (int row = 0; row < 336; row++)
 		{
-			for (int step = 0; step < 1024; step++)
-			{
         // @todo ja: support multiple chips
-				data = ConfHisto[0][col][row][step];
-				if (data != 0)	
-					fout << "0" << "\t" << row << "\t" << col << "\t" << step << "\t" << "0" << "\t" << data << endl;
-			}
+			data = ConfHisto[0][col][row];
+			if (data != 0)
+				fout << "0" << "\t" << row << "\t" << col << "\t" << "0" << "\t" << data << endl;
 		}
 	}
 
@@ -2086,10 +2216,10 @@ void ConfigRegister::ResumeMeasurement() // resume measurement
 	StartReadout();
 }
 
-// TODO: SRAMReadoutReady
-void ConfigRegister::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate)
+void ConfigRegister::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &roFifoStatus, int &CollectedEvents, int &TriggerRate, int &EventRate)
 {
-	SRAMFillLevel = (ReadRegister(CS_SRAM_STATUS)*100)/255; // SRAM filling level in percent
+    // SRAM_FIFO_FULL, FIFO_NOT_EMPTY, FIFO_NEAR_FULL, FIFO_READ_ERROR
+	roFifoStatus = ReadRegister(CS_SRAM_FIFO_STATUS);
 
 	int dataRB = ReadRegister(CS_MEAS_STATUS);
 
@@ -2098,7 +2228,7 @@ void ConfigRegister::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunnin
 	else 
 		MeasurementRunning = false;
 
-	if ((dataRB & 0x02) == 0x02)
+	if (roFifoStatus & 0x04)
 		SRAMFull = true;
 	else 
 		SRAMFull = false;
@@ -2119,12 +2249,35 @@ void ConfigRegister::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunnin
 
 // overloaded to add TLU veto flag while keeping compatability
 void ConfigRegister::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning,
-        int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate,
+        int &roFifoStatus, int &CollectedEvents, int &TriggerRate, int &EventRate,
         bool &TluVeto)
 {
     TluVeto = GetTluVetoFlag();
-    GetSourceScanStatus(SRAMFull, MeasurementRunning, SRAMFillLevel,
+    GetSourceScanStatus(SRAMFull, MeasurementRunning, roFifoStatus,
             CollectedEvents, TriggerRate, EventRate);
+}
+
+int ConfigRegister::GetRoFifoFillLevel()
+{   // TODO: make sure the fill level stays the same for all three reads in hardware. Not safe this way
+//    int low  = ReadRegister(CS_SRAM_FIFO_SIZE_LOW);
+//    int mid  = ReadRegister(CS_SRAM_FIFO_SIZE_MID);
+//    int high = ReadRegister(CS_SRAM_FIFO_SIZE_HIGH);
+    int fill_level = (ReadRegister(CS_SRAM_FIFO_SIZE_HIGH) & 0x0000000F);
+    if(fill_level) {
+        return (fill_level << 16);
+    } else {
+         fill_level = (ReadRegister(CS_SRAM_FIFO_SIZE_MID) & 0x000000FF);
+         if(fill_level) {
+             return (fill_level << 8);
+         } else {
+            fill_level = (ReadRegister(CS_SRAM_FIFO_SIZE_LOW) & 0x000000FF);
+            return (fill_level);
+         }
+    }
+
+//    int fifoFillLevel = 0;
+//    fifoFillLevel = ((high << 16) + (mid << 8) + low)*2;   // times two, since values are 16bit SRAM words
+//    return fifoFillLevel;   // number of bytes in ro fifo
 }
 
 // readout of scan status bits and scan step
