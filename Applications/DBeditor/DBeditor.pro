@@ -33,8 +33,9 @@ win32 {
   LIBS += libPixLib.lib
   LIBS += libVmeInterface.lib
   LIBS += SiLibUSB.lib
-  LIBS += USBPixI3dll.lib
-  LIBS += USBPixI4dll.lib
+  LIBS += USBpix2I3.lib
+  LIBS += USBpix2I4.lib
+  LIBS += USBpix3I4.lib
   LIBS += Suess.lib
   LIBS += libDBeditor.lib
 }

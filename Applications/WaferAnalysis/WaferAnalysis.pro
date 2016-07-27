@@ -60,7 +60,7 @@ win32{
 	           /DHAVE_PLDB /DCOMPL /DNOTDAQ /D__VISUALC__ /MP
   INCLUDEPATH += . $(ROOTSYS)/include $(DATA_VIEWER) $(PIX_LIB)  \
 	          $(PIX_LIB)/PixConfDBInterface $(PIX_ANA) $(DBEDT) \
-                  $(VME_INTERFACE) $(DAQ_BASE)/inc External
+                  $(VME_INTERFACE) $(DAQ_BASE)/inc $(USBPIX2I4) External
 
   QMAKE_LFLAGS_WINDOWS += /LIBPATH:"$(ROOTSYS)\lib" /LIBPATH:"$(DAQ_BASE)\lib"
   QMAKE_LFLAGS_CONSOLE += /LIBPATH:"$(ROOTSYS)\lib" /LIBPATH:"$(DAQ_BASE)\lib"
@@ -86,8 +86,7 @@ win32{
   LIBS += libPixLib.lib
   LIBS += libVmeInterface.lib
   LIBS += SiLibUSB.lib
-  LIBS += usbpixi3dll.lib
-  LIBS += usbpixi4dll.lib
+  LIBS += USBpix2I4.lib
   LIBS += gpac.lib
   LIBS += Suess.lib
 

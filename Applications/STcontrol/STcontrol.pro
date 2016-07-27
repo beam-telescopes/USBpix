@@ -221,9 +221,9 @@ win32{
   INCLUDEPATH += $(PIX_LIB)/PixController
   INCLUDEPATH += $(PIX_ANA)
   INCLUDEPATH += $(DBEDT)
-  INCLUDEPATH += $(USB_INCL_DIR)
-  INCLUDEPATH += $(USBPIXI3DLL)
-  INCLUDEPATH += $(USBPIXI4DLL)
+  INCLUDEPATH += $(DAQ_BASE)/inc
+  INCLUDEPATH += $(USBPIX2I3)
+  INCLUDEPATH += $(USBPIX2I4)
   INCLUDEPATH += $(PIX_RS232)
   INCLUDEPATH += $(PIX_SMTP)/src
 
@@ -253,9 +253,9 @@ win32{
   LIBS += libDBeditor.lib 
   LIBS += libDataViewer.lib
   LIBS += SiLibUSB.lib
-  LIBS += USBPixI3dll.lib
-  LIBS += USBPixI4dll.lib
-  LIBS += USBpix3.lib
+  LIBS += USBpix2I3.lib
+  LIBS += USBpix2I4.lib
+  LIBS += USBpix3I4.lib
   LIBS += PixRS232.lib
   LIBS += SMTPEmail.lib
   LIBS += Suess.lib
