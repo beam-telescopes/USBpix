@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DBTreeView</class>
+ <widget class="QWidget" name="DBTreeView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>353</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>DB TreeView</string>
+  </property>
+  <widget class="QLabel" name="textLabel1">
+   <property name="geometry">
+    <rect>
+     <x>13</x>
+     <y>225</y>
+     <width>71</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>List file  </string>
+   </property>
+   <property name="wordWrap">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="fileList">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>225</y>
+     <width>250</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>250</width>
+     <height>0</height>
+    </size>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+ <resources/>
+ <connections/>
+</ui>

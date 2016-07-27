@@ -33,10 +33,10 @@ SUBDIRS += SmtpClient-for-Qt/SMTPEmail.pro
 # higher-level libraries and applications
 SUBDIRS += Applications/PixLib
 SUBDIRS += Applications/PixAnalysis
-#SUBDIRS += Applications/DBeditor/DBeditor-lib.pro
-#SUBDIRS += Applications/DBeditor
-#SUBDIRS += Applications/DataViewer/DataViewer-lib.pro
-#SUBDIRS += Applications/DataViewer
+SUBDIRS += Applications/DBeditor/DBeditor-lib.pro
+SUBDIRS += Applications/DBeditor
+SUBDIRS += Applications/DataViewer/DataViewer-lib.pro
+SUBDIRS += Applications/DataViewer
 #SUBDIRS += Applications/WaferAnalysis
 #SUBDIRS += Applications/STcontrol
 #siusbman {

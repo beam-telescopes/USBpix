@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainPanel</class>
+ <widget class="QMainWindow" name="MainPanel">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>PixLib DBeditor</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="combLayout">
+      <item>
+       <layout class="QHBoxLayout" name="topLayout">
+        <item>
+         <spacer name="spacer4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>71</width>
+            <height>21</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="viewButton">
+          <property name="text">
+           <string>show both tree views</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="spacer3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>121</width>
+            <height>21</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="spacer9">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>21</width>
+          <height>25</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="fileNewAction"/>
+    <addaction name="fileOpenAction"/>
+    <addaction name="fileCloseAction"/>
+    <addaction name="separator"/>
+    <addaction name="fileExitAction"/>
+   </widget>
+   <widget class="QMenu" name="editMenu">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="editCutAction"/>
+    <addaction name="editCopyAction"/>
+    <addaction name="editPasteAction"/>
+    <addaction name="editPasteTreeAction"/>
+    <addaction name="editPasteRenameTreeAction"/>
+    <addaction name="separator"/>
+    <addaction name="editAdd_DBInquireAction"/>
+    <addaction name="editAdd_DBFieldAction"/>
+    <addaction name="editDelete_DB_objectAction"/>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="editMenu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="fileNewAction">
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="fileOpenAction">
+   <property name="text">
+    <string>&amp;Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="fileCloseAction">
+   <property name="text">
+    <string>C&amp;lose all files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="fileExitAction">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+  </action>
+  <action name="editCutAction">
+   <property name="text">
+    <string>C&amp;ut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="editCopyAction">
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="editPasteAction">
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="editPasteTreeAction">
+   <property name="text">
+    <string>Paste &amp;Tree</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="editPasteRenameTreeAction">
+   <property name="text">
+    <string>Paste, &amp;Rename Tree</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="editAdd_DBInquireAction">
+   <property name="text">
+    <string>Add DBInquire</string>
+   </property>
+  </action>
+  <action name="editAdd_DBFieldAction">
+   <property name="text">
+    <string>Add DBField</string>
+   </property>
+  </action>
+  <action name="editDelete_DB_objectAction">
+   <property name="text">
+    <string>Delete DBObject</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete DB object</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
