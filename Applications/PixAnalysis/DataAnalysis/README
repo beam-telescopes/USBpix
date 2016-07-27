@@ -1,0 +1,107 @@
+README for DataAnalysis
+=======================
+
+
+= Introduction =
+
+DataAnalysis is an analysis interface for the ATLAS pixel system test. It is
+based on the other PixAnalyis packages, PixLib and its underlying libraries and 
+uses QT as toolkit.
+
+
+= Building =
+
+DataAnalysis needs several libraries to build: The Pixel DAQ libraries as well as
+QT 3 (tested with QT 3.3.4) and ROOT (tested with ROOT 5.08.00). To find the former, 
+it assumes a directory layout similar to the layout in CVS, and needs environment 
+variables to be set which are evaluated in the makefile (also see Paolo Morettini's 
+daq.csh or daq.sh). In particular, the following variables are used:
+ROD_DAQ, PIX_LIB, PIX_ANA, VME_INTERFACE, DAQ_LIB_DIR
+
+DataAnalysis is qmake based, so its makefile is dynamically generated from its
+project file (DataAnalysis.pro). This can be forced with
+
+  qmake -o Makefile DataAnalysis.pro
+  make
+
+should build the DataAnalysis binary.
+
+= Short Usage Overview =
+
+- Starting DataAnalysis -
+
+DataAnalysis can be used as GUI or as command line tool.
+
+DataAnalysis   just opens the GUI
+DataAnalysis [cut file]  opens the GUI with the cuts loaded from the specified file
+DataAnalysis [cut file] [data file1, data file2, ...]   loads the cuts and the data from
+                      the specified files and starts the analysis without opening the GUI
+
+- Cuts/Actions -
+
+Open the main cut panel via the resp. menu in the main analysis panel. Each cut/action item 
+has the following properties:
+ * label: used to identify the cut item in the display and printed during analysis
+ * min/max. values: defines the minimal(maximal) value for which the module pass the
+	            test defined by action type. The cutvalue can be disabeled by "..." .
+		    If the action type is NBAD_PIX the min/max defines the percentage of the
+		    number of injections for which the Pixel is counted as bad.
+ * test type: either one of PixLib::PixScan's default scans or "ALL TYPES". If set to a PixScan
+              type, this cut/action item will only apply to scans saved with a resp. PixScan ID
+              by STcontrol. If set to "ALL TYPES", it applies to any scan, regardless if it was
+              a default PixScan type or not.
+	      To cut on the total number of bad Pixels use the test type "BAD PIXEL". This cut 
+	      is independent of histo type and action type.
+ * histo type: the PixScan histogram the action of this item applies to
+ * action type: type of analysis to be performed (e.g. arithmetic mean, # bad pixels etc)
+	        Action Types with  _0 at the end (like ARITH_MEAN_0), consider also Histogrambins
+		with zero bincontent.
+ * min/max BadPix: only if action type is NBAD_PIX. defines the minimal(maximal) number 
+                   of bad Pixels in this analysis.
+ * pixeltype: The action is perfomed only for the elected PixelTypes (normal,ganged,long,
+	      long ganged,inter ganged,all).
+	      Not valid for action type "NBAD_PIX" and test type "BAD PIXEL".
+
+
+Cuts can be stored in files and reloaded in new sessions (load/save cuts functions from the menu). 
+To give some starting point, the user can load the file "default_cuts.txt" available from CVS.
+
+From the menu, you can call: New cut, Load cuts, Save cuts. To edit cuts, double-click an item
+in the list. To delete, highlight an item and press the delete button.
+
+- Analysis -
+
+(when run from the GUI)
+ * Load or define all the actions you want to perform (see "Cuts/Actions" above).
+ * Load any file(s) you want to analyse via the File -> Open menu from the main panel. The combo box
+   should list all scans that were found.
+ * Select the test you want to analyse; leave at "all types" to analyse all.
+ * Go to Analyse -> Start to launch analysis; the result will be printed to stdout in the following 
+   format: 
+   * one paragraph per module, headed by "Module: 51XXXX"
+   * two intro-lines per scan; 1st line is formatted "Scan [scan name] - [time stamp]", 2nd line is 
+     "Load as [path]". "path" is the 2nd argument of the constructor of a PixDBData objekt, which you
+     might use to plot the resp. histograms of this scan
+   * one line each per "action" - as defined by the user in the cut list, see above: 
+     "* action [label] : [histo-type] [action] = [result]"
+
+- Status -
+
+(only when run from GUI)
+ * Create the ModuleMaps for all disks and halfshells and shows the status of the analysed Modules. 
+   If they can not assigned through pdb, they will be showed as provided by their files (sector/stave).
+   Doubleclick on the Module to get detailed information about the scan.
+ 
+ * Doubleclick on the Module in the main Window shows the status (only for analysed Modules) and 
+   detailed information about the scan.
+
+ * In the panel with the detailed information PixScan histograms are highlighted. Clicking on them  
+   show you the ModuleAnalysis output.
+
+- Open issues -
+
+ 
+ * module status (pass/fail of cuts) still needs to be defined
+
+
+ 

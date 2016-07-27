@@ -1,0 +1,51 @@
+BocAnalysis-Readme-File
+
+BocScanAnalysis.cxx/.h
+
+  The BocScanAlgoritm can be found in PixAnalysis/BocAnalysis. Up to now, only analysis of 1- or 
+  2-dimensional Boc Scans is supported.
+   
+  * overall principle
+    The algoritm looks at a scan results and determines in which regions of the scanned parameter
+    space, there have been errors. Regions of the parameter space which are not scanned are
+    considered erroneous because there is no information about their behaviour. The algoritm then
+    calculates the parameter sets which are furthest away possible from the erroneous regions in
+    number of scan steps.
+    Example: a scan with 3 steps in param 1 (verical), and 5 steps in param 2 (horizontal), could
+    the following pattern, the numbers mean distance to the errors in scan steps, that is 0 means
+    erroneous region.
+    			 0 0 1 1 1
+      			 0 1 2 2 1
+ 			 0 1 1 1 1
+       
+    In that simple case, the algoritm would recommend the settings marked by "2" here.
+         
+  * refining of the algoritm
+  	
+     The algorithm described above can for a 2-dim scan yield too many results when a good 
+     parameter region is considerably longer in one parameter than in the other. Consider
+     the following situation:
+
+   			 0 0 0 0 0 0 0 0 0 0	 
+    			 0 1 1 1 1 1 1 1 1 0
+    			 0 1 2 2 2 2 2 2 1 0
+   		         0 1 1 1 1 1 1 1 1 0
+    			 0 0 0 0 0 0 0 0 0 0
+	
+    Here, the simple algorithm would recommend all 6 settings marked by "2", but in fact one
+    would want to have only the middle two settings of them. For that reason, in a 2-dim scan,
+    the algorithm looks for long connected "lines" of previously recommended settings which, and
+    discards all of them but the middle ones.
+    Note that there might in some cases be an ambiguity due to the choice in which direction 
+    (horizontal or vertical) are looked for first. The algorithm uses the direction which has
+    more scan steps first.
+
+  * special case for phases 
+   (Rx data delay, BPM clock phase, B clock phase, V-clock 1 phase, Tx Bpm coarse delay)
+  
+    Since these parameters are phases, a delay of 25ns is equal to a delay of 0 ns. For that
+    reason, 0ns and 24ns are considered as neighbours in the analysis. A scan of e.g. 25 steps
+    in Rx data delay could therefore yield the following distance pattern:
+
+  		  11 11 10 9 8 7 6 5 4 3 2 1 0 0 0 1 2 3 4 5 6 7 8 9 10                 
+
