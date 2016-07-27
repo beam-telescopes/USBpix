@@ -32,24 +32,21 @@ PixRs232Device::PixRs232Device(Portids port) : m_port(port)
 	updateDeviceFunction();  // then it knows position
 	updateDeviceNumberChannels();
 	initializeDevice();
-	
+
 //	double posdummy = 0;
 //	printf ("Position dummy: %f\n", posdummy);
-	
+
 	//posdummy = getPositionMercury();
 	//printf ("Position dummy: %f\n", posdummy);
-	
+
 	//moveAbsolute(200);  // is waiting for the getPosition function to be within certain limits
-
-
-
 
 //	posdummy = getPositionMercury();
 //	printf ("Position dummy after moving: %f\n", posdummy);
 
 	if (PRD_DEBUG) printDevice();
-
 }
+
 PixRs232Device::~PixRs232Device(){
   ComClose(m_port);
 }
@@ -60,7 +57,6 @@ void PixRs232Device::identifyDevice()
 	// get ID of device
 	m_DeviceType = UNKNOWN;
 	m_DeviceFunction = NONE;
-
 	m_writeTerminationString = "\r\n";	//termination string of iseg CR LF, first try
 	m_readTerminationString = "\r\n";	//termination string of iseg CR LF, first try
 
@@ -68,29 +64,48 @@ void PixRs232Device::identifyDevice()
 	writeDevice("NONE");	//test string used to determine the device from the device answer
 	std::string response;
 
-	if(readDevice(response)){ //no error returned most likely if the termination string is correct
+	if (readDevice(response)) { //no error returned most likely if the termination string is correct
 		debug("PixRs232Device::identifyDevice: First termination string fits, its most likely a ISEG device");
-		if(response.compare("?WCN")==0){	//ISEQ answers to NONE with ?WCN
+		if (response.compare("?WCN")==0) {	//ISEQ answers to NONE with ?WCN
 			writeDevice("#");
 			readDevice(response);
-			if(response.length()>10){ // the response of a ISEG is rather long, this is the criterium to identify it
+			if (response.length()>10) { // the response of a ISEG is rather long, this is the criterium to identify it
 				debug("PixRs232Device::identifyDevice(): ISEQ found");
 				m_DeviceType = ISEG_SHQ;
 				return;
 			}
+
 		}
-		else{
+		else {
 			debug("PixRs232Device::identifyDevice(): ERROR: in identifying device, maybe device type unknown or not connected to selected port");
 			m_lastErrMsg += "ERROR identifying device, but correct termination strings\n";
 			m_Status = COM_ERROR;
 			return;
 		}
+
 	}
+
 	//reset errors, time out is wanted here to identify device
 	resetError();
+	//std::cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!INIZIO"<<std::endl;
+
+	m_writeTerminationString = "\r\n";	//termination string of iseg CR LF, first try
+	m_readTerminationString = "\r\n";	//termination string of iseg CR LF, first try
+	writeDevice("TE"); // test call GE_AXIS
+//	Sleep(700); // windows
+	usleep(700 * 1000); // linux
+	readDevice(response);
+	std::cout<<response<<std::endl;
+
+	if(response.compare("TEA")==0 || response.compare("TEB")==0 || response.compare("TE@")==0){
+		debug("PixRs232Device::identifyDevice(): GE_AXIS found");
+		m_DeviceType = GE_AXIS;
+		m_Status = COM_OK;
+		return;
+	}
 
 	m_writeTerminationString = "\r";	//termination string of MICOS CR, second try
-    m_readTerminationString = "\r\n\3";	//termination string of MICOS CR LF ETX, second try
+	m_readTerminationString = "\r\n\3";	//termination string of MICOS CR LF ETX, second try
 
 	writeDevice(".0VE");	//test string used to determine the device from the device answer
 	if(readDevice(response)){	//MICOS MOCO DC answers to ve with identification string Micos GmbH
@@ -123,7 +138,6 @@ void PixRs232Device::identifyDevice()
 		}
 	}
 
-
 	debug(std::string("PixRs232Device::identifyDevice(): ERROR: cannot identifiy device, maybe device type unknown"));
 	m_lastErrMsg += "ERROR: cannot identifiy device, maybe device type unknown!\n\n";
 	m_Status = COM_ERROR;
@@ -133,7 +147,7 @@ void PixRs232Device::updateDeviceFunction()
 {
 	debug("PixRs232Device::updateDeviceFunction()");
 	if (m_DeviceType == ISEG_SHQ) m_DeviceFunction = SUPPLY;
-	else if (m_DeviceType == MOCO_DC || m_DeviceType == MERCURY) m_DeviceFunction = POSITION;
+	else if (m_DeviceType == MOCO_DC || m_DeviceType == MERCURY || m_DeviceType == GE_AXIS) m_DeviceFunction = POSITION;
 	else if (m_DeviceType == JULABO) m_DeviceFunction = CHILLER;
 	else m_DeviceFunction = NONE;
 }
@@ -175,6 +189,9 @@ void PixRs232Device::updateDeviceNumberChannels()
 	else if (m_DeviceType == MERCURY){
 		m_DeviceNumberChannels = 1;
 	}
+	else if (m_DeviceType == GE_AXIS){
+        m_DeviceNumberChannels = 3;
+	}
 }
 
 void PixRs232Device::initializeDevice()
@@ -200,6 +217,13 @@ void PixRs232Device::initializeDevice()
 	if (m_DeviceType == JULABO){
 		for (unsigned int i = 0; i < m_DeviceNumberChannels; ++i)
 			initializeChannel(i);
+	}
+	if (m_DeviceType == GE_AXIS){
+		m_PowerStatus= COM_ON;
+		writeDevice("MO\r\n");
+//		Sleep(500); // windows
+		usleep(500 * 1000); // linux
+		for (unsigned int i = 0; i < m_DeviceNumberChannels; ++i)initializeChannel(i);
 	}
 }
 
@@ -234,12 +258,17 @@ void PixRs232Device::initializeChannel(unsigned int pChannel)
 		}else{
   		m_PowerStatus = COM_OFF;
 		}  // otherwise motor off
-		
+
 		writeDevice("MN", pChannel); // switch motor on
 		writeDevice("SA100000", pChannel); //set standard acceleration
 		writeDevice("SV3000", pChannel); //set standard Speed of 2000/s
 
 		m_maxSpeeds[pChannel] = 2000;
+	}
+
+	if (m_DeviceType == GE_AXIS){
+		m_maxSpeeds[pChannel] = 2000;
+                m_ActualPositionGE[pChannel] = 0;
 	}
 }
 
@@ -455,13 +484,23 @@ float PixRs232Device::getCurrent(unsigned int channel, bool )//inAutoRange)
 	return tCurr;
 }
 
+double pos=0;
 int PixRs232Device::setPosition(unsigned int pChannel, int pPosition)
 {
 	std::stringstream tDebug;
 	tDebug<<"PixRs232Device::setPosition("<<pPosition<<")";
 	debug(tDebug.str());
-	if(m_DeviceFunction != POSITION)
-		return 0;
+	if(m_DeviceFunction != POSITION) return 0;
+
+	if(m_DeviceType == GE_AXIS) {
+          char moveCommand[16];
+          double step = (pPosition - m_ActualPositionGE[pChannel]) * 0.001;
+          sprintf(moveCommand, "%dPR%f\r\n", pChannel + 1, step);
+          writeDevice(moveCommand);
+          usleep(250 * 1000);
+          m_ActualPositionGE[pChannel] = pPosition;
+        }
+
 	if(m_DeviceType == MOCO_DC){
 		if(pChannel < m_DeviceNumberChannels){
 			int tDistance = abs(pPosition-getPosition(pChannel));	//calculate the distance to go
@@ -508,7 +547,7 @@ int PixRs232Device::setPosition(unsigned int pChannel, int pPosition)
 			// new move commands
 			double pPositionDouble = pPosition;
 			moveAbsolute(pPositionDouble, pChannel);
-			
+
 		//tCommand<<"MA"<<pPosition;	//move to position
 		//writeDevice(tCommand.str(), pChannel);
 
@@ -518,6 +557,7 @@ int PixRs232Device::setPosition(unsigned int pChannel, int pPosition)
 			m_Status = COM_LIMIT;
 		}
 	}
+
 	return 0;
 }
 
@@ -528,6 +568,8 @@ void PixRs232Device::goHome()
 		return;
 	if(m_DeviceType == MOCO_DC || m_DeviceType == MERCURY)
 		writeMultiDevice("GH");
+	if(m_DeviceType == GE_AXIS)
+		return;
 }
 void PixRs232Device::setHome()
 {
@@ -536,6 +578,8 @@ void PixRs232Device::setHome()
 		return;
 	if(m_DeviceType == MOCO_DC || m_DeviceType == MERCURY)
 		writeMultiDevice("DH");
+	if(m_DeviceType == GE_AXIS)
+		return;
 }
 void PixRs232Device::getError(std::string &errtxt)
 {
@@ -561,7 +605,7 @@ void PixRs232Device::writeDevice(std::string pCommand, int pAddress)
 #ifdef WIN32
 	Sleep(50);
 #else
-	usleep(50000);
+	usleep(50 * 1000);
 #endif
 	m_lastCommand = pCommand;
 }
@@ -590,6 +634,7 @@ void PixRs232Device::printDevice()
 	else if (getDeviceType() == MOCO_DC) deviceTypeDescription = "MOCO_DC";
 	else if (getDeviceType() == MERCURY) deviceTypeDescription = "MERCURY";
 	else if (getDeviceType() == JULABO) deviceTypeDescription = "JULABO CHILLER";
+	else if (getDeviceType() == GE_AXIS) deviceTypeDescription = "GE_AXIS";
 	else deviceTypeDescription = "UNKNOWN  ";
 
 	// get device function and transfer it to a std::string
@@ -872,6 +917,11 @@ int PixRs232Device::getPosition(unsigned int pChannel)
 	debug("PixRs232Device::getPosition()");
 	if(m_DeviceFunction != POSITION)
 		return 0;
+
+        if (m_DeviceType == GE_AXIS) {
+		return pChannel;
+	}
+
 	if(m_DeviceType == MOCO_DC){
 		std::string tReadback;
 		writeDevice("TP", pChannel);
@@ -950,6 +1000,8 @@ int PixRs232Device::getSpeed(unsigned int pChannel)
 		readDevice(tReadback);
 		return MOCOstringToInt(tReadback);
 	}
+	if(m_DeviceType == GE_AXIS)
+		return 0;
 	return 0;
 }
 
@@ -961,6 +1013,8 @@ int PixRs232Device::getMaxSpeed(unsigned int pChannel)
 	if(m_DeviceType == MOCO_DC || m_DeviceType == MERCURY){
 		return m_maxSpeeds[pChannel];
 	}
+	if(m_DeviceType == GE_AXIS)
+		return 0;
 	return 0;
 }
 
@@ -1140,7 +1194,6 @@ double PixRs232Device::findReference2()   // not yet possible
 #else
   usleep(200*1000);
 #endif
-
 
 	 writeDevice("FE2", pChannel);
 	 writeDevice("WS", pChannel);

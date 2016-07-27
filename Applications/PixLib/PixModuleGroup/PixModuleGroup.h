@@ -151,6 +151,8 @@ namespace PixLib {
 		int m_lastOccAvg[32][16];
 		int m_modHVmask; // mask to store module with too high bias curr.
 
+                int m_modules_configured;
+
 		unsigned int m_nColMod, m_nRowMod;
 
 		// internal helper functions

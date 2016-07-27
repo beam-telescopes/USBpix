@@ -12,6 +12,7 @@
 //
 
 
+
 #include "PixModuleGroup/PixModuleGroup.h"
 #include "PixConfDBInterface/PixConfDBInterface.h"
 #include "PixConfDBInterface/GeneralDBfunctions.h"
@@ -37,6 +38,9 @@
 #endif
 #include <stdlib.h>
 #include "cmath"
+
+#include <time.h>
+#include <sys/time.h>
 
 
 #define PMG_DEBUG false
@@ -2418,6 +2422,8 @@ void PixModuleGroup::setupChargeCalibration(PixScan* /*scn*/)
 }
 
 void PixModuleGroup::initScan(PixScan *scn){
+	m_modules_configured = 0;
+
 	if(PMG_DEBUG)
 		std::cout<<"PixModuleGroup::initScan: run type "<<scn->getRunType()<<std::endl;
 	//This method has to prepare the module group for the scan.
@@ -2583,7 +2589,6 @@ void PixModuleGroup::prepareStep(int nloop, PixScan *scn) {
 }
 
 void PixModuleGroup::scanExecute(PixScan *scn) {
-
 	if(PMG_DEBUG) std::cout<<"PixModuleGroup::scanExecute: RunType "<<scn->getRunType()<<"\n";
 	// Backward comaptibility for apps without scanTerminate
 	m_execToTerminate = true;
@@ -2591,11 +2596,16 @@ void PixModuleGroup::scanExecute(PixScan *scn) {
 	bool isfei4 = (m_modules[0]->getFEFlavour()==PixModule::PM_FE_I4A || m_modules[0]->getFEFlavour()==PixModule::PM_FE_I4B);
 
 	if(scn->getRunType() == PixScan::NORMAL_SCAN) {
-		// configure modules
-		m_pixCtrl->setConfigurationMode();
-		// for FE-I4, be more specific and only send what is needed
-		for(int iloop=0;iloop<3;iloop++){
-			if(scn->getLoopActive(iloop)){
+                // only send the confidutation if the modules have not already been configured
+		if(!m_modules_configured)
+                {
+                  m_modules_configured = 1;
+                  // configure modules
+                  m_pixCtrl->setConfigurationMode();
+
+		  // for FE-I4, be more specific and only send what is needed
+		  for(int iloop=0;iloop<3;iloop++){
+		  	if(scn->getLoopActive(iloop)){
 				switch(scn->getLoopParam(iloop)){
 				case PixScan::VCAL:
 				  m_pixCtrl->sendGlobal(0, isfei4?"PlsrDAC":"DAC_VCAL");
@@ -2640,7 +2650,8 @@ void PixModuleGroup::scanExecute(PixScan *scn) {
 				  break; // scan var. is not on the FE
 				}
 			}
-		}
+		  }
+                }
 
 		// read DCS if requested and fill histogram
 		if(scn->getHistogramFilled(PixScan::DCS_DATA) && scn->getHistogramKept(PixScan::DCS_DATA)){
@@ -2860,7 +2871,6 @@ void PixModuleGroup::scanTerminate(PixScan *scn) {
 }
 
 void PixModuleGroup::scanLoopEnd(int nloop, PixScan *scn) {
-
 	// This method will perform the end-of-loop actions.
 	// Typically this method will upload histograms or fit results from the
 	// ROD and store them in the appropriate PixScan structures.
@@ -3101,7 +3111,6 @@ void PixModuleGroup::scanLoopEnd(int nloop, PixScan *scn) {
 }
 
 void PixModuleGroup::terminateScan(PixScan *scn){
-
 	//This method has to execute end-of-loop actions.
 
 	// Restore module configurations if needed

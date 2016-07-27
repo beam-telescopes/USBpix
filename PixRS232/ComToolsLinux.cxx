@@ -131,7 +131,7 @@ int ComOpen(unsigned uNr,int iBaud,int iParity,int iStopbits,int iDatabits)//,in
 {
 struct		serial_struct sData;
 struct      termios sPortInfo;
-char		cName[]="/dev/ttyS0";
+char		cName[]="/dev/ttyUSB0";
 int			iHandle,i;
 
 

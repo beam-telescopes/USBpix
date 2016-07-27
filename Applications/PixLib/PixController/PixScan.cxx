@@ -1858,6 +1858,32 @@ void PixScan::presetI4B(ScanType presetName) {
 		m_totTargetCharge = 20000;
 		m_restoreModuleConfig = true;
 		m_feVCal = 0x1fff;
+	    }else if (presetName== LASER_SCAN){
+	        m_repetitions = 1;
+	        m_maskStageSteps = 1;
+	        m_strobeLVL1Delay = 26;
+	        m_LVL1Latency = 210;
+	        m_lowerLVL1DelayIfSlaveBy = 2;
+	        m_TLUTriggerDataDelay = 10;
+	        m_digitalInjection = false;
+	        m_isSourceScan = true;
+	        m_maskStageMode = STATIC;
+	        m_maskStageTotalSteps = STEPS_USER;
+	        m_srcTriggerType = EXT_TRG;
+//	        m_srcCountType = COUNT_DR;
+	        m_srcCountType = COUNT_SECS;
+	        m_loopActive[0] = true;
+	        m_loopActive[1] = true;
+	        m_loopParam[0] = DCS_PAR1;
+	        m_loopParam[1] = DCS_PAR2;
+	        setLoopVarValues(0, 0, 200, 2);
+	        setLoopVarValues(1, 0, 1000, 2);
+	        m_histogramFilled[OCCUPANCY] = true;
+	        m_histogramKept[OCCUPANCY] = true;
+	        m_histogramFilled[TOT] = true;
+	        m_histogramKept[TOT] = true;
+	        m_histogramFilled[LVL1] = true;
+	        m_histogramKept[LVL1] = true;
 	} else if(presetName == HITOR_SCAN){
 		m_repetitions = 10;
 		m_strobeDuration = 50;
@@ -2033,6 +2059,7 @@ void PixScan::initConfig() {
 	m_scanTypes["MONLEAK"] = MONLEAK;
 	m_scanTypes["SOURCE_SCAN"] = SOURCE_SCAN;
 	m_scanTypes["FE_ST_SOURCE_SCAN"] = FE_ST_SOURCE_SCAN;
+    m_scanTypes["LASER_SCAN"] = LASER_SCAN;
 	m_scanTypes["NOISE_OCC"] = NOISE_OCC;
 	m_scanTypes["INJ_CALIB"] = INJ_CALIB;
 #ifdef WITH_EUDAQ

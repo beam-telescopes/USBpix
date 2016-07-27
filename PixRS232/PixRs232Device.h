@@ -12,13 +12,13 @@
 #include <string>
 #include <iostream>
 #include <map>
-#include <dllexport.h>
+#include <dllexport.h> 
 
 class DllExport PixRs232Device{
 
  public:
 
-  enum DeviceType {UNKNOWN, ISEG_SHQ, MOCO_DC, MERCURY, JULABO, ALLTYPES};
+  enum DeviceType {UNKNOWN, ISEG_SHQ, MOCO_DC, MERCURY, JULABO, ALLTYPES, GE_AXIS};
   enum DeviceFunction {NONE, SUPPLY, METER, POSITION, CHILLER, ALLFUNCTIONS};
   enum DeviceStatus {COM_OK, COM_ERROR, COM_WARNING, COM_LIMIT, COM_LOCAL};	//communication error, communication warning, device at parameter, time limit or only in local control mode
   enum DevicePowerStatus {COM_ON, COM_OFF, COM_LIM};	//on/off state of device
@@ -63,7 +63,8 @@ class DllExport PixRs232Device{
 
 	bool isMoveCompleted(unsigned int pChannel);
 
-
+	//GE_AXIS variables
+        std::map<int, int> m_ActualPositionGE;
 
   //CHILLER functions
   float getChillerCurrentTemperature(unsigned int pChannel);

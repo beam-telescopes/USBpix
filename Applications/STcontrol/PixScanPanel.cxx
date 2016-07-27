@@ -611,7 +611,7 @@ void PixScanPanel::updateConfig(){
   updateConfigHandlers();
 
   QString fname = scanFileName->text();
-  if(m_currStdScanID==PixScan::SOURCE_SCAN || m_currStdScanID==PixScan::FE_ST_SOURCE_SCAN){
+  if(m_currStdScanID==PixScan::SOURCE_SCAN || m_currStdScanID==PixScan::FE_ST_SOURCE_SCAN || m_currStdScanID==PixScan::LASER_SCAN){
     appIndRawfile->setChecked(true);
     rawBrowseButton_clicked(fname.left(fname.length()-5).toLatin1().data());
   } else if(m_currStdScanID>=0){
