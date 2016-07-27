@@ -44,6 +44,7 @@ siusbman {
 } else {
   message("Skipping QWT-based applications")
 }
+SUBDIRS += Applications/SourceMonitor
 
 # some extra cleaning needed for ROOT-generated files
 QMAKE_CLEAN += ./Applications/PixLib/PixConfDBInterface/RootDBDict.o          

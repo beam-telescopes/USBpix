@@ -1,0 +1,10 @@
+building of examples is based on QT projects. To build one of the applications, 
+start from a command prompt in which the USBpix environment was initialised via 
+the setup script, then go to the according sub-directory and call
+qmake
+(n)make clean
+(n)make
+
+To build all examples in one go, follow the same command sequence in the main Examples directory
+
+NB: Data_Conversion was re-located to Applications/Pixel/SourcAnalysis/Data_Conversion_txt
