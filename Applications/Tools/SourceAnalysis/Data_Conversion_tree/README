@@ -1,0 +1,24 @@
+In this folder you can find example code on how to process source scan 
+or externally triggered raw data files as produced by STcontrol (and
+actually also by TurboDAQ)
+
+simple_ana.cpp - contains a simple root macro plotting a hit map and 
+ToT histogram(s) from a single raw-data file
+
+raw_to_tree.cpp and cluster.cpp belong together - raw_to_tree pre-processes 
+the data such that they can be analysed cy cluster. Both need to be compiled
+with main.cpp and linked to root libraries via the QT projects:
+in USBpix main directory, call setup, then in this directory:
+qmake
+(n)make
+
+To use the raw_to_tree functionality, call from a command line
+Data_Conversion_tree --conv --tag <input data tag> -i <first index> -f <last index>
+to use the cluster functionality, call
+Data_Conversion_tree --clus --tag <input data tag> -i <first index> -f <last index>
+to call both sequentially, call
+Data_Conversion_tree --all --tag <input data tag> -i <first index> -f <last index>
+
+They can process a set of files with subsequent indices in the file name
+(like data_1.raw, data_2.raw etc.)
+

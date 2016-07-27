@@ -1,0 +1,66 @@
+This command-line application controls two conversion routines from RootDB (i.e. USBpix config. format) to RCE config
+format, and in the other direction. Execute the application without any arguments to get help.
+
+* INSTALLATION
+
+Parts of the package need boost: install the boost directory obtained from
+http://www.boost.org/users/history/version_1_55_0.html
+in this directory. only the headers are required, no need for building code.
+
+________________________________________________________________________________________________________________________
+More information of the ModRCEtoDB part of the code:
+
+author: jordan daniel roth
+e-mail: jordanroth2013@gmail.com
+
+last editted 14:02 14. August 2015
+
+_______________
+***	SUMMARY
+
+translates RCE config files into RootDB config files.
+
+takes a directory name and a file name as inputs.
+the directory name is that of the base of a tree of RCE FEI4 config files.
+the second is a *.cfg.root file in which to write a RootDB representation of those config files.
+
+always gives the error "Error in <TDirectoryFile::cd>: Unknown directory PixFe_0" when running. it's okay.
+
+_________________
+***	MORE INFO
+
+please do not hesitate to e-mail me about anything, especially if it's been less than a year or two since i worked on this.
+if you do, however, you may want to attach the files you have questions on in the e-mail. memory's not *that* stupendous.
+
+if you want to add a new field/register/thing, here's how to do it:
+
+	(1) declare the register globally;                            e.g., "PixLib::DBField * Register_New;".
+	(2) declare the register's content globally;                  e.g., "auto Register_New_content = int {-1}".
+	(3) make the register in "set_up_RootDB_field_structure()";   e.g., "Register_New = database->makeField("Register_New");".
+	(4) commit the register in "set_up_RootDB_field_structure()"; e.g., "database->DBProcess(Register_New, COMMIT, Register_New_content);".
+	(5) push the register in "set_up_RootDB_field_structure()";   e.g., "Register->pushField(Register_New);".
+	(6) delete the register in "set_up_RootDB_field_structure()"; e.g., "delete Register_New".
+	(~) if the register lives in "PixModule", you'll have to do 3-6 in "start_setting_up_ROOT_database_for_FEI4_of_flavour()", not "set_up_RootDB_field_structure()".
+	(~) if the register contents need to be altered after initialization, this is done in exactly one of "start_setting_up_ROOT_database_for_FEI4_of_flavour()", "fill_shared_registers_with()", "fill_unique_registers_with()", or the other "fill_unique_registers_with()".
+	(~) if the register lives only in the FEI4A or -B, you'll need to add a "if (flavour == FEI4A)" or "if (flavour == FEI4B)" in front of the code snippets in 3-6.
+
+in order to remove a register, you pretty much just use Ctrl+f and delete every line you find it in.
+
+the code is organized like so:
+
+	declarations for stuff used in "main()".
+	"main()".
+	declarations for stuff used in the stuff used in "main()".
+	definitions of all the stuff, hopefully in the same order as the declarations.
+
+Ctrl+f is your friend.
+
+the following registers may mess things up:
+
+	Misc_Index
+	Misc_Address
+	Misc_CInjLo
+
+i just couldn't figure out very well what to do with them from "ModDBtoRCE".
+the fact that they appear consecutively has nothing to do with it.
+
