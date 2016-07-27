@@ -1,0 +1,168 @@
+#This file contains the settings for Wafer Analysis, sorted in different sections.
+#For example it contains a list of scans, DCS names, chip calibration, Global register names and 
+#PixControler settings that will be analyzed.
+#For help see ReadMeForSettings.txt
+
+
+[Scans]
+GR=GR_TEST
+PR=PR Test
+PRodd=PR odd 1
+PReven=PR even 1
+DigitalTest=DIGITAL_TEST 2
+AnalogTest=ANALOG_TEST
+ThresholdScan=THRESHOLD_SCAN with HV
+ThresholdScanNoHV=THRESHOLD_SCAN no HV
+ThresholdScanInTime=INTIME_THRESH_SCAN
+CrossTalkScanWithHV=CROSSTALK_CHECK with HV
+CrossTalkScanNoHV=CROSSTALK_CHECK no HV
+GADC_VDDAScan_FE0=GADC VDDA Scan FE0
+GADC_VDDAScan_FE1=GADC VDDA Scan FE1
+GADC_PlsrDACscan_FE0=GADC PulserDAC scan FE0
+GADC_PlsrDACscan_FE1=GADC PulserDAC scan FE1
+IVscan=IV_SCAN
+SourceScan=FE_ST_SOURCE_SCAN Am
+LV_Scan_FE0_VDDA=LV_MEAS_FE0_VDDA
+LV_Scan_FE0_VDDD=LV_MEAS_FE0_VDDD
+LV_Scan_FE1_VDDA=LV_MEAS_FE1_VDDA
+LV_Scan_FE1_VDDD=LV_MEAS_FE1_VDDD
+PixelScanMaskENABLE=ANALOG_TEST Masked
+HitDiscScan0=ToT-Code Check HitDiscCnfg 0
+HitDiscScan1=ToT-Code Check HitDiscCnfg 1
+HitDiscScan2=ToT-Code Check HitDiscCnfg 2
+NOccScan3000=NOISE_OCC 3000
+ScanNotAnalyzed1=GDAC_FAST_TUNE
+ScanNotAnalyzed2=GDAC_FAST_TUNE 1
+ScanNotAnalyzed3=GDAC_FAST_TUNE 2
+ScanNotAnalyzed4=GDAC_FAST_TUNE 1500
+ScanNotAnalyzed5=GDAC_FAST_TUNE 2000
+ScanNotAnalyzed6=GDAC_FAST_TUNE 2500
+ScanNotAnalyzed7=IF_TUNE 1
+ScanNotAnalyzed8=FDAC_TUNE
+ScanNotAnalyzed9=TDAC_FAST_TUNE 1
+ScanNotAnalyzed10=TDAC_FAST_TUNE 2
+ScanNotAnalyzed11=T0_SCAN
+ScanNotAnalyzed12=TOT_CALIB_LUT
+ScanNotAnalyzed13=DIGITAL_TEST High Threshold
+ScanNotAnalyzed14=Analog to create CAP0 mask
+ScanNotAnalyzed15=Analog to create CAP1 mask
+ScanNotAnalyzed16=TOT_VERIF 1
+ScanNotAnalyzed17=TOT_VERIF 2
+ScanNotAnalyzed18=RX_DELAY_SCAN 1
+ScanNotAnalyzed19=RX_DELAY_SCAN 2
+ScanNotAnalyzed20=NOISE_OCC 3000
+ScanNotAnalyzed21=NOISE_OCC 2500
+ScanNotAnalyzed22=NOISE_OCC 2000
+ScanNotAnalyzed23=NOISE_OCC 1500
+
+
+
+[DCSGraphAnaValues]
+#IDDA1AP=IDDA1_UNCFG
+#IDDA2AP=IDDA2_UNCFG
+#IDDD1AP=IDDD1_UNCFG
+#IDDD2AP=IDDD2_UNCFG
+#IDDA1M=IDDA1_MIDI
+#IDDA2M=IDDA2_MIDI
+#IDDD1M=IDDD1_MIDI
+#IDDD2M=IDDD2_MIDI
+#IDDA1CONF=IDDA1_AFTER_CFG
+#IDDA2CONF=IDDA2_AFTER_CFG
+#IDDD1CONF=IDDD1_AFTER_CFG
+#IDDD2CONF=IDDD2_AFTER_CFG
+
+[GlobalRegValues]
+#VthinAF=GlobalRegister_Vthin_AltFine
+#SetSN=GlobalRegister_Chip_SN
+
+[PixCrtlSetting]
+#Iref_set=general_IrefPads
+
+[ChipCalibration]
+#PlsrDACoffs=Misc_VcalGradient0
+#PlsrDACslopeST=Misc_VcalGradient1
+#CapCalibST=Misc_CInjHi
+
+[AddToTotalCount]
+AnalogTest=1
+DigitalTest=1
+ThresholdScan=1
+PR=1
+CrossTalkScanWithHV=1
+SourceScan=1
+#HitDiscScan=1
+analyzeBumpConnection=1
+analyzePixelShorts=1
+NOccScan3000=1
+PixelScanMaskENABLE=1
+
+
+[DACscanAnalysisSettings]
+GADC_VDDAScan_FE0:VrefAnTune [DAC]:GADC [ADC Counts]:1:1e3:1e0
+GADC_VDDAScan_FE1:VrefAnTune [DAC]:GADC [ADC Counts]:1:1e3:1e0
+GADC_PlsrDACscan_FE0:PlsrDAC [DAC]:GADC [ADC Counts]:1:1e1:1e0
+GADC_PlsrDACscan_FE1:PlsrDAC [DAC]:GADC [ADC Counts]:1:1e1:1e0
+LV_Scan_FE0_VDDA:VrefAnTune [DAC]:Supply Voltage [V]:1e3:1e1:1e0
+LV_Scan_FE0_VDDD:VrefDigTune [DAC]:Supply Voltage [V]:1e3:1e1:1e0
+LV_Scan_FE1_VDDA:VrefAnTune [DAC]:Supply Voltage [V]:1e3:1e1:1e0
+LV_Scan_FE1_VDDD:VrefDigTune [DAC]:Supply Voltage [V]:1e3:1e1:1e0
+
+[PostProcessing]
+CheckForAbortRun=0
+TotalCount=1
+CalculateResult=0
+CheckBumpConnection=1
+CheckPixelShorts=1
+CompareResults=0
+WriteProjectFilePerWafer=1
+
+[CheckForAbort]
+#IDDA1AP
+#IDDA2AP
+#IDDD1AP
+#IDDD2AP
+#IDDA1CONF
+#IDDA2CONF
+#IDDD1CONF
+#IDDD2CONF
+
+[CalculateResult]
+
+[CompareResults]
+#PlsrDACslopeST=PlsrDACslope:3:Blue
+#CapCalibST=CapCalib:3:Blue
+#IrefST=IrefBestDAC:0:Blue
+
+[ZoomDistributionPlots]
+#IDDD2AP
+#TotalPixelsFail
+#PixAnClowFail
+
+[CheckPixelShorts]
+SearchDistance=-1/-1:-1/0:-1/1:0/-1:0/0:0/1:1/-1:1/0:1/1
+
+[IVcurveAnalysis]
+OperationPointSingleChip=-20
+OperationPointDoubleChip=-80
+SlopeAtBreakdown=0.00000002
+CurrentLimit=0.000009
+Smoothing=5
+
+[ExportOverviewData]
+ChipNr:Module
+IrefBestDAC:Iref
+CapCalib:Cin[aF]
+PlsrDACslope:VcalSlope[uV/DAC]
+status:Status
+
+[PlotSettings]
+OutputPath=../results
+STcontrolColorPalette=0
+MapPlotRangeInSigma=8
+HistogramPlotRangeInSigma=16
+ScatterPlotRangeInSigma=24
+1DHistFillColor=5
+ScatterDotColor=1
+
+[ConfigDataFilePath]
+../config

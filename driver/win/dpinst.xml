@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<dpInst>
+    <language code="0x0409">
+        <dpinstTitle>S3 Multi IO System 32/64 bit Driver Installation</dpinstTitle>
+        <welcomeTitle>S3 Multi IO System Driver for 32/64 bit Windows systems!</welcomeTitle>
+        <welcomeIntro>This wizard will walk you through installing the driver for the S3 Multi IO System. Version 2.0.1.7 from 01/22/2013</welcomeIntro>
+    </language>
+    <language code="0x0407">
+        <dpinstTitle>S3 Multi IO System 32/64 bit Driver Installation</dpinstTitle>
+        <welcomeTitle>S3 Multi IO System Driver for 32/64 bit Windows systems!</welcomeTitle>
+        <welcomeIntro>This wizard will walk you through installing the driver for the S3 Multi IO System. Version 2.0.1.7 from 01/22/2013</welcomeIntro>
+    </language>
+    <icon>silab.ico</icon>
+    <legacyMode>ON</legacyMode>
+</dpInst>
+

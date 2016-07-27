@@ -1,0 +1,176 @@
+#This file contains the settings for Wafer Analysis, sorted in different sections.
+#For example it contains a list of scans, DCS names, chip calibration, Global register names and 
+#PixControler settings that will be analyzed.
+#For help see ReadMeForSettings.txt
+
+[Scans]
+RXDelay=RX Delay Scan
+RXDelay2=RX Delay Scan 2
+GR0=GR test all 0
+GR1A=GR test all 1 A
+GR1B=GR test all 1 B
+GR1C=GR test all 1 C
+GR1D=GR test all 1 D
+GR1E=GR test all 1 E
+GR1F=GR test all 1 F
+SC_CMD=Scan Chain CMD
+SC_DOB=Scan Chain DOB
+SC_ECL=Scan Chain ECL
+#ChipSN1=read GR for EFUSE
+ChipSN2=read GR for EFUSE 2
+CapCalib=Cap calibration
+PlsrDAC=PlsrDAC calib
+Iref=Iref Scan
+VrefDig=VrefOutDigital Scan
+VrefAn=VrefOutAnalog Scan
+InjFreqCurrScan=current @ high inj freq
+HitOrScan=HitOr Scan
+PRE=PR test even 1
+PRO=PR test odd 1
+ServiceRecords1=request service records 1
+ServiceRecords2=request service records 2
+ServiceRecords3=request service records 3
+ServiceRecords4=request service records 4
+ServiceRecords5=request service records 5
+AnalogTest=analog test
+AnalogTestChigh=Chigh analog test
+AnalogTestClow=Clow analog test
+DigitalTest=digital test
+ThresholdScan=Threshold Scan
+BufferTest=buffer tot test
+CrossTalkScan=Crosstalk Scan
+CheckPixelDisable=check pixel disable
+LatencyTest=latency test
+ESLtest=check ESL
+ESLtestAfterECR=check ESL after ECR
+InjDelScan=Injection Delay Scan
+
+[DCSGraphAnaValues]
+IDDA1AP=IDDA1_UNCFG
+IDDA2AP=IDDA2_UNCFG
+IDDD1AP=IDDD1_UNCFG
+IDDD2AP=IDDD2_UNCFG
+IDDA1M=IDDA1_MIDI
+IDDA2M=IDDA2_MIDI
+IDDD1M=IDDD1_MIDI
+IDDD2M=IDDD2_MIDI
+IDDA1CONF=IDDA1_AFTER_CFG
+IDDA2CONF=IDDA2_AFTER_CFG
+IDDD1CONF=IDDD1_AFTER_CFG
+IDDD2CONF=IDDD2_AFTER_CFG
+#BgAn=BgRef_An
+#BgDig=BgRef_Dig
+BgAn0=BgRef_An0
+BgDig0=BgRef_Dig0
+BgAn1=BgRef_An1
+BgDig1=BgRef_Dig1
+BgAn2=BgRef_An2
+BgDig2=BgRef_Dig2
+IrefST=Iref Scan_ana
+
+[GlobalRegValues]
+#VthinAF=GlobalRegister_Vthin_AltFine
+SetSN=GlobalRegister_Chip_SN
+
+[PixCrtlSetting]
+#Iref_set=general_IrefPads
+
+[ChipCalibration]
+#PlsrDACoffs=Misc_VcalGradient0
+PlsrDACslopeST=Misc_VcalGradient1
+CapCalibST=Misc_CInjHi
+
+[AddToTotalCount]
+AnalogTest=1
+AnalogTestChigh=1
+AnalogTestClow=1
+DigitalTest=1
+#ThresholdScan=1
+#ScurveFailed=1
+HitOrScan=1
+#BufferTest=1
+CrossTalkScan=1
+CheckPixelDisable=1
+LatencyTest=1
+PR=1
+ESLtest=1
+ESLtestAfterECR=1
+
+[DACscanAnalysisSettings]
+Iref:Iref [PAD]:Current [uA]:1e9:1e9:1e19:2000
+VrefDig:VrefDigSetting [DAC]:VrefDig [mA]:1e3:1e6:1e8
+VrefAn:VrefAnSetting [DAC]:VrefAn [mA]:1e3:1e6:1e8
+
+[PostProcessing]
+#AddAptasicColumn=1
+CheckForAbortRun=1
+TotalCount=1
+CorrectVrefs=1
+CalculateResult=1
+CompareResults=1
+
+[CheckForAbort]
+IDDA1AP
+IDDA2AP
+IDDD1AP
+IDDD2AP
+IDDA1CONF
+IDDA2CONF
+IDDD1CONF
+IDDD2CONF
+
+[CalculateResult]
+ThrMeanCorr=CapCalib/CapCalibST*PlsrDACslope/PlsrDACslopeST*ThrMean
+ThrSigCorr=CapCalib/CapCalibST*PlsrDACslope/PlsrDACslopeST*ThrSig
+NoiMeanCorr=CapCalib/CapCalibST*PlsrDACslope/PlsrDACslopeST*NoiMean
+NoiSigCorr=CapCalib/CapCalibST*PlsrDACslope/PlsrDACslopeST*NoiSig
+
+[CorrectBandGaps]
+BgAn0=IDDA1AP:IDDA2AP:IDDD1AP:IDDD2AP
+BgDig0=IDDA1AP:IDDA2AP:IDDD1AP:IDDD2AP
+BgAn1=IDDA1CONF:IDDA2CONF:IDDD1CONF:IDDD2CONF
+BgDig1=IDDA1CONF:IDDA2CONF:IDDD1CONF:IDDD2CONF
+BgAn2=IDDA1M:IDDA2M:IDDD1M:IDDD2M
+BgDig2=IDDA1M:IDDA2M:IDDD1M:IDDD2M
+
+[CorrectTunVrefs]
+VrefDigMin:BgDig1:BgAn1
+VrefDigMax:BgDig1:BgAn1
+VrefAnMin:BgDig1:BgAn1
+VrefAnMax:BgDig1:BgAn1
+
+[CapacitanceCorrection]
+Offset=-1360.
+Dividor=1.081
+Voltage=1000
+
+[CompareResults]
+PlsrDACslopeST=PlsrDACslope:3:Blue
+CapCalibST=CapCalib:3:Blue
+IrefST=IrefBestDAC:0:Blue
+
+[ZoomDistributionPlots]
+#IDDD2AP:-10:10
+
+[ExportToXML]
+status=Status
+CapCalib=InjectionCapacitance
+TotalPixelsFail=FailingPixels
+PixAnFail=AnalogFailingPixels
+PixDigFail=DigitalFailingPixels
+TotalColumnsFail=FailingColumns
+ThrMeanCorr=ThresholdMean
+NoiMeanCorr=NoiseMean
+PlsrDACslope=PlsrDACslope
+IDDA2CONF=DigitalCurrent
+IDDD2CONF=AnalogCurrent
+RunAborted=RunAborted
+ChipSN2=SerialNumber
+
+[ExportOverviewData]
+ChipNr:Chip
+ChipSN2:SN
+IrefBestDAC:Iref
+CapCalib:Cin[aF]
+PlsrDACslope:VcalSlope[uV/DAC]
+status:Status
