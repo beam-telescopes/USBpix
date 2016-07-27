@@ -37,18 +37,20 @@ SUBDIRS += Applications/DBeditor/DBeditor-lib.pro
 SUBDIRS += Applications/DBeditor
 SUBDIRS += Applications/DataViewer/DataViewer-lib.pro
 SUBDIRS += Applications/DataViewer
-#SUBDIRS += Applications/WaferAnalysis
-#SUBDIRS += Applications/STcontrol
-#siusbman {
-#  SUBDIRS += Applications/SiUSBman
-#} else {
-#  message("Skipping QWT-based applications")
-#}
+SUBDIRS += Applications/WaferAnalysis
+SUBDIRS += Applications/STcontrol
+siusbman {
+  SUBDIRS += Applications/SiUSBman
+} else {
+  message("Skipping QWT-based applications")
+}
 
 # some extra cleaning needed for ROOT-generated files
 QMAKE_CLEAN += ./Applications/PixLib/PixConfDBInterface/RootDBDict.o          
 QMAKE_CLEAN += ./Applications/PixLib/PixConfDBInterface/RootDBDict.h
 QMAKE_CLEAN += ./Applications/PixLib/PixConfDBInterface/RootDBDict.cxx
+QMAKE_CLEAN += ./Applications/PixLib/PixConfDBInterface/RootDBDict_rdict.pcm
 QMAKE_CLEAN += ./Applications/PixLib/PixDbInterface/RootDbDict.o
 QMAKE_CLEAN += ./Applications/PixLib/PixDbInterface/RootDbDict.cxx
 QMAKE_CLEAN += ./Applications/PixLib/PixDbInterface/RootDbDict.h
+QMAKE_CLEAN += ./Applications/PixLib/PixDbInterface/RootDbDict_rdict.pcm
