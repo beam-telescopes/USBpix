@@ -1,0 +1,12 @@
+on CCentos7, xc3sprog can be built from source. cmake and the ftdi 
+packages are required, so you might have to install that first:
+add file elrepo.repo in this directory to /etc/yum.repos.d, then call:
+sudo yum install cmake libftdi libftdi-devel
+
+Building/installatuion - the last step will install into /usr/local, 
+so you'll need root rights: best run the entire procedure as root:
+svn co https://xc3sprog.svn.sourceforge.net/svnroot/xc3sprog/trunk xc3sprog
+cd xc3sprog
+cmake . 
+make 
+make install 
