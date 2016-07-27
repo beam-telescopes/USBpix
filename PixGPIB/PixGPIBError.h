@@ -1,0 +1,33 @@
+///////////////////////////////////////////////////////////////////
+// PixGPIBError.h
+//   Header file for class PixGPIBError
+///////////////////////////////////////////////////////////////////
+// (c) ATLAS Pixel Detector software
+///////////////////////////////////////////////////////////////////
+// 
+///////////////////////////////////////////////////////////////////
+//  Version 00-00-01 21/011/2008 Daniel Dobos
+///////////////////////////////////////////////////////////////////
+
+#ifndef PixGPIBError_H
+#define PixGPIBError_H
+
+#include <string>
+#include <sstream>
+#include <dllexport.h>
+
+class DllExport PixGPIBError
+{
+
+public:
+  PixGPIBError(bool useStdout=true);
+  void printGPIBError(const char *msg);
+  void getError(std::string&);
+
+private:
+  bool m_useStdout;
+  std::stringstream m_errMsg;
+
+};
+
+#endif //PixGPIBError_H

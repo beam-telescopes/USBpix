@@ -1,0 +1,2 @@
+QWTDIR=$$(QWTDIR)
+LIBGPAC_BASE=$${DAQ_BASE}/libgpac
