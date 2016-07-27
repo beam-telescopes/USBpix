@@ -9,7 +9,7 @@ SOURCES += PixGPIB.cxx
 SOURCES += PixGPIBDevice.cxx
 SOURCES += PixGPIBError.cxx
 
-INCLUDEPATH += $(USB_INCL_DIR)
+INCLUDEPATH += $(DAQ_BASE)/inc
 
 unix {
 	USE_GPIB_LINUX = $$(USE_GPIB_LINUX)

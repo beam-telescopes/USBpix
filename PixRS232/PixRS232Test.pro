@@ -8,7 +8,7 @@ SOURCES=\
   PixRs232Device.cxx \
   PixRs232Test.cxx
 
-INCLUDEPATH += $(USB_INCL_DIR)
+INCLUDEPATH += $(DAQ_BASE)/inc
 
 win32 {
   CONFIG += console

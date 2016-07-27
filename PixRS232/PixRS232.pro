@@ -7,7 +7,7 @@ TEMPLATE = lib
 SOURCES=\
   PixRs232Device.cxx
 
-INCLUDEPATH += $(USB_INCL_DIR)
+INCLUDEPATH += $(DAQ_BASE)/inc
 
 win32 {
   SOURCES += ComTools.cxx
