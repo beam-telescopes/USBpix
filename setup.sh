@@ -337,10 +337,9 @@ fi
 
 echo "ROOTSYS      = ${ROOTSYS}"
 echo "QT5DIR       = ${QT5DIR}"
-echo "USB_INCL_DIR = ${USB_INCL_DIR}"
-echo "USB_LIB_DIR  = ${USB_LIB_DIR}"
-echo "USBPIXI3DLL  = ${USBPIXI3DLL}"
-echo "USBPIXI4DLL  = ${USBPIXI4DLL}"
+echo "USBPIX2I3    = ${USBPIX2I3}"
+echo "USBPIX2I4    = ${USBPIX2I4}"
+echo "USBPIX3I4    = ${USBPIX3I4}"
 
 (
   echo "# Created by $0 on `date`. Modify using $0 if possible."
