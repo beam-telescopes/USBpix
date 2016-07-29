@@ -77,40 +77,17 @@ class ChipTest;
 class STPixModuleGroup : public QObject, public PixLib::PixModuleGroup {
 
   friend class CtrlThread;
-  friend class ScanThread;
 
   Q_OBJECT
 
  public:
 
-  // Subclass using QThread used for parallel execution of a USBPixController-scan to allow for checks
-  // of scan progress during scan execution
-  // Author: Joern Grosse-Knetter
-  
-  class ScanThread : public QThread {
-
-  friend class CtrlThread;
-  friend class STPixModuleGroup;
-
-  public:
-    ScanThread(STPixModuleGroup& group, QApplication* application); 
-    void setPixScan(PixLib::PixScan *ps){m_ps = ps;};
-    void run() Q_DECL_OVERRIDE ;
-
-  private:
-    STPixModuleGroup& m_STPixModuleGroup;
-    PixLib::PixScan *m_ps;
-    QApplication* m_app;
-
-  };
-  
   // Subclass using QThread used for parallel Scan support, Rod initialising and other Tasks from Tool panel
   // Author: Iris Rottlaender
   
   class CtrlThread : public QThread {
 
   friend class STPixModuleGroup;
-  friend class ScanThread;
 
   public:
     CtrlThread(STPixModuleGroup& group, QApplication* application); 
@@ -132,7 +109,6 @@ class STPixModuleGroup : public QObject, public PixLib::PixModuleGroup {
     pixScanRunOptions scanOpts;
     ChipTest *m_ct;
     bool m_resetMods;
-    ScanThread *m_scanThr;
 
   protected:
     void scan();
