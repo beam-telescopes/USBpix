@@ -12,6 +12,7 @@ SUBDIRS += PixModule
 SUBDIRS += Histo
 SUBDIRS += PixDbInterface
 SUBDIRS += PixMcc
+SUBDIRS += PixCcpd
 SUBDIRS += Config
 SUBDIRS += PixConfDBInterface
 
