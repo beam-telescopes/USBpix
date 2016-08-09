@@ -233,6 +233,8 @@ public:
 
   // tell the current FE flavour being in use
   int currFEFlavour();
+  // tell the current CCPD flavour being in use (0 if no CCPD is loaded)
+  std::map<std::string, int> currCcpdFlavour();
 
   // set brun-in mode (typically called from prim.list)
   void setBurnInChan(int chan, bool setIref, bool skipIfNotIref, bool wrapGrpId);

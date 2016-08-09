@@ -987,7 +987,7 @@ void MainPanel::decrGDAC(int step){
 	  cfged.shiftValue(4, step);
 	  cfged.StoreCfg();
 	}else if(fetype=="FE_I4A" || fetype=="FE_I4B"){ // FE-I4
-	  ConfigEditI4 cfged(&mod_conf, fe_conf, 0, this);
+	  ConfigEditI4 cfged(&mod_conf, fe_conf, 0, 0, this);
  	  cfged.shiftValue(4, step);
  	  cfged.storeCfg();
 	} else{ // unknown
@@ -1043,7 +1043,7 @@ void MainPanel::decrTDAC(int step){
 	  ConfigEdit cfged(&mod_conf, 0, fe_conf, 0, this);
 	  cfged.ShiftPTable(1,step);
 	}else if(fetype=="FE_I4A" || fetype=="FE_I4B"){ // FE-I4
-	  ConfigEditI4 cfged(&mod_conf, fe_conf, 0, this);
+	  ConfigEditI4 cfged(&mod_conf, fe_conf, 0, 0, this);
 	  cfged.ShiftPTable(1,step);
 	} else{ // unknown
 	  m_engine.toLog("MainPanel::decrTDAC() : Con't identify FE flavour ("+fetype+"), no TDAC action possible.");

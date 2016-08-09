@@ -24,10 +24,10 @@
 
 #include <math.h>
 
-fileBrwsManager::fileBrwsManager(QWidget *parent, int type, QWidget *textField, QString ext) : QObject(parent){
+fileBrwsManager::fileBrwsManager(QWidget *parent, int type, QWidget *textField) : QObject(parent){
   m_type = type;
   m_textField = textField;
-  m_wparent = parent;m_ext = ext;
+  m_wparent = parent;
 }
 fileBrwsManager::~fileBrwsManager(){
 }
@@ -37,8 +37,8 @@ void fileBrwsManager::browse(){
   QString qpath = QString::null;
   if(m_type==2) qpath = ledt->text();
   QStringList filter;
-  if(m_ext!="") filter += m_ext+" file (*."+m_ext+")";
   filter += "Any file (*.*)";
+//  QFileDialog fdia(m_wparent,"Specify output folder for file",qpath);
   QFileDialog fdia(0,"Specify output folder for file",qpath);
 #if defined(QT5_FIX_QDIALOG)
     fdia.setOption(QFileDialog::DontUseNativeDialog, true);
@@ -289,6 +289,7 @@ void optionsPanel::save(){
   }
   // close panel
   if(!m_embed) accept();
+  else emit saveDone();
 }
 int optionsPanel::fillTab(QWidget *tab, ConfGroup &cgrp, const char *subcfg_name){
   QVBoxLayout *layout1 = new QVBoxLayout( tab );
@@ -315,7 +316,7 @@ int optionsPanel::fillTab(QWidget *tab, ConfGroup &cgrp, const char *subcfg_name
 	int type = ((ConfString&)obj).getType();
 	if(type>0){
 	  pbhandle = new QPushButton("...",tab);
-	  fileBrwsManager *fbm = new fileBrwsManager(this, type, tmpWgt, ((ConfString&)obj).getExt().c_str());
+	  fileBrwsManager *fbm = new fileBrwsManager(this, type, tmpWgt);
 	  QObject::connect(pbhandle, SIGNAL(clicked()), fbm, SLOT(browse()));
 	}
 	if(m_embed) connect((QLineEdit*)tmpWgt, SIGNAL(textChanged ( const QString & )), this, SLOT(save()));
@@ -458,6 +459,10 @@ int optionsPanel::fillTab(QWidget *tab, ConfGroup &cgrp, const char *subcfg_name
 	QSpinBox *sbc = new QSpinBox(tab);
 	sbc->setMaximum(99999);
 	layout3->addWidget(sbc);
+	m_matrixEdit[obj.name()] = new QPushButton(this);
+	m_matrixEdit[obj.name()]->setText("Edit");
+	layout3->addWidget(m_matrixEdit[obj.name()]);
+	m_matrixEdit[obj.name()]->hide();
 	ConfMatrix &mapobj = (ConfMatrix&)obj;
 	if(mapobj.subtype()==ConfMatrix::U16){
 	  ConfMask<unsigned short int> &mmask = *((ConfMask<unsigned short int> *)mapobj.m_value);

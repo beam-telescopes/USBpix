@@ -4305,6 +4305,19 @@ std::map<int, std::string> STControlEngine::GetFeFlavours(){
   }
   return retval;
 }
+std::map<std::string, int> STControlEngine::currCcpdFlavour(){
+  std::map<std::string, int> retval;
+  for( std::vector<STRodCrate *>::iterator crate = m_sTRodCrates.begin(); crate != m_sTRodCrates.end(); crate++ ) {
+    for(int i=0; i<(*crate)->nGroups(); i++){
+      Config &cfg = (*crate)->getPixModuleChipConf(i, 0, 17);
+      if(cfg.name()!="dummychip"){ // there is a CCPD, let's check its flavour
+	std::string flv = ((ConfString&)cfg["ClassInfo"]["ClassName"]).value();
+	if(retval.find(flv)==retval.end()) retval[flv]=1;
+      }
+    }
+  }
+  return retval;
+}
 
 void STControlEngine::setBurnInChan(int chan, bool setIref, bool skipIfNotIref, bool wrapGrpId){
   // loop over crates

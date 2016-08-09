@@ -18,7 +18,7 @@ class fileBrwsManager : public QObject{
   Q_OBJECT
 
  public:
-  fileBrwsManager(QWidget *parent, int type, QWidget *textField, QString ext);
+  fileBrwsManager(QWidget *parent, int type, QWidget *textField);
   ~fileBrwsManager();
 
  public slots:
@@ -27,7 +27,6 @@ class fileBrwsManager : public QObject{
  private:
   int m_type;
   QWidget *m_textField, *m_wparent;
-  QString m_ext;
 };
 
 class optionsPanel : public QDialog{
@@ -48,14 +47,19 @@ class optionsPanel : public QDialog{
   PixLib::Config &m_config;
   QPushButton *cancB;
   QPushButton *saveB;
+  std::map<std::string, QPushButton*> getMatrixEdit(){return m_matrixEdit;};
 
  public slots:
   void save();
   void cancel(){close();};
   void setTableNrows(int nrow);
 
+ signals:
+  void saveDone();
+
  private:
   bool m_embed, m_useScrollbar, m_noEdit;
+  std::map<std::string, QPushButton*> m_matrixEdit;
 
 };
 

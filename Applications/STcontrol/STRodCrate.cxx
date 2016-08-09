@@ -34,6 +34,7 @@
 #include <PixMcc/PixMcc.h>
 #include <PixFe/PixFe.h>
 #include <PixFe/PixFeExc.h>
+#include <PixCcpd/PixCcpd.h>
 #include <Config/Config.h>
 #include <Config/ConfGroup.h>
 #include <Config/ConfObj.h>
@@ -1559,6 +1560,11 @@ PixLib::Config& STRodCrate::getPixModuleChipConf(int iGrp, int modID, int chipID
       }else if(chipID==16){
 	if(mod->pixMCC()!=0)
 	  return mod->pixMCC()->config();
+	else
+	  return dummyCfg;
+      }else if(chipID==17){
+	if(mod->pixCCPD()!=0)
+	  return mod->pixCCPD()->config();
 	else
 	  return dummyCfg;
       }else

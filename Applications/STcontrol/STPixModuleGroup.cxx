@@ -1626,18 +1626,18 @@ void STPixModuleGroup::CtrlThread::config()
 	}
       }
       switch(m_tagOpt[0]){
-      case 0:
+      case 0: // all
       default:
 	getSTPixModuleGroup()->downloadConfig();
 	getSTPixModuleGroup()->getPixController()->setConfigurationMode();
 	getSTPixModuleGroup()->getPixController()->sendModuleConfig(0);
 	break;
-      case 1:
+      case 1: // FE global regs
 	getSTPixModuleGroup()->downloadConfig();
 	getSTPixModuleGroup()->getPixController()->setConfigurationMode();
 	getSTPixModuleGroup()->getPixController()->sendGlobal(0);
 	break;
-      case 2:
+      case 2: // FE pixel regs
 	getSTPixModuleGroup()->downloadConfig();
 	getSTPixModuleGroup()->getPixController()->setConfigurationMode();
 	if(m_tagOpt[2]>=0 && m_tagOpt[2]<40 && m_tagStrg!="ALL")
@@ -1673,13 +1673,23 @@ void STPixModuleGroup::CtrlThread::config()
 	    getSTPixModuleGroup()->getPixController()->sendPixel(0);
 	}
 	break;
-      case 3:
+      case 3: // set to cfg. mode
 	getSTPixModuleGroup()->getPixController()->setConfigurationMode();
 	getSTPixModuleGroup()->getPixController()->setFEConfigurationMode();
 	break;
-      case 4:
+      case 4: // set to run mode
 	getSTPixModuleGroup()->getPixController()->setRunMode();
 	getSTPixModuleGroup()->getPixController()->setFERunMode();
+	break;
+      case 5: // all (only FE)
+	getSTPixModuleGroup()->downloadConfig();
+	getSTPixModuleGroup()->getPixController()->setConfigurationMode();
+	getSTPixModuleGroup()->getPixController()->sendPixel(0); // has become identical to sendModuleConfig(unsigned int moduleMask) without CCPD
+	break;
+      case 6: // only CCPD
+	getSTPixModuleGroup()->downloadConfig();
+	getSTPixModuleGroup()->getPixController()->setConfigurationMode();
+	getSTPixModuleGroup()->getPixController()->sendCCPD();
 	break;
       }
       if(m_tagOpt[1]!=ChipTest::CURRENTCFG && m_tagOpt[1]!=ChipTest::READONLY){
@@ -3568,7 +3578,7 @@ void STPixModuleGroup::processPixScanHistos(pixScanRunOptions scanOpts){
 	  // new module entry
 	  int nFe = 0;
 	  for(PixLib::PixModule::feIterator it = (*mi)->feBegin(); it!=(*mi)->feEnd(); it++) nFe++;
-	  modInq  = createEmptyModule(grpInq, mname, nFe, (((*mi)->pixMCC()!=0)?1:0), 0);
+	  modInq  = createEmptyModule(grpInq, mname, nFe, (((*mi)->pixMCC()!=0)?1:0), (((*mi)->pixCCPD()!=0)?1:0));
 	  // need to close and re-open, otherwise FE subrecords not seen by Config::write...
 	  // @ to do: complain to Guido about missing update in higher record
 	  //   levels when creating stuff from scratch

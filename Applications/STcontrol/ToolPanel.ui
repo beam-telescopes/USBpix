@@ -215,6 +215,16 @@
                 <string>set to run mode</string>
                </property>
               </item>
+              <item>
+               <property name="text">
+                <string>all (only FE)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>only CCPD</string>
+               </property>
+              </item>
              </widget>
             </item>
             <item>

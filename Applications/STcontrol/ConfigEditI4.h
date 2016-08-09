@@ -9,6 +9,7 @@ namespace PixLib{
   class Config;
   class PixFe;
 }
+class optionsPanel;
 
 /*! Editor for FE-I4 chip and module configuration
  *
@@ -22,7 +23,7 @@ class ConfigEditI4 : public QDialog, public Ui::ConfigEditI4{
 
  public:
   // convention for conf_in: first entries are for FEs, last is for the module
-  ConfigEditI4(PixLib::Config *mod_conf, std::vector<PixLib::Config*> fe_conf, int id,
+  ConfigEditI4(PixLib::Config *mod_conf, std::vector<PixLib::Config*> fe_conf, PixLib::Config* ccpdConf, int id,
 	       QWidget* parent = 0, Qt::WindowFlags fl = 0);
   ~ConfigEditI4();
 
@@ -78,6 +79,8 @@ class ConfigEditI4 : public QDialog, public Ui::ConfigEditI4{
   void shiftValueUp(){shiftValue(1);};
   void shiftValueDown(){shiftValue(-1);};
   void shiftValueVar();
+  void opMapEdit();
+  void extSave();
 
  signals:
   void cfgSaved(int, int);
@@ -86,6 +89,7 @@ class ConfigEditI4 : public QDialog, public Ui::ConfigEditI4{
  private:
   PixLib::Config *m_modConf;
   std::vector<PixLib::Config*> m_feConf;
+  PixLib::Config *m_ccpdConf;
   PixLib::PixFe *m_Fe;
   int m_id;
   int m_nFEs, m_nGtab;
@@ -98,6 +102,7 @@ class ConfigEditI4 : public QDialog, public Ui::ConfigEditI4{
   bool m_gtLock;
   bool m_ptLock;
   bool m_clLock;
+  optionsPanel *m_op;
 };
 
 #endif // CONFIGEDITI4_H

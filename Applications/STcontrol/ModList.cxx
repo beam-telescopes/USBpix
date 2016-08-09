@@ -506,12 +506,15 @@ void ModList::editModule(QTreeWidgetItem *in_item, bool doubleClick){
       else if(fetype=="FE_I4A" || fetype=="FE_I4B"){ // FE-I4
 	// create and open editor panel
 	std::vector<Config*> conf;// first elements are FEs, last is module
-	for(int chipID=0;chipID<99;chipID++) {
+	for(int chipID=0;chipID<16;chipID++) {
 	  Config &tmpCfg = crate->getPixModuleChipConf(item->grpId(), item->modId(), chipID);
 	  if(tmpCfg.name()=="dummychip") break; // end of FE list reached
 	  else conf.push_back(&tmpCfg);
 	}
-	ConfigEditI4 *cfgedt = new ConfigEditI4(&mcfg,conf, newId, 0);
+	Config *ccpdCfg=0;
+	Config &cfg = crate->getPixModuleChipConf(item->grpId(), item->modId(), 17);
+	if(cfg.name()!="dummychip") ccpdCfg = &cfg;
+	ConfigEditI4 *cfgedt = new ConfigEditI4(&mcfg,conf, ccpdCfg, newId, 0);
 	cfgedt->setAttribute(Qt::WA_DeleteOnClose);
 	// read module name
 	std::string mname = crate->getModName(item->grpId(), item->modId());

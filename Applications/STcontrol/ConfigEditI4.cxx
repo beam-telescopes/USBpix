@@ -11,6 +11,7 @@
 #include "SetAll.h"
 #include "ColPairSwitch.h"
 #include "RefWin.h"
+#include "OptionsPanel.h"
 
 #include <QTableWidget>
 #include <QStringList>
@@ -21,8 +22,9 @@
 
 using namespace std;
 
-ConfigEditI4::ConfigEditI4(PixLib::Config *mod_conf, std::vector<PixLib::Config*> fe_conf, int id, QWidget* parent, Qt::WindowFlags fl) :
-  QDialog(parent, fl), m_modConf(mod_conf), m_feConf(fe_conf), m_id(id)
+ConfigEditI4::ConfigEditI4(PixLib::Config *mod_conf, std::vector<PixLib::Config*> fe_conf, PixLib::Config* ccpdConf, 
+			   int id, QWidget* parent, Qt::WindowFlags fl) :
+  QDialog(parent, fl), m_modConf(mod_conf), m_feConf(fe_conf), m_ccpdConf(ccpdConf), m_id(id)
 {
   setupUi(this);
   QObject::connect(tableGlobal_1, SIGNAL(cellPressed(int,int)), this, SLOT(globPressed1(int,int)));
@@ -288,6 +290,21 @@ ConfigEditI4::ConfigEditI4(PixLib::Config *mod_conf, std::vector<PixLib::Config*
 			tableTotCalib->setItem(j,i,new QTableWidgetItem("not set"));
 		}
 	}
+
+  // deal with the CCPD config via the default panel
+  m_op = 0;
+  if(m_ccpdConf!=0){
+    m_op = new optionsPanel(*m_ccpdConf,this, 0, true, true, true);
+    tabWidget->addTab(m_op,"CCPD");
+    std::map<std::string, QPushButton*> editButtons = m_op->getMatrixEdit();
+    for(std::map<std::string, QPushButton*>::iterator it = editButtons.begin(); it!=editButtons.end(); it++){
+      // show edit button (hidden by default)
+      it->second->show(); 
+      // connect button to our CCPD matrix editor
+      connect(it->second, SIGNAL(pressed()), this, SLOT(opMapEdit()));
+    }
+    connect(m_op, SIGNAL(saveDone()), this, SLOT(extSave()));
+  }
 
   // read values from config
   reset();
@@ -1369,4 +1386,105 @@ void ConfigEditI4::InvertMap(bool all){
 
   emit cfgSaved((int) moduleID->value(), m_id);
   reset();
+}
+void ConfigEditI4::opMapEdit(){
+  QPushButton *caller = dynamic_cast<QPushButton*>(sender());
+  std::string grpName="";
+  std::string objName="";
+  // maximum setting
+  int maxval=512; // 16bit, set later from type of ConfObj?
+  if(m_op!=0 && m_ccpdConf!=0){
+    std::map<std::string, QPushButton*> editButtons = m_op->getMatrixEdit();
+    for(std::map<std::string, QPushButton*>::iterator it = editButtons.begin(); it!=editButtons.end(); it++){
+      if(it->second == caller){
+	long unsigned int pos = it->first.find("_");
+	if(pos!=(long unsigned int)std::string::npos){
+	  // get details of pixel register ConfObj
+	  grpName = it->first.substr(0,pos);
+	  objName = it->first.substr(pos+1, it->first.length()-pos-1);
+	  //std::cerr << "ConfigEditI4::opMapEdit() called by register " << grpName << " - " << objName << std::endl;
+	}
+	break;
+      }
+    }
+    // prepare editor
+    Config &conf = *m_ccpdConf;
+    if(conf[grpName].name()!="__TrashConfGroup__" && conf[grpName][objName].name()!="__TrashConfObj__"){
+      unsigned int nCol = 1;
+      unsigned int nRow = 1;
+      uint **mydata = 0;
+      ConfMatrix &mapobj = (ConfMatrix&)conf[grpName][objName];
+      // variables to transfer data to CfgMap
+      // fill arrays for grahpical editor, depending on ConfMask-type
+      if(mapobj.subtype()==ConfMatrix::U16){
+	maxval=63;
+	std::vector<unsigned short int> temp;
+	((ConfMask<unsigned short int> *)mapobj.m_value)->get(temp);
+	nCol = ((ConfMask<unsigned short int> *)mapobj.m_value)->get().size();
+	nRow = ((ConfMask<unsigned short int> *)mapobj.m_value)->get().front().size();	
+	mydata = new uint*[nCol];
+	for(uint k=0;k<nCol; k++)
+	  mydata[k] = new uint[nRow];
+	std::vector<unsigned short int>::iterator it, itEnd=temp.end();
+	int i=0;
+	for(it=temp.begin(); it!=itEnd; it++){
+	  mydata[i%nCol][nRow-1-i/nCol] = (uint)(*it);
+	  i++;
+	}
+      } else if(mapobj.subtype()==ConfMatrix::U1){
+	maxval=1;
+	std::vector<bool> temp;
+	((ConfMask<bool> *)mapobj.m_value)->get(temp);
+	nCol = ((ConfMask<bool> *)mapobj.m_value)->get().size();
+	nRow = ((ConfMask<bool> *)mapobj.m_value)->get().front().size();	
+	mydata = new uint*[nCol];
+	for(uint k=0;k<nCol; k++)
+	  mydata[k] = new uint[nRow];
+	std::vector<bool>::iterator it, itEnd=temp.end();
+	int i=0;
+	for(it=temp.begin(); it!=itEnd; it++){
+	  mydata[i%nCol][nRow-1-i/nCol] = (uint)(*it);
+	  i++;
+	}
+      }
+      
+      if(mydata!=0){
+	CfgMap MapToShow(mydata, maxval, nCol, nRow, false, this, 0, 0, ModName->text().toLatin1().data(), 0, 6, 24);
+	MapToShow.setGangedButton->hide();
+	MapToShow.setIntGangedButton->hide();
+	MapToShow.setLongButton->hide();
+	if(MapToShow.exec()==QDialog::Accepted){
+	  // store changes in config objects
+	  if(mapobj.subtype()==ConfMatrix::U16){
+	    std::vector<unsigned short int> temp;
+	    ((ConfMask<unsigned short int> *)mapobj.m_value)->get(temp);
+	    std::vector<unsigned short int>::iterator it, itEnd=temp.end();
+	    int i=0;
+	    for(it=temp.begin(); it!=itEnd; it++){
+	      (*it) = (unsigned short int)mydata[i%nCol][nRow-1-i/nCol];
+	      i++;
+	    }
+	    ((ConfMask<unsigned short int> *)mapobj.m_value)->set(temp);
+	  } else if(mapobj.subtype()==ConfMatrix::U1){
+	    std::vector<bool> temp;
+	    ((ConfMask<bool> *)mapobj.m_value)->get(temp);
+	    std::vector<bool>::iterator it, itEnd=temp.end();
+	    int i=0;
+	    for(it=temp.begin(); it!=itEnd; it++){
+	      (*it) = (bool)mydata[i%nCol][nRow-1-i/nCol];
+	      i++;
+	    }
+	    ((ConfMask<bool> *)mapobj.m_value)->set(temp);
+	  }
+	  // signal that the config. was altered
+	  extSave();
+	}
+	for(uint k=0;k<nCol; k++)
+	  delete[] mydata[k];
+      }
+    }
+  }
+}
+void ConfigEditI4::extSave(){
+  emit cfgSaved((int) moduleID->value(), m_id);
 }
