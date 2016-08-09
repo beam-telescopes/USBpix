@@ -11,6 +11,7 @@
 #include <PixFe/PixFeI1Config.h>
 #include <PixFe/PixFeI4AConfig.h>
 #include <PixFe/PixFeI4BConfig.h>
+#include <PixCcpd/PixCcpd.h>
 #include <PixModule/PixModule.h>
 
 #include <RenameWin.h>
@@ -85,6 +86,7 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   m_MeasurementStartTime=-1;
 
   connect( &m_engine, SIGNAL(configChanged()), this, SLOT(updateFegrSel()) );
+  connect( &m_engine, SIGNAL(configChanged()), this, SLOT(updateCCPDgrSel()) );
   connect( &m_engine, SIGNAL(crateListChanged()), this, SLOT(updateCrateGrpSel()) );
   connect( &m_engine, SIGNAL(sendPixScanStatus(int,int,int,int,int,int,int,int,int)), this, SLOT(updateStatus(int,int,int,int,int,int,int,int,int)));
   connect( rodBox, SIGNAL(activated(int)), this , SLOT(observedRodChanged(int)));
@@ -127,6 +129,7 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
     loopPostActLabel[sci] = 0;
     LoopBox[sci] = 0;
     loopFERegName[sci] = 0;
+    loopCCPDRegName[sci] = 0;
   }
 
   loopType[0] = loop0Type;
@@ -148,6 +151,7 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   loopPostActLabel[0] = loop0PostActLabel;
   LoopBox[0] = Loop0Box;
   loopFERegName[0] = feGlobRegName0;
+  loopCCPDRegName[0] = CCPDGlobRegName0;
   loopType[1] = loop1Type;
   loopEndAction[1] = loop1EndAction;
   loopActive[1] = loop1Active;
@@ -167,6 +171,7 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   loopPostActLabel[1] = loop1PostActLabel;
   LoopBox[1] = Loop1Box;
   loopFERegName[1] = feGlobRegName1;
+  loopCCPDRegName[1] = CCPDGlobRegName1;
   loopType[2] = loop2Type;
   loopEndAction[2] = loop2EndAction;
   loopActive[2] = loop2Active;
@@ -186,6 +191,7 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   loopPostActLabel[2] = loop2PostActLabel;
   LoopBox[2] = Loop2Box;
   loopFERegName[2] = feGlobRegName2;
+  loopCCPDRegName[2] = CCPDGlobRegName2;
 
   // enabling of these
   connect( loop0Type,   SIGNAL( activated(int) ), this, SLOT( setFeReg0() ) );
@@ -194,6 +200,12 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   connect( loop1Active, SIGNAL( toggled(bool) ),  this, SLOT( setFeReg1() ) );
   connect( loop2Type,   SIGNAL( activated(int) ), this, SLOT( setFeReg2() ) );
   connect( loop2Active, SIGNAL( toggled(bool) ),  this, SLOT( setFeReg2() ) );
+  connect( loop0Type,   SIGNAL( activated(int) ), this, SLOT( setCCPDReg0() ) );
+  connect( loop0Active, SIGNAL( toggled(bool) ),  this, SLOT( setCCPDReg0() ) );
+  connect( loop1Type,   SIGNAL( activated(int) ), this, SLOT( setCCPDReg1() ) );
+  connect( loop1Active, SIGNAL( toggled(bool) ),  this, SLOT( setCCPDReg1() ) );
+  connect( loop2Type,   SIGNAL( activated(int) ), this, SLOT( setCCPDReg2() ) );
+  connect( loop2Active, SIGNAL( toggled(bool) ),  this, SLOT( setCCPDReg2() ) );
 
   // fill map of known scan option handles
   if(!editor) m_knownHandles.insert(std::make_pair("general_sourceRawFile",(QObject*)rawFileName));
@@ -412,6 +424,8 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
 					 (QObject*)loopPtsBox[sci]));
     m_knownHandles.insert(std::make_pair(("loops_feGlobRegNameLoop_"+QString::number(sci)).toLatin1().data(),
 					 (QObject*)loopFERegName[sci]));
+    m_knownHandles.insert(std::make_pair(("loops_CCPDGlobRegNameLoop_"+QString::number(sci)).toLatin1().data(),
+					 (QObject*)loopCCPDRegName[sci]));
   }
   m_knownHandles.insert(std::make_pair("loops_innerLoopSwap",(QObject*)stageAdvBox));
   m_knownHandles.insert(std::make_pair("loops_dspMaskStaging",(QObject*)maskOnDsp));
@@ -608,6 +622,7 @@ void PixScanPanel::updateConfig(){
     scanLabel->setText(label);
 
   updateFegrSel();
+  updateCCPDgrSel();
   updateConfigHandlers();
 
   QString fname = scanFileName->text();
@@ -658,6 +673,24 @@ void PixScanPanel::updateFegrSel(){
     }
   }
 
+}
+void PixScanPanel::updateCCPDgrSel(){
+	
+  std::map<std::string, int> flavours = m_engine.currCcpdFlavour();
+
+  for(int i=0;i<MAX_LOOPS;i++){
+    loopCCPDRegName[i]->clear();
+    loopCCPDRegName[i]->addItem("unknown");
+  }
+  for(std::map<std::string, int>::iterator it=flavours.begin(); it!=flavours.end(); it++){
+    PixCcpd *ccpd = PixCcpd::make(0, it->first);
+    for(int i=0;i<MAX_LOOPS;i++){
+      for(int j=0;j<(int)ccpd->config()["global"].size();j++){
+	loopCCPDRegName[i]->addItem(ccpd->config()["global"][j].name().c_str());
+      }
+    }
+    delete ccpd;
+  }
 }
 void PixScanPanel::updateConfigHandlers(){
 
@@ -1272,6 +1305,7 @@ void PixScanPanel::updateLoopSettings(int ID){
     loopType[ID]->setEnabled(true);
   }
   setFeReg(ID);
+  setCCPDReg(ID);
 }
 void PixScanPanel::updateLoopPts(int ID){
   if(ID<0 || ID>MAX_LOOPS) return;
@@ -2099,6 +2133,10 @@ void PixScanPanel::scanRunning(int type)
 void PixScanPanel::setFeReg(int regId){
   if(regId>=0 && regId<MAX_LOOPS)
     loopFERegName[regId]->setEnabled(loopActive[regId]->isChecked() && loopType[regId]->currentText()=="FEI4_GR");
+}
+void PixScanPanel::setCCPDReg(int regId){
+  if(regId>=0 && regId<MAX_LOOPS)
+    loopCCPDRegName[regId]->setEnabled(loopActive[regId]->isChecked() && loopType[regId]->currentText()=="CCPD_GR");
 }
 void PixScanPanel::enableRawFileStuff(bool){
   bool setEn = saveFile->isChecked() && !(appIndRawfile->isChecked());

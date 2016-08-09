@@ -5398,6 +5398,16 @@
                     </property>
                    </spacer>
                   </item>
+                  <item>
+                   <widget class="QLabel" name="label_CCPD_16">
+                    <property name="text">
+                     <string>CCPD glob. reg.</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="CCPDGlobRegName0"/>
+                  </item>
                  </layout>
                 </item>
                 <item>
@@ -6208,6 +6218,16 @@
                     </property>
                    </spacer>
                   </item>
+                  <item>
+                   <widget class="QLabel" name="label_CCPD_17">
+                    <property name="text">
+                     <string>CCPD glob. reg.</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="CCPDGlobRegName1"/>
+                  </item>
                  </layout>
                 </item>
                 <item>
@@ -7017,6 +7037,16 @@
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_CCPD_18">
+                    <property name="text">
+                     <string>CCPD glob. reg.</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="CCPDGlobRegName2"/>
                   </item>
                  </layout>
                 </item>

@@ -90,6 +90,11 @@ class PixScanPanel : public QWidget, public Ui::PixScanPanel{
   void setFeReg2(){setFeReg(2);};
   void setFeReg(int);
   void updateFegrSel();
+  void setCCPDReg0(){setCCPDReg(0);};
+  void setCCPDReg1(){setCCPDReg(1);};
+  void setCCPDReg2(){setCCPDReg(2);};
+  void setCCPDReg(int);
+  void updateCCPDgrSel();
   void showAddModLabels(bool);
 
   // Slots to set config parameters
@@ -125,6 +130,7 @@ class PixScanPanel : public QWidget, public Ui::PixScanPanel{
   QLabel*    loopPostActLabel[MAX_LOOPS];
   QGroupBox* LoopBox[MAX_LOOPS];
   QComboBox* loopFERegName[MAX_LOOPS];
+  QComboBox* loopCCPDRegName[MAX_LOOPS];
   QLabel*    fillingLabel;
 
   // estimate remaining time:
