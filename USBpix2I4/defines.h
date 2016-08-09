@@ -90,7 +90,11 @@ enum {CH1, CH2, CH3, CH4, MAX_BI_CHANNEL};
 #define CS_RO_CONTROL_STOP_READOUT	  (1 << 1)
 #define CS_RO_CONTROL_ONLY_CH4_BIT 2
 #define CS_RO_CONTROL_ONLY_CH4 (1 << (CS_RO_CONTROL_ONLY_CH4_BIT))
-#define CS_CONF_SM_FIFO_CONTROL		79
+#define CS_GPAC_CMOS_OUT_LOW		79
+#define CS_GPAC_CMOS_OUT_HIGH		80
+#define CS_GPAC_INJECTION_PERIOD	81
+#define CS_GPAC_INJECTION_WIDTH		82
+#define CS_GPAC_INJECTION_COUNT		83
 #define CS_STRB_OUTPUT_GATE 84
 #define CS_SRAM_RO_THRESHOLD            85
 #define CS_FLAG_TLU_VETO                86
@@ -1677,6 +1681,42 @@ enum {CH1, CH2, CH3, CH4, MAX_BI_CHANNEL};
 #define SC_ECL_B_BITSIZE		3470
 #define SC_ECL_B_BYTESIZE		434
 
+#define CCPD_DAC_REG_ITEMS	   4
+#define CCPD_DAC_REG_BITSIZE    32
+#define CCPD_DAC_REG_BYTESIZE   4
+
+#define CCPD_GLOBAL_REG_ITEMS	    15
+#define CCPD_V2_GLOBAL_REG_ITEMS    25
+#define CCPD_GLOBAL_REG_BITSIZE     90
+#define CCPD_V2_GLOBAL_REG_BITSIZE  120
+#define CCPD_GLOBAL_REG_BYTESIZE    12
+#define CCPD_V2_GLOBAL_REG_BYTESIZE 15
+
+
+#define CCPD_ROW_ITEM_ITEMS       4
+#define CCPD_V2_ROW_ITEM_ITEMS    5
+#define CCPD_ROW_ITEM_BITSIZE    10
+#define CCPD_V2_ROW_ITEM_BITSIZE 16 
+#define CCPD_ROW_ITEM_BYTESIZE    2
+#define CCPD_V2_ROW_ITEM_BYTESIZE 2   
+#define CCPD_ROW_REG_BITSIZE    120
+
+
+#define CCPD_COL_ITEM_ITEMS       9
+#define CCPD_V2_COL_ITEM_ITEMS    10 
+#define CCPD_COL_ITEM_BITSIZE     11
+#define CCPD_V2_COL_ITEM_BITSIZE  12  
+#define CCPD_COL_ITEM_BYTESIZE    2
+#define CCPD_V2_COL_ITEM_BYTESIZE 2  
+#define CCPD_COL_REG_BITSIZE    220
+
+#define CCPD_LF_GLOBAL_REG_ITEMS	17
+#define CCPD_LF_GLOBAL_REG_BITSIZE	81
+#define CCPD_LF_GLOBAL_REG_BYTESIZE	11
+#define CCPD_LF_PIXEL_REG_ITEMS		2
+#define CCPD_LF_PIXEL_REG_BITSIZE	2760
+#define CCPD_LF_PIXEL_REG_BYTESIZE	345
+
 // Data output block
 #define SCDOB0			1
 #define SCDOB1			2
@@ -1904,8 +1944,108 @@ enum {CH1, CH2, CH3, CH4, MAX_BI_CHANNEL};
 #define	B_SCECL107		1108
 #define	B_SCECL108		1109
 
-/*
- * macros & defines for for FE-I4 raw data and trigger data processing
+// CCPD Register
+#define	CCPD_BLRES			10001
+#define	CCPD_THRES			10002
+#define	CCPD_VN				10003
+#define	CCPD_VNFB			10004
+#define	CCPD_VNFOLL			10005
+#define	CCPD_VNLOAD			10006
+#define	CCPD_VNDAC			10007
+#define	CCPD_NU1			10008
+#define	CCPD_NU2			10009
+#define	CCPD_NOTUSED		10010
+#define	CCPD_VNCOMP			10011
+#define	CCPD_VNCOMPL		10012
+#define	CCPD_VNOUT0			10013
+#define	CCPD_VNOUT1			10014
+#define	CCPD_VNOUT2			10015
+
+#define	CCPD_ENR          	20001
+#define	CCPD_INDACR       	20002
+#define	CCPD_ENL          	20003
+#define	CCPD_INDACL       	20004
+
+#define	CCPD_L0           	20049
+#define	CCPD_R0           	20050
+#define	CCPD_L1           	20051
+#define	CCPD_R1           	20052
+#define	CCPD_L2           	20053
+#define	CCPD_R2           	20054
+#define	CCPD_ENSTRIP      	20055
+#define	CCPD_WR          	20056
+#define	CCPD_ENCURRENT    	20057
+
+#define CCPD_THR          30000
+#define CCPD_VCAL         30001
+
+//CCPD v2 registers
+#define	V2_CCPD_BLRES			40001
+#define	V2_CCPD_THRES			40002
+#define	V2_CCPD_VN				40003
+#define	V2_CCPD_VN2				40004
+#define	V2_CCPD_VNFB			40005
+#define	V2_CCPD_VNFOLL			40006
+#define	V2_CCPD_VNLOAD			40007
+#define	V2_CCPD_VNDAC			40008
+#define	V2_CCPD_THPRES			40009
+#define	V2_CCPD_THP				40010
+#define V2_CCPD_VNOUT			40011
+#define	V2_CCPD_VNCOMP			40012
+#define	V2_CCPD_VNCOMPLD		40013
+#define	V2_CCPD_VNOUT1			40014
+#define	V2_CCPD_VNOUT2			40015
+#define	V2_CCPD_VNOUT3			40016
+#define	V2_CCPD_VNBUFFER		40017
+#define	V2_CCPD_VPFOLL			40018
+#define	V2_CCPD_VNBIAS			40019
+#define	V2_CCPD_Q0  			40020
+#define	V2_CCPD_Q1  			40021
+#define	V2_CCPD_Q2  			40022
+#define	V2_CCPD_Q3  			40023
+#define	V2_CCPD_Q4  			40024
+#define	V2_CCPD_Q5  			40025
+
+#define	V2_CCPD_ENR          	40026
+#define	V2_CCPD_INDACR       	50002
+#define	V2_CCPD_ENL          	50003
+#define	V2_CCPD_INDACL       	50004
+#define V2_CCPD_EN	 			50005
+ 
+#define	V2_CCPD_L0           	50125
+#define	V2_CCPD_R0           	50126
+#define	V2_CCPD_L1           	50127
+#define	V2_CCPD_R1           	50128
+#define	V2_CCPD_L2           	50129
+#define	V2_CCPD_R2           	50130
+#define	V2_CCPD_STR    			50131
+#define	V2_CCPD_LD          	50132
+#define	V2_CCPD_DC          	50133
+#define	V2_CCPD_A       		50124
+
+//CCPD LF registers
+#define LF_CCPD_BLRES			50001
+#define LF_CCPD_VN				60002
+#define LF_CCPD_VPFB			60003
+#define LF_CCPD_VNFOLL			60004
+#define LF_CCPD_VPLOAD			60005
+#define LF_CCPD_LSBDACL			60006
+#define LF_CCPD_ICOMP			60007
+#define LF_CCPD_VSTRETCH		60008
+#define LF_CCPD_WGT0			60009
+#define LF_CCPD_WGT1			60010
+#define LF_CCPD_WGT2			60011
+#define LF_CCPD_IDACTEST		60012
+#define LF_CCPD_IDACLTEST		60013
+#define LF_CCPD_TRIM_EN			60014
+#define LF_CCPD_INJECT_EN		60015
+#define LF_CCPD_MONITOR_EN		60016
+#define LF_CCPD_PREAMP_EN		60017
+
+#define LF_CCPD_SW_ANA			70001
+#define LF_CCPD_PIXELS			70002
+
+/* * macros & defines for for FE-I4 raw data and trigger data processing
  */
 
 /*

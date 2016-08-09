@@ -4,6 +4,7 @@
 #include "SiLibUSB.h"
 #include "ConfigRegister.h"
 #include "ConfigFEMemory.h"
+#include "ConfigCCPDMemory.h"
 #include "ReadoutStatusRegister.h"
 #include "MemoryArbiterStatusRegister.h"
 #include "defines.h"
@@ -92,7 +93,36 @@ public:
 	//void ReadScanChainFromFE(int ScanChainSelect, int chip_addr);
 	 int IndexToRegisterNumber(int the_index);   // needed to hide FE-I4 / FE-I3 structure differences to outside world
 
+	 // Some CCPD Stuff
+	void SetCcpdGlobalVal(int the_index, int the_value); // sets one item in global CCPD configuration
+	void SetCcpdColCtrlVal(int the_index, int the_value, int Wr_ID, int col); // sets one item in pixel CCPD configuration. row or col == -1 means broadcast to all
+	void SetCcpdRowCtrlVal(int the_index, int the_value, int Wr_ID, int row, int col); // sets one item in pixel CCPD configuration. row or col == -1 means broadcast to all
+	void SetCcpdv2ColCtrlVal(int the_index, int the_value, int Wr_ID, int col); // sets one item in pixel CCPD configuration. row or col == -1 means broadcast to all
+	void SetCcpdv2RowCtrlVal(int the_index, int the_value, int Wr_ID, int row, int col); // sets one item in pixel CCPD configuration. row or col == -1 means broadcast to all
+	void GetCcpdGlobalVarAddVal(int Variable, int& Address, int& Size, int& Value); // writes value, bitsize and address of one item of global configuration to given addresses
+	void GetCcpdGlobalRBVarAddVal(int Variable, int& Address, int& Size, int& Value); // writes value, bitsize and address of one item of read-back global configuration to given addresses
+	void WriteCcpdGlobal(); // writes the global register of CCPD
+	void WriteCcpdPixel(int col); // writes the pixel register of CCPD
+	void WriteCompleteCcpdShiftRegister(); //writes the complete CCPD shift register with global and pixel register
 
+	void SetCcpdThr(int the_value); // sets the Thr value that is generated using the on pcb DACs
+	void SetCcpdVcal(int the_value); // sets the Vcal value that is generated using the on pcb DACs
+	void WriteCcpdOnPcbDacs(); // writes the Thr and Vcal value in the DACs and enables the DACs.
+	
+	void SetCcpdInDacValue(int col, int row, int value); //V2: sets array with InDac values
+	void SetCcpdMonitorValue(int col, int row, int value); //V2: sets array with Monitor values
+	void ResetCcpdMonitor(); // V2: reset Monitor
+	void SetCcpdEnableValue(int row, int value); //V2: sets array with Enable values
+
+	void SetCcpdStripROValue(int value); //V2: sets StripRO values
+	void SetCcpdWrLdIDValue(int col, int value); //V2: sets array with WrLdID values
+	void SetCcpddirectcurrentValue(int value); //V2: sets directcurrent values
+	void SetCcpdampoutValue(int col, int value); //V2: sets array with ampout values
+	void SetCcpdsimplepixelValue(int value); //V2: enables simple pixel
+	
+	void SetCcpdLFPixels(int pixel, int value);
+	void SetCcpdLFSw_Ana(int row, int value);
+	
 	// accessor function for ConfigRegister
 public:
 	void ResetAll(); // sets all registers in the fpga to zero
@@ -204,11 +234,15 @@ public:
 	void GetSRAMWordsRB(unsigned int* data, int size, int chip_addr);
 	void EnableManEnc(bool on_off);
 	void SetManEncPhase(int phase);
+	void StartCcpdInjections(int duration, int strobeLength, int numberInjections);
+	bool StopCcpdInjections();
+	void CcpdSingleInject(int strobeLength);
   size_t ConvertChipAddrToIndex(int chip_addr);
   void StartReadout();
   void StopReadout();
   void SetAdapterCardFlavor(int flavor);
   void ResetReadoutStatusRegisters();
+  void SetCCPDVersion(int version);
 
 public:
   std::vector<int> ReadoutChannelAssoc;
@@ -216,6 +250,7 @@ public:
 
 private:
 	SiUSBDevice * myUSB0;
+	ConfigCCPDMemory * confCCPDMem;
   std::vector<ConfigFEMemory *> confFEMem;
   ConfigFEMemory * confFEBroadcast;
 

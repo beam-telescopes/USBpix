@@ -1,5 +1,6 @@
 
 #ifdef CF__LINUX
+#include <unistd.h>
 #elif defined __VISUALC__
 #include "stdafx.h"
 #endif
@@ -49,6 +50,8 @@ USBpix::USBpix(int chip_add_0, int mod_add, SiUSBDevice * Handle0,
   FEI4Aexisting = !isFEI4B;
   FEI4Bexisting = isFEI4B;
 
+  confCCPDMem = new ConfigCCPDMemory(confReg1); 
+
   //WriteRegister(CS_CONF_SM_FIFO_CONTROL, 0);
 }
 
@@ -64,6 +67,7 @@ USBpix::~USBpix(){
   delete memoryArbiterStatusRegister;
   
   delete confReg1;
+  delete confCCPDMem;
   delete confFEBroadcast;
 }
   
@@ -1074,11 +1078,117 @@ int USBpix::IndexToRegisterNumber(int the_index)   // needed to hide FE-I4 / FE-
 	return confFEBroadcast->IndexToRegisterNumber(the_index);
 }
 
+void USBpix::SetCcpdGlobalVal(int the_index, int the_value) // sets one item in global CCPD configuration
+{
+	confCCPDMem->SetCcpdGlobalVal(the_index, the_value);
+}
+
+void USBpix::SetCcpdColCtrlVal(int the_index, int the_value, int Wr_ID, int col) // sets one item in pixel CCPD configuration. row or col == -1 means broadcast to all
+{
+	confCCPDMem->SetCcpdColCtrlVal(the_index, the_value, Wr_ID, col);
+}
+
+void USBpix::SetCcpdRowCtrlVal(int the_index, int the_value, int Wr_ID, int row, int col) // sets one item in pixel CCPD configuration. row or col == -1 means broadcast to all
+{
+	confCCPDMem->SetCcpdRowCtrlVal(the_index, the_value, Wr_ID, row, col);
+
+}
 
 
+void USBpix::SetCcpdv2ColCtrlVal(int the_index, int the_value, int Wr_ID, int col) // sets one item in pixel CCPD configuration. row or col == -1 means broadcast to all
+{
+	confCCPDMem->SetCcpdv2ColCtrlVal(the_index, the_value, Wr_ID, col);
+}
+
+void USBpix::SetCcpdv2RowCtrlVal(int the_index, int the_value, int Wr_ID, int row, int col) // sets one item in pixel CCPD configuration. row or col == -1 means broadcast to all
+{
+	confCCPDMem->SetCcpdv2RowCtrlVal(the_index, the_value, Wr_ID, row, col);
+
+}
+
+void USBpix::SetCcpdInDacValue(int col, int row, int value){
+	confCCPDMem->SetCcpdInDacValue(col, row, value);
+}
+
+void USBpix::ResetCcpdMonitor(){
+	confCCPDMem->ResetCcpdMonitor();
+}
+
+void USBpix::SetCcpdMonitorValue(int col, int row, int value){
+	confCCPDMem->SetCcpdMonitorValue(col, row, value);
+}
+
+void USBpix::SetCcpdEnableValue(int row, int value){
+	confCCPDMem->SetCcpdEnableValue(row, value);
+}
+
+void USBpix::SetCcpdStripROValue(int value){
+	confCCPDMem->SetCcpdStripROValue(value);
+}
+
+void USBpix::SetCcpdWrLdIDValue(int col, int value){
+	confCCPDMem->SetCcpdWrLdIDValue(col, value);
+}  
+
+void USBpix::SetCcpddirectcurrentValue(int value){
+	confCCPDMem->SetCcpddirectcurrentValue(value);
+}
+
+void USBpix::SetCcpdampoutValue(int col, int value){
+	confCCPDMem->SetCcpdampoutValue(col, value);
+}  
+
+void USBpix::SetCcpdsimplepixelValue(int value){
+	confCCPDMem->SetCcpdsimplepixelValue(value);
+} 
+
+void USBpix::SetCcpdLFPixels(int pixel, int value){
+	confCCPDMem->SetCcpdLFPixels(pixel, value);
+}
+
+void USBpix::SetCcpdLFSw_Ana(int row, int value){
+	confCCPDMem->SetCcpdLFSw_Ana(row, value);
+}
+	
+void USBpix::GetCcpdGlobalVarAddVal(int Variable, int& Address, int& Size, int& Value) // writes value, bitsize and address of one item of global configuration to given addresses
+{
+	confCCPDMem->GetCcpdGlobalVarAddVal(Variable, Address, Size, Value);
+}
+
+void USBpix::GetCcpdGlobalRBVarAddVal(int Variable, int& Address, int& Size, int& Value) // writes value, bitsize and address of one item of read-back global configuration to given addresses 
+{
+	confCCPDMem->GetCcpdGlobalRBVarAddVal(Variable, Address, Size, Value);
+}
  
+void USBpix::WriteCcpdGlobal() // writes the global register of CCPD
+{
+	confCCPDMem->WriteCcpdGlobal();
+}
 
- 
+void USBpix::WriteCcpdPixel(int col)
+{
+	confCCPDMem->WriteCcpdPixel(col);
+}
+
+void USBpix::WriteCompleteCcpdShiftRegister(){
+	confCCPDMem->WriteCompleteCcpdShiftRegister();
+}
+
+void USBpix::SetCcpdThr(int the_value)
+{
+	confCCPDMem->SetCcpdThr(the_value);
+}
+
+void USBpix::SetCcpdVcal(int the_value)
+{
+	confCCPDMem->SetCcpdVcal(the_value);
+}
+
+void USBpix::WriteCcpdOnPcbDacs()
+{
+	confCCPDMem->WriteCcpdOnPcbDacs();
+}
+
 void USBpix::ResetAll() // sets all registers in the fpga to zero
 {
 	confReg1->ResetAll();
@@ -1919,3 +2029,36 @@ std::vector<int> USBpix::GetReverseReadoutChannelAssoc()
   }
   return result;
 }
+
+void USBpix::StartCcpdInjections(int duration, int strobeLength, int numberInjections)
+{
+	WriteRegister(CS_GPAC_INJECTION_PERIOD, (unsigned char) duration);
+	WriteRegister(CS_GPAC_INJECTION_WIDTH, (unsigned char) strobeLength);
+	WriteRegister(CS_GPAC_INJECTION_COUNT, 0);
+	while (numberInjections > 0)
+	{
+		int injections = min(numberInjections, 255);
+		numberInjections -= injections;
+		WriteRegister(CS_GPAC_INJECTION_COUNT, (unsigned char) injections);
+		// FIXME: Wait for known amount of time
+		#ifdef CF__LINUX
+			usleep(100);
+		#else
+			Sleep(1);
+		#endif
+		WriteRegister(CS_GPAC_INJECTION_COUNT, 0);
+	}
+}
+
+bool USBpix::StopCcpdInjections()
+{
+	return false;
+}
+
+void USBpix::CcpdSingleInject(int strobeLength){
+	StartCcpdInjections(strobeLength, strobeLength, 1);
+}
+void USBpix::SetCCPDVersion(int version){
+  if(confCCPDMem!=0) confCCPDMem->SetCCPDVersion(version);
+}
+	

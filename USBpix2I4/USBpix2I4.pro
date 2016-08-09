@@ -3,6 +3,7 @@ include(../build-config/config.inc)
 HEADERS += \
   ConfDataArray.h \
   ConfigFEMemory.h \
+  ConfigCCPDMemory.h \
   ConfigRegister.h \
   USBpix.h \
   USBPixI4DCS.h \
@@ -21,6 +22,7 @@ HEADERS += \
 SOURCES += \
   ConfDataArray.cpp \
   ConfigFEMemory.cpp \
+  ConfigCCPDMemory.cpp \
   ConfigRegister.cpp \
   USBpix.cpp \
   USBPixI4DCS.cpp \

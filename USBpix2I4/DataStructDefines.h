@@ -1546,4 +1546,132 @@ static ConfDataStruct scanChainECL_FEI4B_ds[SC_ECL_B_ITEMS] = {				//FIXME
 	{	108	,	 B_SCECL108,	 "	B_SCECL108	"	,	3456, 	14,	0, false}
 };
 
+
+// CCPD Structures
+
+static ConfDataStruct ccpdOnPcbDacItem[CCPD_DAC_REG_ITEMS] = {
+	{ 0,    CCPD_THR,      "CCPD_THR",               0,   14,      0, false},
+	{ 1,    IDLE,          "IDLE",                  14,    2,      0, false},
+	{ 2,    CCPD_VCAL,     "CCPD_VCAL",             16,   14,      0, false},
+	{ 3,    IDLE,          "IDLE",                  30,    2,      0, false}
+};
+
+static ConfDataStruct ccpdGlobalReg[CCPD_GLOBAL_REG_ITEMS] = {
+	{ 0,    CCPD_VNOUT2,          "CCPD_VNOUT2",               0,   6,      0, false},
+	{ 1,    CCPD_VNOUT1,          "CCPD_VNOUT1",               6,   6,      0, false},
+	{ 2,    CCPD_VNOUT0,          "CCPD_VNOUT0",              12,   6,      0, false},
+	{ 3,    CCPD_VNCOMPL,         "CCPD_VNCOMPL",             18,   6,      0, false},
+	{ 4,    CCPD_VNCOMP,          "CCPD_VNCOMP",              24,   6,      0, false},
+	{ 5,    CCPD_NOTUSED,         "CCPD_NOTUSED",             30,   6,      0, false},
+	{ 6,    CCPD_NU2,             "CCPD_NU2",                 36,   6,      0, false},
+	{ 7,    CCPD_NU1,             "CCPD_NU1",                 42,   6,      0, false},
+	{ 8,    CCPD_VNDAC,           "CCPD_VNDAC",               48,   6,      0, false},
+	{ 9,    CCPD_VNLOAD,          "CCPD_VNLOAD",              54,   6,      0, false},
+	{10,    CCPD_VNFOLL,          "CCPD_VNFOLL",              60,   6,      0, false},
+	{11,    CCPD_VNFB,            "CCPD_VNFB",                66,   6,      0, false},
+	{12,    CCPD_VN,              "CCPD_VN",                  72,   6,      0, false},
+	{13,    CCPD_THRES,           "CCPD_THRES",               78,   6,      0, false}, // true = inv bitorder
+	{14,    CCPD_BLRES,           "CCPD_BLRES",               84,   6,      0, false}
+};
+
+static ConfDataStruct ccpdRowControlItem[CCPD_ROW_ITEM_ITEMS] = {
+	{ 0,    CCPD_INDACL,         "CCPD_INDACL",              0,   4,      0, false},	
+	{ 1,    CCPD_ENL,            "CCPD_ENL",                 4,   1,      0, false},
+	{ 2,    CCPD_INDACR,         "CCPD_INDACR",              5,   4,      0, false},
+	{ 3,    CCPD_ENR,            "CCPD_ENR",                 9,   1,      0, false}
+};
+
+static ConfDataStruct ccpdColControlItem[CCPD_COL_ITEM_ITEMS] = {
+	{ 0,    CCPD_ENCURRENT,      "CCPD_ENCURRENT",        0,   1,      0, false},
+	{ 1,    CCPD_WR,             "CCPD_WR",               1,   3,      0, false},
+	{ 2,    CCPD_ENSTRIP,        "CCPD_ENSTRIP",          4,   1,      0, false},
+	{ 3,    CCPD_R2,             "CCPD_R2",               5,   1,      0, false},
+	{ 4,    CCPD_L2,             "CCPD_L2",               6,   1,      0, false},
+	{ 5,    CCPD_R1,             "CCPD_R1",               7,   1,      0, false},
+	{ 6,    CCPD_L1,             "CCPD_L1",               8,   1,      0, false},
+	{ 7,    CCPD_R0,             "CCPD_R0",               9,   1,      0, false},
+	{ 8,    CCPD_L0,             "CCPD_L0",              10,   1,      0, false}
+};
+
+// CCPD v2 Structures
+
+static ConfDataStruct ccpdv2GlobalReg[CCPD_V2_GLOBAL_REG_ITEMS] = {
+	{ 0,    V2_CCPD_Q5,              "V2_CCPD_Q5",                   0,   1,      0, false},
+	{ 1,    V2_CCPD_Q4,              "V2_CCPD_Q4",                   1,   1,      0, false},
+	{ 2,    V2_CCPD_Q3,              "V2_CCPD_Q3",                   2,   1,      0, false},
+	{ 3,    V2_CCPD_Q2,              "V2_CCPD_Q2",                   3,   1,      0, false},
+	{ 4,    V2_CCPD_Q1,              "V2_CCPD_Q1",                   4,   1,      0, false},
+	{ 5,    V2_CCPD_Q0,              "V2_CCPD_Q0",                   5,   1,      0, false},
+	{ 6,    V2_CCPD_VNBIAS,          "V2_CCPD_VNBIAS",               6,   6,      0, false},
+	{ 7,    V2_CCPD_VPFOLL,          "V2_CCPD_VPFOLL",              12,   6,      0, false},
+	{ 8,    V2_CCPD_VNBUFFER,        "V2_CCPD_VNBUFFER",            18,   6,      0, false},
+	{ 9,    V2_CCPD_VNOUT3,          "V2_CCPD_VNOUT3",              24,   6,      0, false},
+	{10,    V2_CCPD_VNOUT2,          "V2_CCPD_VNOUT2",              30,   6,      0, false},
+	{11,    V2_CCPD_VNOUT1,          "V2_CCPD_VNOUT1",              36,   6,      0, false},
+	{12,    V2_CCPD_VNCOMPLD,        "V2_CCPD_VNCOMPLD",            42,   6,      0, false},
+	{13,    V2_CCPD_VNCOMP,          "V2_CCPD_VNCOMP",              48,   6,      0, false},
+	{14,    V2_CCPD_VNOUT,           "V2_CCPD_VNOUT",               54,   6,      0, false},
+	{15,    V2_CCPD_THP,             "V2_CCPD_THP",                 60,   6,      0, false},
+	{16,    V2_CCPD_THPRES,          "V2_CCPD_THPRES",              66,   6,      0, false},
+	{17,    V2_CCPD_VNDAC,           "V2_CCPD_VNDAC",               72,   6,      0, false},
+	{18,    V2_CCPD_VNLOAD,          "V2_CCPD_VNLOAD",              78,   6,      0, false},
+	{19,    V2_CCPD_VNFOLL,          "V2_CCPD_VNFOLL",              84,   6,      0, false},
+	{20,    V2_CCPD_VNFB,            "V2_CCPD_VNFB",                90,   6,      0, false},
+	{21,    V2_CCPD_VN2,             "V2_CCPD_VN2",                 96,   6,      0, false},
+	{22,    V2_CCPD_VN,              "V2_CCPD_VN",                 102,   6,      0, false},
+	{23,    V2_CCPD_THRES,           "V2_CCPD_THRES",              108,   6,      0, false}, 
+	{24,    V2_CCPD_BLRES,           "V2_CCPD_BLRES",              114,   6,      0, false}
+};
+
+static ConfDataStruct ccpdv2RowControlItem[CCPD_V2_ROW_ITEM_ITEMS] = {
+	{ 0,    V2_CCPD_EN,             "V2_CCPD_EN",                  0,     6,      0, false},
+	{ 1,    V2_CCPD_INDACL,         "V2_CCPD_INDACL",              6,     4,      0, false},	
+	{ 2,    V2_CCPD_ENL,            "V2_CCPD_ENL",                 10,    1,      0, false},
+	{ 3,    V2_CCPD_INDACR,         "V2_CCPD_INDACR",              11,    4,      0, false},
+	{ 4,    V2_CCPD_ENR,            "V2_CCPD_ENR",                 15,    1,      0, false}
+};
+
+static ConfDataStruct ccpdv2ColControlItem[CCPD_V2_COL_ITEM_ITEMS] = {
+	{ 0,    V2_CCPD_A,      		"V2_CCPD_A",         0,   1,      0, false},
+	{ 1,    V2_CCPD_DC,             "V2_CCPD_DC",        1,   1,      0, false},
+	{ 2,    V2_CCPD_LD,        		"V2_CCPD_LD",        2,   3,      0, false},
+	{ 3,    V2_CCPD_STR,        	"V2_CCPD_Str",       5,   1,      0, false},
+	{ 4,    V2_CCPD_R2,             "V2_CCPD_R2",        6,   1,      0, false},
+	{ 5,    V2_CCPD_L2,             "V2_CCPD_L2",        7,   1,      0, false},
+	{ 6,    V2_CCPD_R1,             "V2_CCPD_R1",        8,   1,      0, false},
+	{ 7,    V2_CCPD_L1,             "V2_CCPD_L1",        9,   1,      0, false},
+	{ 8,    V2_CCPD_R0,             "V2_CCPD_R0",       10,   1,      0, false},
+	{ 9,    V2_CCPD_L0,             "V2_CCPD_L0",       11,   1,      0, false}
+};
+
+// CCPD LF Structures
+
+static ConfDataStruct ccpdLFGlobalReg[CCPD_LF_GLOBAL_REG_ITEMS] = {
+	{ 0,    LF_CCPD_PREAMP_EN,       "LF_CCPD_PREAMP_EN",            0,   1,      0, false},
+	{ 1,    LF_CCPD_MONITOR_EN,      "LF_CCPD_MONITOR_EN",           1,   1,      0, false},
+	{ 2,    LF_CCPD_INJECT_EN,       "LF_CCPD_INJECT_EN",            2,   1,      0, false},
+	{ 3,    LF_CCPD_TRIM_EN,         "LF_CCPD_TRIM_EN",              3,   3,      0, false},
+	{ 4,    LF_CCPD_IDACLTEST,       "LF_CCPD_IDACLTEST",            6,   3,      0, false},
+	{ 5,    LF_CCPD_IDACTEST,        "LF_CCPD_IDACTEST",             9,   6,      0, false},
+	{ 6,    LF_CCPD_WGT2,            "LF_CCPD_WGT2",               	15,   6,      0, false},
+	{ 7,    LF_CCPD_WGT1,            "LF_CCPD_WGT1",              	21,   6,      0, false},
+	{ 8,    LF_CCPD_WGT0,            "LF_CCPD_WGT0",            	27,   6,      0, false},
+	{ 9,    LF_CCPD_VSTRETCH,        "LF_CCPD_VSTRETCH",            33,   6,      0, false},
+	{10,    LF_CCPD_ICOMP,           "LF_CCPD_ICOMP",               39,   6,      0, false},
+	{11,    LF_CCPD_LSBDACL,         "LF_CCPD_LSBDACL",             45,   6,      0, false},
+	{12,    LF_CCPD_VPLOAD,          "LF_CCPD_VPLOAD",              51,   6,      0, false},
+	{13,    LF_CCPD_VNFOLL,          "LF_CCPD_VNFOLL",              57,   6,      0, false},
+	{14,    LF_CCPD_VPFB,            "LF_CCPD_VPFB",                63,   6,      0, false},
+	{15,    LF_CCPD_VN,              "LF_CCPD_VN",                  69,   6,      0, false},
+	{16,    LF_CCPD_BLRES,           "LF_CCPD_BLRES",               75,   6,      0, false}
+	
+};
+
+static ConfDataStruct ccpdLFPixelReg[CCPD_LF_PIXEL_REG_ITEMS] = {
+/* 	{ 0,    LF_CCPD_PIXELS,         "LF_CCPD_PIXELS",       0,  2735,      0, false}, */
+/* 	{ 1,    LF_CCPD_SW_ANA,         "LF_CCPD_SW_ANA",    2736,    24,      0, false}	 */
+	{ 0,    LF_CCPD_PIXELS,         "LF_CCPD_PIXELS",       0,  32,      0, false},
+	{ 1,    LF_CCPD_SW_ANA,         "LF_CCPD_SW_ANA",      32,  24,      0, false}	
+};
+
 #endif
