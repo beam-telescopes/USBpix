@@ -3568,7 +3568,7 @@ void STPixModuleGroup::processPixScanHistos(pixScanRunOptions scanOpts){
 	  // new module entry
 	  int nFe = 0;
 	  for(PixLib::PixModule::feIterator it = (*mi)->feBegin(); it!=(*mi)->feEnd(); it++) nFe++;
-	  modInq  = createEmptyModule(grpInq, mname, nFe, (((*mi)->pixMCC()!=0)?1:0));
+	  modInq  = createEmptyModule(grpInq, mname, nFe, (((*mi)->pixMCC()!=0)?1:0), 0);
 	  // need to close and re-open, otherwise FE subrecords not seen by Config::write...
 	  // @ to do: complain to Guido about missing update in higher record
 	  //   levels when creating stuff from scratch

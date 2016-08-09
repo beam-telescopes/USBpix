@@ -45,6 +45,10 @@ public:
   void sendPixel(unsigned int moduleMask, std::string regName, bool allDcsIdentical=false);  //! send pixel register cfg.
   void sendPixel(unsigned int moduleMask, std::string regName, int DC) ;  //! send pixel register cfg. for specific DC
   void sendGlobal(unsigned int moduleMask, std::string regName);                      //! send gloabal register cfg.
+  void writeCcpdConfig(PixModule&){};                                                 //! write CCPD-part of config - called by writeModuleConfig
+  void sendCCPDGlobal(){};                                                            //! send CCPD global register
+  void sendCCPDPixel(){};                                                             //! send CCPD pixel register
+  void sendCCPD(){};                                                                  //! send CCPD cfg
 
   void sendPixelChargeCalib(int pModuleID, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge);
 
@@ -58,6 +62,9 @@ public:
   void burnEPROM(); // burns the FE GR values to the EPROM. Caution, non reversibel!!!
 
   void readGADC(int type, std::vector<int> &GADCvalues, int FEindex);
+
+  void StartCCPDInject(){}; //! start CCPD injection 
+  void StopCCPDInject(){};  //! stop CCPD injection
 
   void writeScanConfig(PixScan &scn);                                           //! Write scan parameters
   void startScan(PixScan *scn);                                                 //! Start a scan

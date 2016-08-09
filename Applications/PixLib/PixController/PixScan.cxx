@@ -1806,6 +1806,49 @@ void PixScan::presetI4B(ScanType presetName) {
 // 		m_histogramKept[CLUSTER_SIZE] = true;
 // 		m_histogramFilled[CLSIZE_TOT] = true;
 // 		m_histogramKept[CLSIZE_TOT] = true;
+	} else if (presetName == ANALOG_TEST_CCPD) {
+		m_feVCal = 0;
+		m_strobeDuration = 500;
+		m_strobeFrequency = 4000;
+		m_digitalInjection = false;
+		m_singleDCloop = false;
+		m_loopOverDcs = false;
+		m_avoidSpecialsCols = false;
+		m_strobeLVL1Delay = 40;
+		m_maskStageSteps = 3;
+		m_maskStageTotalSteps = STEPS_3;
+		m_maskStageMode = ENA;
+		m_srcTriggerType = CCPD_STROBE_TRG;
+	} else if (presetName == THRESHOLD_SCAN_CCPD) {
+		m_repetitions = 100;
+		m_strobeDuration = 500;
+		m_strobeFrequency = 4000;
+		m_singleDCloop = false;
+		m_loopOverDcs = false;
+		m_avoidSpecialsCols = false;
+		m_digitalInjection = false;
+		m_maskStageSteps = 3;
+		m_maskStageTotalSteps = STEPS_3;
+		m_loopActive[0] = true;
+		m_strobeLVL1Delay = 40;
+		m_srcTriggerType = CCPD_STROBE_TRG;
+		m_loopParam[0] = DCS_PAR1;
+		m_readDcsChan = "INJECT0";
+		m_readDcsMode = VOLTAGE;
+		m_scanPar1DcsChan = "INJECT0";
+	    m_scanPar1DcsPar = "voltage-low";
+		m_dspProcessing[0] = false;
+		setLoopVarValues(0, 0, 1.5, 61);
+		m_loopAction[0] = SCURVE_FIT;
+		m_dspLoopAction[0] = false;
+		m_histogramFilled[OCCUPANCY] = true;
+		m_histogramKept[OCCUPANCY] = true;
+		m_histogramFilled[SCURVE_MEAN] = true;
+		m_histogramKept[SCURVE_MEAN] = true;
+		m_histogramFilled[SCURVE_SIGMA] = true;
+		m_histogramKept[SCURVE_SIGMA] = true;
+		m_histogramFilled[SCURVE_CHI2] = true;
+		m_histogramKept[SCURVE_CHI2] = true;
 	} else if(presetName== NOISE_OCC){
 		m_repetitions = 10000000;
 		m_maskStageSteps = 1;
@@ -1881,9 +1924,43 @@ void PixScan::presetI4B(ScanType presetName) {
 		m_histogramKept[OCCUPANCY] = false;
 		m_histogramFilled[SUM_OCC] = true;
 		m_histogramKept[SUM_OCC] = true;
+	} else if (presetName == FDAC_TUNE_CCPD) {
+		m_repetitions = 25;
+		m_strobeDuration = 500;
+		m_strobeFrequency = 4000;
+		m_digitalInjection = false;
+		m_singleDCloop = false;
+		m_loopOverDcs = false;
+		m_avoidSpecialsCols = false;
+		m_maskStageTotalSteps = STEPS_3;
+		m_maskStageSteps = 3;
+		m_strobeLVL1Delay = 40;
+		m_srcTriggerType = CCPD_STROBE_TRG;
+		m_loopActive[0] = true;
+		m_dspProcessing[0] = false;
+		m_dspLoopAction[0] = false;
+		m_loopParam[0] = FDACS;
+		setLoopVarValues(0, 0, 15, 16);
+		m_loopAction[0] = FDAC_TUNING_CCPD;
+		m_histogramFilled[FDAC_T] = true;
+		m_histogramKept[FDAC_T] = true;
+		m_histogramFilled[FDAC_TOT] = true;
+		m_histogramKept[FDAC_TOT] = true;
+		m_histogramFilled[OCCUPANCY] = false;
+		m_histogramKept[OCCUPANCY] = false;
+		m_histogramFilled[TOT_MEAN] = true;
+		m_histogramKept[TOT_MEAN] = true;
+		m_histogramFilled[TOT_SIGMA] = true;
+		m_histogramKept[TOT_SIGMA] = false;
+		m_totTargetValue = 6;
+		m_totTargetCharge = 20000;
+		m_restoreModuleConfig = false;
+		m_feVCal = 0x1fff;
 	} else {
 		throw PixScanExc(PixControllerExc::ERROR, "Undefined scan preset");
 	}
+
+	resetScan();
 }
 
 void PixScan::initConfig() {
@@ -2035,6 +2112,9 @@ void PixScan::initConfig() {
 	m_scanTypes["FE_ST_SOURCE_SCAN"] = FE_ST_SOURCE_SCAN;
 	m_scanTypes["NOISE_OCC"] = NOISE_OCC;
 	m_scanTypes["INJ_CALIB"] = INJ_CALIB;
+	m_scanTypes["ANALOG_TEST_CCPD"] = ANALOG_TEST_CCPD;
+	m_scanTypes["THRESHOLD_SCAN_CCPD"] = THRESHOLD_SCAN_CCPD;
+	m_scanTypes["FDAC_TUNE_CCPD"] = FDAC_TUNE_CCPD;
 #ifdef WITH_EUDAQ
 	m_scanTypes["TESTBEAM_EUDAQ"] = EUDAQ;
 #endif
@@ -2084,6 +2164,7 @@ void PixScan::initConfig() {
 	triggerMap["FE Self Trigger"]            = FE_SELFTRIGGER;
 	triggerMap["strobe + USBpix selftrg."]   = STROBE_USBPIX_SELF_TRG;
 	triggerMap["strobe + FE selftrg."]       = STROBE_FE_SELF_TRG;
+	triggerMap["CCPD strobe"]  	         = CCPD_STROBE_TRG;
 	conf["general"].addList("srcTriggerType", m_srcTriggerType, STROBE_SCAN, triggerMap,
 		"type of trigger for source scans", true);
 
@@ -2168,6 +2249,7 @@ void PixScan::initConfig() {
 	//scanvarMap["FEI3_GR"] = FEI3_GR;
 	//scanvarMap["CAPMEAS"] = CAPMEAS;
 	scanvarMap["FEI4_GR"] = FEI4_GR;
+	scanvarMap["CCPD_GR"] = CCPD_GR;
 	scanvarMap["TRIGGER_DELAY"] = TRIGGER_DELAY;
 	scanvarMap["LATENCY"] = LATENCY;
 	scanvarMap["INCR_LAT_TRGDEL"] = INCR_LAT_TRGDEL;
@@ -2205,6 +2287,7 @@ void PixScan::initConfig() {
 	endactMap["TOT_TO_CHARGE"] = TOT_TO_CHARGE;
 	endactMap["CALC_MEAN_NOCC"] = CALC_MEAN_NOCC;
 	endactMap["CLEAR_IOMUX_BITS"] = CLEAR_IOMUX_BITS;
+	endactMap["FDAC_TUNING_CCPD"] = FDAC_TUNING_CCPD;
 	conf["loops"].addBool("dspMaskStaging", m_dspMaskStaging, true,
 		"Mask staging executed by the DSP", true);
 	conf["loops"].addBool("innerLoopSwap", m_innerLoopSwap, false,
@@ -2246,6 +2329,8 @@ void PixScan::initConfig() {
 			"End loop action executed by the DSP", true);
 		conf["loops"].addString("feGlobRegName"+lnum.str(), m_loopFEI4GR[ll], "PlsrDAC",
 			"Name of FE-I4 register to be scanned", true);
+		conf["loops"].addString("CCPDGlobRegName"+lnum.str(), m_loopCCPDGR[ll], "global_VN",
+			"Name of CCPD register to be scanned", true); 
 	}
 
 	// Scan specific parameters
@@ -2275,6 +2360,8 @@ void PixScan::initConfig() {
 		"Cut on NOcc above which pixels are defined noisy", true);
 	conf["scans"].addInt("nbadChiCut", m_nbadchicut, 100000,
 		"Number of bad chi^2 values in S-curve scans after which a re-fit with MINUIT is started", true);
+	conf["scans"].addBool("convertToCharge", m_convertToCharge, true,
+		"Convert values to charge automatically", true);
 
 	// Group histograms
 	conf.addGroup("histograms");

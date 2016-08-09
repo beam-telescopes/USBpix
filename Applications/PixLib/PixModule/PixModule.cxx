@@ -24,6 +24,7 @@
 #include "PixFe/PixFeI2.h"
 #include "PixFe/PixFeI4A.h"
 #include "PixFe/PixFeI4B.h"
+#include "PixCcpd/PixCcpd.h"
 #include "PixConfDBInterface/PixConfDBInterface.h"
 #include "Config/Config.h"
 #include "PixModule/PixModule.h"
@@ -43,6 +44,7 @@ PixModule::PixModule(DBInquire *dbInquire, PixModuleGroup *modGrp, std::string n
   createConfig(dbInquire);
   Config &conf = *m_conf;
   m_mcc = 0;
+  m_ccpd = 0;
 
   if(dbInquire==0) return;
 
@@ -99,6 +101,34 @@ PixModule::PixModule(DBInquire *dbInquire, PixModuleGroup *modGrp, std::string n
         }
       }
     }
+    // Look for CCPD inquires
+    if((*it)->getName() == "PixCcpd"){
+      // Read CCPD derived class
+      fieldIterator f = (*it)->findField("ClassInfo_ClassName");
+      if(f!=(*it)->fieldEnd()) {
+        std::string className;
+        bool stat = dbInquire->getDB()->DBProcess(f, READ, className);
+        if(stat) m_ccpd = PixCcpd::make(*it, className);
+      }
+      if(m_ccpd==0){// next steps needed for backward-compatibility: field "ClassInfo_ClassName" might be missing
+	// default: try v1
+	try{
+	  m_ccpd = PixCcpd::make(*it,"PixCcpdv1");
+	}catch(PixDBException &exc){
+	  // exception thrown due to inconsistency Config-RootDB -> most likely v2, so let's try that
+	  try{
+	    m_ccpd = PixCcpd::make(*it,"PixCcpdv2");
+	  }catch(...){
+	    std::cerr << "PixModule constructor: exception caught while creating CCPD from DBrecord" << std::endl;
+	    m_ccpd = 0;
+	  }
+	}catch(...){
+	  std::cerr << "PixModule constructor: exception caught while creating CCPD from DBrecord" << std::endl;
+	  m_ccpd = 0;
+	}
+      }
+      if(m_ccpd!=0) conf.addConfig(&(m_ccpd->config()));
+    }
   }
   // temporary - need something smarter to define FE gemoetry in module
   if(m_fe.size()>2) m_feRows = 2;
@@ -118,6 +148,7 @@ PixModule::PixModule(PixModuleGroup *modGrp, unsigned int id, std::string name, 
   m_moduleId = id;
 
   m_mcc = 0; // if MCC flavour = NONE, keep NULL-pointer
+  m_ccpd = 0; // JGK: to do (but currently not needed): add option to have CCPD created
   
   // Switch between different MCC flavours
   if(mccType=="MCC_I1"){
@@ -236,6 +267,7 @@ void PixModule::createConfig(DBInquire *dbInquire){
 
   conf.reset();
   if(dbInquire!=0) conf.read(dbInquire);
+
 }
 
 PixModule::~PixModule() {
@@ -245,6 +277,9 @@ PixModule::~PixModule() {
   // Delete FEs
   for(std::vector<PixFe*>::iterator fe = m_fe.begin(); fe != m_fe.end(); fe++)
     delete *fe;
+
+  // delete CCPD
+  delete m_ccpd;
 }
 
 void PixModule::loadConfig(std::string name) {
@@ -254,6 +289,9 @@ void PixModule::loadConfig(std::string name) {
   // Load configuration data into child FEs
   for(std::vector<PixFe*>::iterator fe = m_fe.begin(); fe != m_fe.end(); fe++)
     (*fe)->loadConfig(name);
+
+  //Load CCPD configuration data into child CCPD
+  if(m_ccpd!=0) m_ccpd->loadConfig(name);
 }
 
 void PixModule::saveConfig(std::string name) {
@@ -263,6 +301,9 @@ void PixModule::saveConfig(std::string name) {
   // Save configuration data from child FEs
   for(std::vector<PixFe*>::iterator fe = m_fe.begin(); fe != m_fe.end(); fe++)
     (*fe)->saveConfig(name);
+
+  // Save configuration data from child CCPD
+  if(m_ccpd!=0) m_ccpd->saveConfig(name);
 }
 
 void PixModule::storeConfig(std::string name) {
@@ -272,6 +313,9 @@ void PixModule::storeConfig(std::string name) {
   // Store configuration data into child FEs
   for(std::vector<PixFe*>::iterator fe = m_fe.begin(); fe != m_fe.end(); fe++)
     (*fe)->storeConfig(name);
+
+  // Store configuration data into child CCPD
+  //if(m_ccpd!=0) m_ccpd->storeConfig(name);
 }
 
 bool PixModule::restoreConfig(std::string name) {
@@ -282,6 +326,9 @@ bool PixModule::restoreConfig(std::string name) {
   // Restore configuration data into child FEs
   for(std::vector<PixFe*>::iterator fe = m_fe.begin(); fe != m_fe.end(); fe++) {
     if (!(*fe)->restoreConfig(name)) ret = false;
+
+  // Restore configuration data into child CCPD
+  if (m_ccpd!=0/* && !m_ccpd->restoreConfig(name)*/) ret = false;
   }
   return ret;
 }
@@ -293,6 +340,9 @@ void PixModule::deleteConfig(std::string name) {
   // Delete configuration data into child FEs
   for(std::vector<PixFe*>::iterator fe = m_fe.begin(); fe != m_fe.end(); fe++)
     (*fe)->deleteConfig(name);
+
+  // Delete configuration data into child CCPD
+  //if(m_ccpd!=0) m_ccpd->deleteConfig(name);
 }
 
 void PixModule::setConfig(int /*structId*/, int /*moduleNum*/) {

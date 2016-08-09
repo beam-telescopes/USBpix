@@ -116,9 +116,16 @@ public:
   virtual void sendModuleConfig(unsigned int moduleMask) = 0;                                     //! Send module configuration 
   virtual void sendPixel(unsigned int moduleMask) = 0;                                            //! send specif. pixel register cfg.
   virtual void sendGlobal(unsigned int moduleMask) = 0;                                           //! send specif. gloabal register cfg.
+  virtual void sendCCPDGlobal() = 0;															  //! send CCPD global register
+  virtual void sendCCPDPixel() = 0;																  //! send CCPD pixel register
+  virtual void sendCCPD() = 0;																      //! send CCPD config
   virtual void sendPixel(unsigned int moduleMask, std::string regName, bool allDcsIdentical=false) = 0;  //! send pixel register cfg.
-  virtual void sendPixel(unsigned int moduleMask, std::string regName, int DC)=0 ;  //! send pixel register cfg. for specific DC
+  virtual void sendPixel(unsigned int moduleMask, std::string regName, int DC)=0 ;  			  //! send pixel register cfg. for specific DC
   virtual void sendGlobal(unsigned int moduleMask, std::string regName) = 0;                      //! send gloabal register cfg.
+  virtual void writeCcpdConfig(PixModule& mod) = 0;												  //! write CCPD-part of config - called by writeModuleConfig
+  virtual void StartCCPDInject() = 0;															  //! start CCPD injection 
+  virtual void StopCCPDInject() = 0;															  //! stop CCPD injection 
+
 
   //DLP: sends the charge calibration for the clusterizer
   virtual void sendPixelChargeCalib(int pModuleID, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge) = 0;

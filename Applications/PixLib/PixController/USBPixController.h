@@ -166,6 +166,10 @@ namespace PixLib {
     void sendPixel(unsigned int moduleMask, std::string regName, int DC) ;  //! send pixel register cfg. for specific DC
     void sendGlobal(unsigned int moduleMask, std::string regName);  //! send gloabal register cfg.
     int  readGlobal(int regNo, int feIndex);
+    void writeCcpdConfig(PixModule& mod);                                             //! write CCPD-part of config - called by writeModuleConfig
+    void sendCCPDGlobal();                                                            //! send CCPD global register
+    void sendCCPDPixel();                                                             //! send CCPD pixel register
+    void sendCCPD();                                                                  //! send CCPD cfg
 
     //DLP: sends the charge calibration for the clusterizer
     void sendPixelChargeCalib(int pModuleID, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge);
@@ -184,6 +188,9 @@ namespace PixLib {
     
     // M.B.: Read FEs GADC
     void readGADC(int type, std::vector<int> &GADCvalues, int FEindex=-1);
+
+    void StartCCPDInject(); //! start CCPD injection 
+    void StopCCPDInject();  //! stop CCPD injection
 
     void writeScanConfig(PixScan &scn);                               //! Write scan parameters
     void startScan(PixScan *scn);
@@ -366,6 +373,13 @@ namespace PixLib {
 
     // translations between USB classes and FE class
     std::map<std::string, int> m_globRegNames, m_latchNames;//, m_cmdNames;
+
+    // translations between USB classes and CCPD class
+    std::map<std::string, int> m_ccpd_globals;
+    std::map<std::string, int> m_ccpd_globals2;
+    std::map<std::string, int> m_ccpd_globalsLF;
+    //CCPD 
+    bool m_withCCPD;
 
     // info/problem/error message storage strings
     std::string m_infoBuff, m_errBuff;

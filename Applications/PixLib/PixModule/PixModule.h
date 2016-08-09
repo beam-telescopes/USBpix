@@ -39,6 +39,7 @@ namespace PixLib {
   class PixModuleGroup;
   class PixMcc;
   class PixFe;
+  class PixCcpd;
   class Config;
 
   //! Pix Module Exception class; an object of this type is thrown in case of a module error
@@ -95,8 +96,9 @@ namespace PixLib {
     // Accessors
     std::string moduleName() {return m_name;}          // Name of the module 
     PixModuleGroup *getPixModGroup() {return m_group;}    // Pointer to Module Group
-    PixMcc *pixMCC() {return m_mcc;}                      // Pointer to MCC
-    PixFe  *pixFE(int nFE);                               // Pointers to FEs
+    PixMcc  *pixMCC() {return m_mcc;}                      // Pointer to MCC
+    PixCcpd *pixCCPD(){return m_ccpd;}                     // Pointer to CCPD
+    PixFe   *pixFE(int nFE);                               // Pointers to FEs
     feIterator feBegin() { return m_fe.begin(); };
     feIterator feEnd()   { return m_fe.end(); };
     Config &config() { return *m_conf; };
@@ -173,6 +175,9 @@ namespace PixLib {
     // to manage FE geometry
     unsigned int m_feRows;
     
+	// Pointers to child CCPD
+    PixCcpd *m_ccpd;
+
     // Configuration structure    
     Config *m_conf;
     

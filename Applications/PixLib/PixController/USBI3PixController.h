@@ -133,6 +133,10 @@ public:
   void sendPixel(unsigned int moduleMask, std::string regName, int DC, bool sendGlob);
   void sendGlobal(unsigned int moduleMask);
   void sendGlobal(unsigned int moduleMask, std::string regName);
+  void writeCcpdConfig(PixModule&){};                                                 //! write CCPD-part of config - called by writeModuleConfig
+  void sendCCPDGlobal(){};                                                            //! send CCPD global register
+  void sendCCPDPixel(){};                                                             //! send CCPD pixel register
+  void sendCCPD(){};                                                                  //! send CCPD cfg
 
   //JW: Setup data paths inside FPGA
   void setCalibrationMode();
@@ -210,6 +214,8 @@ public:
   void setFEConfigurationMode();
   void readEPROM(){};
   void burnEPROM(){};
+  void StartCCPDInject(){}; //! start CCPD injection 
+  void StopCCPDInject(){};  //! stop CCPD injection
   void readGADC(int /*type*/, std::vector<int> &/*GADCvalues*/, int /*FEindex=-1*/){};
   void pauseRun();
   void resumeRun();

@@ -101,6 +101,10 @@ public:
   virtual void sendPixel(unsigned int, std::string, bool) {};                                 //! send pixel register cfg.
   virtual void sendPixel(unsigned int, std::string, int){} ;                                  //! send pixel register cfg. for specific DC
   virtual void sendGlobal(unsigned int, std::string){};                                       //! send gloabal register cfg.
+  virtual void writeCcpdConfig(PixModule&){};                                                 //! write CCPD-part of config - called by writeModuleConfig
+  virtual void sendCCPDGlobal(){};                                                            //! send CCPD global register
+  virtual void sendCCPDPixel(){};                                                             //! send CCPD pixel register
+  virtual void sendCCPD(){};                                                                  //! send CCPD cfg
 
   virtual void sendPixelChargeCalib(int pModuleID, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge);
 
@@ -116,6 +120,9 @@ public:
   virtual void burnEPROM(){}; // burns the FE GR values to the EPROM. Caution, non reversibel!!!
   
   virtual void readGADC(int , std::vector<int> &, int){};
+
+  virtual void StartCCPDInject(){}; //! start CCPD injection 
+  virtual void StopCCPDInject(){};  //! stop CCPD injection
 
   virtual void writeScanConfig(PixScan &scn);                               //! Write scan parameters
   virtual void startScan(PixScan *scn){writeScanConfig(*scn); startScan();};

@@ -33,6 +33,9 @@
 #include "PixModule/PixModule.h"
 #include "PixFe/PixFeI4A.h"
 #include "PixFe/PixFeI4B.h"
+#include "PixCcpd/PixCcpdv1.h"
+#include "PixCcpd/PixCcpdv2.h"
+#include "PixCcpd/PixCcpdLF.h"
 #include "PixDcs/SleepWrapped.h"
 #include "PixDcs/PixDcs.h"
 #include "PixDcs/USB_PixDcs.h"
@@ -98,6 +101,7 @@ PixController(modGrp, dbInquire), m_readoutChannelReadsChip(4) {
   m_upcStartScanHasFinished = false;
 	m_infoBuff="";
 	m_errBuff="";
+	m_withCCPD=false;
 
 	// to be updated later
 	m_nColFe = 80;
@@ -131,6 +135,7 @@ PixController(modGrp), m_readoutChannelReadsChip(4) { //! Constructor
   m_upcStartScanHasFinished = false;
 	m_infoBuff="";
 	m_errBuff="";
+	m_withCCPD=false;
 
 	// to be updated later
 	m_nColFe = 80;
@@ -382,6 +387,69 @@ void USBPixController::configInit(){
 	m_latchNames["FDAC2"]   = FDAC2+1;
 	m_latchNames["FDAC3"]   = FDAC3+1;
 	m_latchNames["DIGINJ"]  = DIGINJ+1;
+
+	//CCPD
+	m_ccpd_globals["BLRes"]  = CCPD_BLRES;
+	m_ccpd_globals["ThRes"]  = CCPD_THRES;
+	m_ccpd_globals["VN"]     = CCPD_VN;
+	m_ccpd_globals["VNFB"]   = CCPD_VNFB;
+	m_ccpd_globals["VNFoll"] = CCPD_VNFOLL;
+	m_ccpd_globals["VNLoad"] = CCPD_VNLOAD;
+	m_ccpd_globals["VNDAC"]  = CCPD_VNDAC;
+	m_ccpd_globals["NU1"]    = CCPD_NU1;
+	m_ccpd_globals["NU2"]    = CCPD_NU2;
+	m_ccpd_globals["NotUsed"]= CCPD_NOTUSED;
+	m_ccpd_globals["VNComp"] = CCPD_VNCOMP;
+	m_ccpd_globals["VNCompL"]= CCPD_VNCOMPL;
+	m_ccpd_globals["VNOut0"] = CCPD_VNOUT0;
+	m_ccpd_globals["VNOut1"] = CCPD_VNOUT1;
+	m_ccpd_globals["VNOut2"] = CCPD_VNOUT2;
+	
+	//CCPD v2
+	m_ccpd_globals2["BLRes"]   = V2_CCPD_BLRES;
+	m_ccpd_globals2["ThRes"]   = V2_CCPD_THRES;
+	m_ccpd_globals2["VN"]      = V2_CCPD_VN;
+	m_ccpd_globals2["VN2"]     = V2_CCPD_VN2;
+	m_ccpd_globals2["VNFB"]    = V2_CCPD_VNFB;
+	m_ccpd_globals2["VNFoll"]  = V2_CCPD_VNFOLL;
+	m_ccpd_globals2["VNLoad"]  = V2_CCPD_VNLOAD;
+	m_ccpd_globals2["VNDAC"]   = V2_CCPD_VNDAC;
+	m_ccpd_globals2["ThPRes"]  = V2_CCPD_THPRES;
+	m_ccpd_globals2["ThP"]     = V2_CCPD_THP;
+	m_ccpd_globals2["VNOut"]   = V2_CCPD_VNOUT;
+	m_ccpd_globals2["VNComp"]  = V2_CCPD_VNCOMP;
+	m_ccpd_globals2["VNCompLd"]= V2_CCPD_VNCOMPLD;
+	m_ccpd_globals2["VNOut1"]  = V2_CCPD_VNOUT1;
+	m_ccpd_globals2["VNOut2"]  = V2_CCPD_VNOUT2;
+	m_ccpd_globals2["VNOut3"]  = V2_CCPD_VNOUT3;
+	m_ccpd_globals2["VNBuffer"]= V2_CCPD_VNBUFFER;
+	m_ccpd_globals2["VPFoll"]  = V2_CCPD_VPFOLL;
+	m_ccpd_globals2["VNBias"]  = V2_CCPD_VNBIAS;
+	m_ccpd_globals2["Q0"]      = V2_CCPD_Q0;
+	m_ccpd_globals2["Q1"]      = V2_CCPD_Q0;
+	m_ccpd_globals2["Q2"]      = V2_CCPD_Q0;
+	m_ccpd_globals2["Q3"]      = V2_CCPD_Q0;
+	m_ccpd_globals2["Q4"]      = V2_CCPD_Q0;
+	m_ccpd_globals2["Q5"]      = V2_CCPD_Q0;
+	
+	//CCPD LF
+	m_ccpd_globalsLF["BLRes"]   = LF_CCPD_BLRES;
+	m_ccpd_globalsLF["VN"]   = LF_CCPD_VN;
+	m_ccpd_globalsLF["VPFB"]   = LF_CCPD_VPFB;
+	m_ccpd_globalsLF["VNFoll"]   = LF_CCPD_VNFOLL;
+	m_ccpd_globalsLF["VPLoad"]   = LF_CCPD_VPLOAD;
+	m_ccpd_globalsLF["LSBdacL"]   = LF_CCPD_LSBDACL;
+	m_ccpd_globalsLF["IComp"]   = LF_CCPD_ICOMP;
+	m_ccpd_globalsLF["VStrech"]   = LF_CCPD_VSTRETCH;
+	m_ccpd_globalsLF["WGT0"]   = LF_CCPD_WGT0;
+	m_ccpd_globalsLF["WGT1"]   = LF_CCPD_WGT1;
+	m_ccpd_globalsLF["WGT2"]   = LF_CCPD_WGT2;
+	m_ccpd_globalsLF["IDacTEST"]   = LF_CCPD_IDACTEST;
+	m_ccpd_globalsLF["IDacLTEST"]   = LF_CCPD_IDACLTEST;
+	m_ccpd_globalsLF["Trim_En"]   = LF_CCPD_TRIM_EN;
+	m_ccpd_globalsLF["Inject_En"]   = LF_CCPD_INJECT_EN;
+	m_ccpd_globalsLF["Monitor_En"]   = LF_CCPD_MONITOR_EN;
+	m_ccpd_globalsLF["Preamp_En"]   = LF_CCPD_PREAMP_EN;
 
 	m_configValid = false;
 }
@@ -1179,6 +1247,15 @@ void USBPixController::writeModuleConfig(PixModule& mod) {
   }
   m_chipIds = newChipIds;
 
+  PixCcpd* ccpd = mod.pixCCPD();
+  if(ccpd!=0){
+	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeModuleConfig() CCPD included" << endl;
+	writeCcpdConfig(mod);
+	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeModuleConfig() CCPD included before m_withCCPD " << m_withCCPD << endl;
+	m_withCCPD=true;
+	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeModuleConfig() CCPD included after m_withCCPD " << m_withCCPD << endl;
+  }
+
   int demux_ctrl = 0;
   for (int i = 0; i < 4; i++)
   {
@@ -1384,6 +1461,10 @@ void USBPixController::sendModuleConfig(unsigned int moduleMask) {
 	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called sendModuleConfig"<<endl;
 	// call sendPixel, has become identical by now
 	sendPixel(moduleMask);
+	if(m_withCCPD){ 
+		if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: sendModuleConfig m_withCCPD true"<<endl;
+		sendCCPD();
+	}
 }
 
 void USBPixController::sendModuleConfig(PixModule& mod) {
@@ -1910,7 +1991,8 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
   m_USBpix->SetFineStrbDelay(scn.getStrobeFineDelay());
 
 	if (scn.getSrcTriggerType()==PixScan::STROBE_SCAN || scn.getSrcTriggerType()==PixScan::STROBE_EXTTRG || 
-	    scn.getSrcTriggerType()==PixScan::STROBE_USBPIX_SELF_TRG || scn.getSrcTriggerType()==PixScan::STROBE_FE_SELF_TRG) {
+	    scn.getSrcTriggerType()==PixScan::STROBE_USBPIX_SELF_TRG || scn.getSrcTriggerType()==PixScan::STROBE_FE_SELF_TRG ||
+	    scn.getSrcTriggerType()==PixScan::CCPD_STROBE_TRG) {
 	  m_USBpix->disableTriggerReplicationMaster();
 	  if(scn.getSrcTriggerType()==PixScan::STROBE_SCAN){
 	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->disableExtLV1()"<<endl;
@@ -1932,6 +2014,9 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 	    // disable ext. trigger in FPGA
 	    m_USBpix->setTriggerMode(PixScan::USBPIX_SELF_TRG);
 	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: FE_SELFTRIGGER trigger mode set" << " - Board-ID: " << m_boardID[0] << endl;
+	  } else if (scn.getSrcTriggerType()==PixScan::CCPD_STROBE_TRG) {
+	    m_USBpix->setTriggerMode(PixScan::STROBE_SCAN);
+	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: CCPD_EXT_TRG trigger mode set" << " - Board-ID: " << m_boardID[0] << endl;
 	  } else {
 	    m_USBpix->setTriggerMode(PixScan::EXT_TRG);
 	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: EXT_TRG trigger mode set" << " - Board-ID: " << m_boardID[0] << endl;
@@ -2489,6 +2574,7 @@ void USBPixController::stopScan() {
     m_USBpix->StopReadout();
 		m_USBpix->StopMeasurement();
 		m_USBpix->WriteStrbStop(); // in case strobe was started; shouldn't harm otherwise
+		m_USBpix->StopCcpdInjections();	// in case strobe was started; shouldn't harm otherwise
 		m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
 		m_SourceScanEventQuantity = 0;
 		// set cancel flag, so we know that scan was cancelled/stopped
@@ -3185,6 +3271,7 @@ int USBPixController::nTrigger() {                 //! Returns the number of tri
 				if(!measurementRunning && !m_testBeamFlag /* && m_sramReadoutReady*/) { // TODO
 				        if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: MeasRunning(" << (*it) << ") = false => reading SRAM..."<<endl;
 					m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
+					m_USBpix->StopCcpdInjections();	// in case strobe was started; shouldn't harm otherwise
 					m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
 					m_SourceScanEventQuantity = 0;
 					m_USBpix->ReadSRAM(*it);
@@ -3867,4 +3954,260 @@ int USBPixController::detectAdapterCard(unsigned int boardId){
   default:                  // no board
     return -1;
   }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// M.B.: CCPD Support ////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void USBPixController::writeCcpdConfig(PixModule& mod) {
+  if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called writeCcpdConfig()"<<endl;
+
+  int moduleId = mod.moduleId();
+  
+  PixCcpd* ccpd = mod.pixCCPD();
+  PixCcpdv1* ccpdv1 = dynamic_cast<PixCcpdv1*>(ccpd);
+  PixCcpdv2* ccpdv2 = dynamic_cast<PixCcpdv2*>(ccpd);
+  PixCcpdLF* ccpdLF = dynamic_cast<PixCcpdLF*>(ccpd);
+
+  if(ccpdv1!=0){
+    if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeCcpdConfig() CCPD V1 found"<<endl;
+    m_USBpix->SetCCPDVersion((int)ConfigCCPDMemory::HV2FEI4_V1);
+    Config &cfg = ccpd->config();
+
+    // copy CCPD global register content
+	if(cfg["global"].name()!="__TrashConfGroup__"){
+		for(std::map<std::string, int>::iterator it=m_ccpd_globals.begin(); it!=m_ccpd_globals.end(); it++){
+			if(cfg["global"][it->first].name()!="__TrashConfObj__")
+				m_USBpix->SetCcpdGlobalVal(it->second, ((ConfInt&)cfg["global"][it->first]).getValue());
+		
+		}
+    }
+
+    // and now the pixel register content
+	if(cfg["pixel"].name()!="__TrashConfGroup__"){
+    /*  if(cfg["pixel"]["PRtest"].name()!="__TrashConfObj__"){
+	ConfMask<unsigned short int> &prVal = ((ConfMatrix&)cfg["pixel"]["PRtest"]).valueU16();
+	for (unsigned int col=0; col<prVal.get().size(); col++) {
+	  for (unsigned int row=0; row<prVal[0].size(); row++) {
+	    unsigned int content = prVal[col][row];
+	    // to do: write "content" to USBPix for all mapped CCPD pixels
+	  }
+	}
+      }*/
+		if(cfg["pixel"]["INDAC"].name()!="__TrashConfObj__"){
+		ConfMask<unsigned short int> &InDAC = ((ConfMatrix&)cfg["pixel"]["INDAC"]).valueU16();
+			if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeCcpdConfig() pixel register" <<endl;
+			for (unsigned int col=0; col<InDAC.get().size(); col++) {
+					for (unsigned int row=0; row<InDAC[0].size(); row++) {
+						// if pixel is in	col 0,3,6...57 -> Wr_ID=0 ? col % 3 -> 0
+						//					col 1,4,7...58 -> Wr_ID=1 ? col % 3 -> 1
+						//					col 2,5,8...59 -> Wr_ID=2 ? col % 3 -> 2
+						//					row 0,2,4...22 -> InDACR ?? Needs to be tested
+						//					row 1,3,5...23 -> InDACL ?? Needs to be tested
+						if ((row % 2)==0){
+							m_USBpix->SetCcpdColCtrlVal(CCPD_WR, (col % 3) ,  (col % 3), col/3);
+							m_USBpix->SetCcpdRowCtrlVal(CCPD_INDACR, InDAC[col][row] , (col % 3) , row/2, col/3);
+						}
+						else {
+							m_USBpix->SetCcpdColCtrlVal(CCPD_WR, (col % 3) ,  (col % 3), col/3);
+							m_USBpix->SetCcpdRowCtrlVal(CCPD_INDACL, InDAC[col][row] , (col % 3) , row/2, col/3);
+						}
+					}
+			}
+		}
+		
+		if(cfg["pixel"]["EnR"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_ENR, ((ConfBool&)cfg["pixel"]["EnR"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+		if(cfg["pixel"]["EnL"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_ENL, ((ConfBool&)cfg["pixel"]["EnL"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+		if(cfg["pixel"]["L0"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_L0, ((ConfBool&)cfg["pixel"]["L0"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+		if(cfg["pixel"]["L1"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_L1, ((ConfBool&)cfg["pixel"]["L1"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+		if(cfg["pixel"]["L2"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_L2, ((ConfBool&)cfg["pixel"]["L2"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+		if(cfg["pixel"]["R0"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_R0, ((ConfBool&)cfg["pixel"]["R0"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+		if(cfg["pixel"]["R1"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_R1, ((ConfBool&)cfg["pixel"]["R1"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+		if(cfg["pixel"]["R2"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_R2, ((ConfBool&)cfg["pixel"]["R2"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+		if(cfg["pixel"]["EnCurrent"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_ENCURRENT, ((ConfBool&)cfg["pixel"]["EnCurrent"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+		if(cfg["pixel"]["EnStrip"].name()!="__TrashConfObj__"){
+			m_USBpix->SetCcpdColCtrlVal(CCPD_ENSTRIP, ((ConfBool&)cfg["pixel"]["EnStrip"]).value(), -1, -1); // Wr_ID=-1  || col=-1 means broadcast to all 			
+		}
+
+	}
+
+	// copy CCPD on PCB register content
+    if(cfg["OnPcbDACs"].name()!="__TrashConfGroup__"){
+		m_USBpix->SetCcpdThr(((ConfInt&)cfg["OnPcbDACs"]["CCPD_Threshold"]).getValue());
+		m_USBpix->SetCcpdVcal(((ConfInt&)cfg["OnPcbDACs"]["CCPD_Vcal"]).getValue());
+	}
+
+	
+  } else if(ccpdv2!=0){ //------------------Version 2---------------------------------------
+    if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeCcpdConfig() CCPD V2 found"<<endl;
+    m_USBpix->SetCCPDVersion((int)ConfigCCPDMemory::HV2FEI4_V2);
+    Config &cfg = ccpd->config();
+	
+	// copy CCPD global register content
+	if(cfg["global"].name()!="__TrashConfGroup__"){
+		for(std::map<std::string, int>::iterator it=m_ccpd_globals2.begin(); it!=m_ccpd_globals2.end(); it++){
+			if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeCcpdConfig() V2 global it->first"<< it->first <<endl;
+			if(cfg["global"][it->first].name()!="__TrashConfObj__")
+				
+				m_USBpix->SetCcpdGlobalVal(it->second, ((ConfInt&)cfg["global"][it->first]).getValue());
+		
+		}
+    }
+	bool StripReadout = false;
+	bool DirectCurrentReadout = false;
+	bool SimplePixel = false;
+	
+	if(cfg["pixel"].name()!="__TrashConfGroup__"){
+	
+		//get values from config
+		
+		// Simple Pixel
+		if(cfg["pixel"]["simplepixel"].name()!="__TrashConfObj__"){
+			SimplePixel = ((ConfBool&)cfg["pixel"]["simplepixel"]).value(); 	
+			m_USBpix->SetCcpdsimplepixelValue(SimplePixel);
+		}
+		
+		//row items
+		if(cfg["pixel"]["Monitor"].name()!="__TrashConfObj__"){
+			ConfMask<unsigned short int> &Monitor = ((ConfMatrix&)cfg["pixel"]["Monitor"]).valueU16();
+			m_USBpix->ResetCcpdMonitor();
+			if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeCcpdConfig() ResetCcpdMonitor called" << endl;
+			for (unsigned int col=0; col<Monitor.get().size(); col++) {
+				for (unsigned int row=0; row<Monitor[0].size(); row++) {
+					m_USBpix->SetCcpdMonitorValue(col, row, Monitor[col][row]);	
+				}
+			}
+		}
+		if(cfg["pixel"]["INDAC"].name()!="__TrashConfObj__"){
+			ConfMask<unsigned short int> &InDAC = ((ConfMatrix&)cfg["pixel"]["INDAC"]).valueU16();
+			for (unsigned int col=0; col<InDAC.get().size(); col++) {
+				for (unsigned int row=0; row<InDAC[0].size(); row++) {
+					m_USBpix->SetCcpdInDacValue(col, row, InDAC[col][row]);
+				}
+			}
+		}
+		if(cfg["pixel"]["Enable"].name()!="__TrashConfObj__"){
+			ConfMask<unsigned short int> &Enable = ((ConfMatrix&)cfg["pixel"]["Enable"]).valueU16();
+			for (unsigned int row=0; row<Enable[0].size(); row++) {
+				m_USBpix->SetCcpdEnableValue(row, Enable[0][row]);
+			}
+		}
+		
+		//col items
+				
+		if(cfg["pixel"]["Str"].name()!="__TrashConfObj__"){
+			StripReadout = ((ConfBool&)cfg["pixel"]["Str"]).value(); 
+			//FIXME at the moment all or no pixel enable, 	 
+			m_USBpix->SetCcpdStripROValue(StripReadout); 				
+		}
+		if(cfg["pixel"]["dc"].name()!="__TrashConfObj__"){
+			DirectCurrentReadout = ((ConfBool&)cfg["pixel"]["dc"]).value(); 
+			//FIXME at the moment all or no pixel enable, 		
+			m_USBpix->SetCcpddirectcurrentValue(DirectCurrentReadout);
+		}
+		if(cfg["pixel"]["Ampout"].name()!="__TrashConfObj__"){
+			ConfMask<unsigned short int> &Ampout = ((ConfMatrix&)cfg["pixel"]["Ampout"]).valueU16();
+			for (unsigned int col=0; col<Ampout.get().size(); col++) {
+				m_USBpix->SetCcpdampoutValue(col, Ampout[col][0]);
+			}
+		}		
+	}
+  } else if(ccpdLF!=0){ //------------------Version LF---------------------------------------
+  
+	  if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeCcpdConfig() CCPD LF found"<<endl;
+		m_USBpix->SetCCPDVersion((int)ConfigCCPDMemory::HV2FEI4_LF);
+		Config &cfg = ccpd->config();
+		
+	  if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeCcpdConfig() after SetCCPDVersion"<<endl;
+	  
+		// copy CCPD global register content
+		if(cfg["global"].name()!="__TrashConfGroup__"){
+			for(std::map<std::string, int>::iterator it=m_ccpd_globalsLF.begin(); it!=m_ccpd_globalsLF.end(); it++){
+				if(cfg["global"][it->first].name()!="__TrashConfObj__")
+					m_USBpix->SetCcpdGlobalVal(it->second, ((ConfInt&)cfg["global"][it->first]).getValue());
+			
+			}
+		}
+		
+		if(cfg["pixel"]["SW_Ana"].name()!="__TrashConfObj__"){
+			ConfMask<unsigned short int> &SW_Ana = ((ConfMatrix&)cfg["pixel"]["SW_Ana"]).valueU16();
+			for (unsigned int row=0; row<SW_Ana[0].size(); row++) {
+				m_USBpix->SetCcpdLFSw_Ana(row, SW_Ana[0][row]);
+			}
+		}
+		
+		if(cfg["pixel"]["Pixels"].name()!="__TrashConfObj__"){
+			ConfMask<unsigned short int> &Pixels = ((ConfMatrix&)cfg["pixel"]["Pixels"]).valueU16();
+			for (unsigned int col=0; col<Pixels.get().size(); col++) {
+				for (unsigned int row=0; row<Pixels[0].size(); row++) {
+					m_USBpix->SetCcpdLFPixels(row, Pixels[col][row]);
+				}
+			}
+		}
+  } else{ 
+	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: writeCcpdConfig() CCPD version NOT found"<<endl;
+  } 
+  if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: end of writeCcpdConfig()"<<endl;
+}
+
+void USBPixController::StartCCPDInject() {
+	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called StartCCPDInject()"<<endl;
+	m_USBpix->StartCcpdInjections(100, 10, 255);			
+}
+
+void USBPixController::StopCCPDInject() {
+	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called StopCCPDInject()"<<endl;
+	m_USBpix->StopCcpdInjections();			
+}
+void USBPixController::sendCCPDGlobal(){
+
+	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called sendCCPDGlobal "<<endl;
+	if(m_withCCPD){
+		m_USBpix->WriteCcpdGlobal();
+		m_USBpix->WriteCcpdOnPcbDacs();	
+	}
+	else if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called sendCCPDGlobal but no CCPD "<<endl;
+
+}
+void USBPixController::sendCCPDPixel(){
+
+//CCPDTODO
+
+	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called sendCCPDPixel"<<endl;
+	if(m_withCCPD){
+		m_USBpix->WriteCcpdPixel(0);
+	}
+	else if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called sendCCPDPixel	but no CCPD "<<endl;
+}
+void USBPixController::sendCCPD(){
+	//sendCCPDGlobal();
+	//sendCCPDPixel();
+	m_USBpix->WriteCompleteCcpdShiftRegister();		
 }

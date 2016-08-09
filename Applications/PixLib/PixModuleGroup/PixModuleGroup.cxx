@@ -28,6 +28,7 @@
 #include "Config/Config.h"
 #include "PixFe/PixFeI4A.h"
 #include "PixFe/PixFeI4B.h"
+#include "PixCcpd/PixCcpd.h"
 #include "PixDcs/PixDcs.h"
 #include "PixDcs/SleepWrapped.h"
 #include <FitClass.h>  
@@ -39,7 +40,7 @@
 #include "cmath"
 
 
-#define PMG_DEBUG false
+#define PMG_DEBUG true
 using namespace SctPixelRod;
 using namespace PixLib;
 
@@ -458,8 +459,8 @@ void PixModuleGroup::prepareTDACFastTuning(int nloop, PixScan *scn) {
 									hTdac->set(colmod, rowmod, tdacs[col][row]);
 								}
 							}
-							if(PMG_DEBUG && col == 12 && rowmod == 139) cout << "old tdac before computing: " << tdacs[col][row]<< endl;
-							if(PMG_DEBUG && col == 12 && rowmod == 139) cout << "colmod: " << colmod << ", rowmod: " << rowmod << endl;
+							if(PMG_DEBUG && col == 39 && rowmod == 139) cout << "old tdac before computing: " << tdacs[col][row]<< endl;
+							if(PMG_DEBUG && col == 39 && rowmod == 139) cout << "colmod: " << colmod << ", rowmod: " << rowmod << endl;
 							// Compute new TDAC value
 							if(PMG_DEBUG && col == 0 && rowmod == 0) cout << "---------- Starting to compute new TDAC values ----------------------" << endl;
 
@@ -467,26 +468,25 @@ void PixModuleGroup::prepareTDACFastTuning(int nloop, PixScan *scn) {
 
 							if(fei4!=0) delta *= -1;
 
-							if(PMG_DEBUG && col == 12 && rowmod == 139) cout << "Measured Occ is = " << (*hn)(colmod,rowmod) << endl;
+							if(PMG_DEBUG && col == 39 && rowmod == 139) cout << "Measured Occ is = " << (*hn)(colmod,rowmod) << endl;
 
 							if ((*hn)(colmod,rowmod) > trg || (scn->scanIndex(nloop)>1 && (*hDir)(colmod,rowmod)>0 
 								&& (*hno)(colmod,rowmod)>(*hn)(colmod,rowmod))) {
-									if(PMG_DEBUG && col == 12 && rowmod == 139) cout << "decrementing TDAC, delta = " << delta*-1 << ", old TDAC is " << tdacs[col][row] << endl;
+									if(PMG_DEBUG && col == 39 && rowmod == 139) cout << "decrementing TDAC, delta = " << delta*-1 << ", old TDAC is " << tdacs[col][row] << endl;
 									newTDAC = tdacs[col][row] + corr + delta;
 									hDir->set(colmod, rowmod, -1);
 							} else {
-								if(PMG_DEBUG && col == 12 && rowmod == 139) cout << "incrementing TDAC, delta = " << delta*-1 << ", old TDAC is " << tdacs[col][row] <<endl;
+								if(PMG_DEBUG && col == 39 && rowmod == 139) cout << "incrementing TDAC, delta = " << delta*-1 << ", old TDAC is " << tdacs[col][row] <<endl;
 								newTDAC = tdacs[col][row] + corr - delta;
 								hDir->set(colmod, rowmod, 1);
 							}
-							if(PMG_DEBUG && colmod == 12 && rowmod == 139) cout << "New TDAC value before cutoff is " << newTDAC << endl;
+							if(PMG_DEBUG && colmod == 39 && rowmod == 139) cout << "New TDAC value before cutoff is " << newTDAC << endl;
 						}
 						if (newTDAC > maxtrim)                         newTDAC = maxtrim;
-						if (fei4==0 && newTDAC < 10 && scn->scanIndex(nloop) != 0) newTDAC = 10;
 						if (newTDAC < 0 && scn->scanIndex(nloop) != 0) newTDAC = 0;
 						if (newTDAC>=0){
 							tdacs[col][row] = (unsigned int) newTDAC;
-							if(PMG_DEBUG && col == 12 && rowmod == 139) cout << " --------------- Final new TDAC value is " << newTDAC << " --------------- " << endl;
+							if(PMG_DEBUG && col == 39 && rowmod == 139) cout << " --------------- Final new TDAC value is " << newTDAC << " --------------- " << endl;
 						}
 					}
 				}
@@ -668,15 +668,13 @@ void PixModuleGroup::prepareGDACFastTuning(int nloop, PixScan *scn) {
 					if(PMG_DEBUG) cout << "New GDAC value before cutoff is " << newGDAC << endl;
 				}
 
-				if ((fei4a!=0 || fei4b!=0)&& scn->getLoopParam(nloop)==PixScan::GDAC && newGDAC > 32767)  newGDAC = 32767;
-				if (!(fei4a!=0 || fei4b!=0)&& scn->getLoopParam(nloop)==PixScan::GDAC && newGDAC > 31)  newGDAC = 31;
+				if (scn->getLoopParam(nloop)==PixScan::GDAC && newGDAC > 32767)  newGDAC = 32767;
 				if (scn->getLoopParam(nloop)==PixScan::FEI4_GR && newGDAC > 255) newGDAC = 255;
-				if (!(fei4a!=0 || fei4b!=0) && newGDAC < 5 && scn->scanIndex(nloop) != 0) newGDAC = 5;
 				if (newGDAC < 0 && scn->scanIndex(nloop) != 0) newGDAC = 0;
 				if (newGDAC>=0){
 					gdac = (unsigned int) newGDAC;
+					if(PMG_DEBUG) cout << " --------------- Final new GDAC value is " << newGDAC << " --------------- " << endl;
 				}
-				if(PMG_DEBUG) cout << " --------------- Final new GDAC value is " << newGDAC << " --------------- " << endl;
 				if(fei4a!=0){
 					(*fe)->writeGlobRegister("Vthin_AltFine", gdac&0xff);
 					if (scn->getLoopParam(nloop)==PixScan::GDAC) 
@@ -1341,7 +1339,7 @@ void PixModuleGroup::endOccSumming(int nloop, PixScan *scn) {
 								double newOcc = (*hOcc)(colmod,rowmod);
 								double newVal = oldVal + newOcc;
 								hSumOcc->set(colmod, rowmod, newVal);
-								if(PMG_DEBUG && colmod == 12 && rowmod == 139) cout << "Summed histogram: oldSum = " << oldVal	<< ", newOcc = " << newOcc << ", newSum = " << newVal << endl;
+								if(PMG_DEBUG && colmod == 39 && rowmod == 139) cout << "Summed histogram: oldSum = " << oldVal	<< ", newOcc = " << newOcc << ", newSum = " << newVal << endl;
 							}
 						}
 					}
@@ -2108,12 +2106,8 @@ void PixModuleGroup::endIFTuning(int nloop, PixScan *scn) {
 						hTot->set(colmod, rowmod, (*hTrg)(colmod, rowmod));
 					}
 				}
-				PixFe* fei4a = dynamic_cast<PixFeI4A*>(*fe);
-				PixFe* fei4b = dynamic_cast<PixFeI4B*>(*fe);
-				if(fei4a != 0 || fei4b != 0)
-				  (*fe)->writeGlobRegister("PrmpVbpf",(int)(scn->getLoopVarValues(nloop))[bestIF]);	//CG:EDIT : error would occure here during IF_TUNE with FE-I3.
-				else
-				  (*fe)->writeGlobRegister("DAC_IF",(int)(scn->getLoopVarValues(nloop))[bestIF]);
+				//	(*fe)->writeGlobRegister("DAC_IF",(int)(scn->getLoopVarValues(nloop))[bestIF]);
+				(*fe)->writeGlobRegister("PrmpVbpf",(int)(scn->getLoopVarValues(nloop))[bestIF]);
 			}
 		}
 	}
@@ -2377,8 +2371,7 @@ void PixModuleGroup::setupChargeCalibration(PixScan* /*scn*/)
 		std::cout<<"PixModuleGroup::setupChargeCalibration"<<std::endl;
 	int tNumberOfTOThistos = PixScan::TOT15 - PixScan::TOT0 + 1;
 	for (unsigned int iModule=0; iModule<m_modules.size(); ++iModule){
-	  if (m_modules[iModule]->m_readoutActive && 
-	      (m_modules[iModule]->getFEFlavour()==PixModule::PM_FE_I4A || m_modules[iModule]->getFEFlavour()==PixModule::PM_FE_I4B)){ // only reasonable for FE-I4
+		if (m_modules[iModule]->m_readoutActive){
 			for (std::vector<PixFe*>::iterator iFE = m_modules[iModule]->feBegin(); iFE != m_modules[iModule]->feEnd(); ++iFE){
 				unsigned int tModuleID = m_modules[iModule]->m_moduleId;
 				std::vector<ConfMask<float>* > tTotCalibHistos;
@@ -2518,6 +2511,8 @@ void PixModuleGroup::scanLoopStart(int nloop, PixScan *scn) {
 			break;
 		case PixScan::OFFSET_CALIB:
 			break;
+		case PixScan::FDAC_TUNING_CCPD:
+			break;
 		case PixScan::NO_ACTION:
 		default:
 			break;
@@ -2575,6 +2570,8 @@ void PixModuleGroup::prepareStep(int nloop, PixScan *scn) {
 		case PixScan::DISCBIAS_TUNING:
 			prepareDiscBiasTuning(nloop, scn);
 			break;
+		case PixScan::FDAC_TUNING_CCPD:
+			break;
 		case PixScan::NO_ACTION:
 		default:
 			break;
@@ -2587,8 +2584,6 @@ void PixModuleGroup::scanExecute(PixScan *scn) {
 	if(PMG_DEBUG) std::cout<<"PixModuleGroup::scanExecute: RunType "<<scn->getRunType()<<"\n";
 	// Backward comaptibility for apps without scanTerminate
 	m_execToTerminate = true;
-	// check module flavour based on 1st module (shouldn't have flavour mix!)
-	bool isfei4 = (m_modules[0]->getFEFlavour()==PixModule::PM_FE_I4A || m_modules[0]->getFEFlavour()==PixModule::PM_FE_I4B);
 
 	if(scn->getRunType() == PixScan::NORMAL_SCAN) {
 		// configure modules
@@ -2598,46 +2593,42 @@ void PixModuleGroup::scanExecute(PixScan *scn) {
 			if(scn->getLoopActive(iloop)){
 				switch(scn->getLoopParam(iloop)){
 				case PixScan::VCAL:
-				  m_pixCtrl->sendGlobal(0, isfei4?"PlsrDAC":"DAC_VCAL");
+					m_pixCtrl->sendGlobal(0, "PlsrDAC");
 					break;
 				case PixScan::GDAC:
-				  if(isfei4){
-				    m_pixCtrl->sendGlobal(0, "Vthin_AltCoarse");
-				    m_pixCtrl->sendGlobal(0, "Vthin_AltFine");
-				  } else
-				    m_pixCtrl->sendGlobal(0, "GLOBAL_DAC");
-				  break;
+					m_pixCtrl->sendGlobal(0, "Vthin_AltCoarse");
+					m_pixCtrl->sendGlobal(0, "Vthin_AltFine");
+					break;
 				case PixScan::IF:
-				  m_pixCtrl->sendGlobal(0, isfei4?"PrmpVbpf":"DAC_IF");
+					m_pixCtrl->sendGlobal(0, "PrmpVbpf");
 					break;
 				case PixScan::LATENCY:
-				  m_pixCtrl->sendGlobal(0, "TrigLat");
-				  break;
+					m_pixCtrl->sendGlobal(0, "TrigLat");
+					break;
 				case PixScan::FEI4_GR:
-				  if(isfei4) m_pixCtrl->sendGlobal(0, scn->getLoopFEI4GR(iloop));
-				  break;
+					m_pixCtrl->sendGlobal(0, scn->getLoopFEI4GR(iloop));
+					break;
+				case PixScan::CCPD_GR: 
+				        m_pixCtrl->sendCCPD(); 
+				        break;
 				case PixScan::STROBE_DELAY:
-				  if(isfei4) m_pixCtrl->sendGlobal(0, "PlsrDelay"); // not available on FE-I3
-				  break;
+					m_pixCtrl->sendGlobal(0, "PlsrDelay");
+					break;
 				case PixScan::TDACS:
-				  if(!isfei4){
-				    m_pixCtrl->sendPixel(0, "TDAC6");
-				    m_pixCtrl->sendPixel(0, "TDAC5");
-				  }
-				  m_pixCtrl->sendPixel(0, "TDAC4");
-				  m_pixCtrl->sendPixel(0, "TDAC3");
-				  m_pixCtrl->sendPixel(0, "TDAC2");
-				  m_pixCtrl->sendPixel(0, "TDAC1");
-				  m_pixCtrl->sendPixel(0, "TDAC0");
-				  break;
+					m_pixCtrl->sendPixel(0, "TDAC4");
+					m_pixCtrl->sendPixel(0, "TDAC3");
+					m_pixCtrl->sendPixel(0, "TDAC2");
+					m_pixCtrl->sendPixel(0, "TDAC1");
+					m_pixCtrl->sendPixel(0, "TDAC0");
+					break;
 				case PixScan::FDACS:
-				  if(isfei4) m_pixCtrl->sendPixel(0, "FDAC3");
-				  m_pixCtrl->sendPixel(0, "FDAC2");
-				  m_pixCtrl->sendPixel(0, "FDAC1");
-				  m_pixCtrl->sendPixel(0, "FDAC0");
-				  break;
+					m_pixCtrl->sendPixel(0, "FDAC3");
+					m_pixCtrl->sendPixel(0, "FDAC2");
+					m_pixCtrl->sendPixel(0, "FDAC1");
+					m_pixCtrl->sendPixel(0, "FDAC0");
+					break;
 				default:
-				  break; // scan var. is not on the FE
+					break; // scan var. is not on the FE
 				}
 			}
 		}
@@ -3063,6 +3054,9 @@ void PixModuleGroup::scanLoopEnd(int nloop, PixScan *scn) {
 	case PixScan::CALC_MEAN_NOCC:
 		endMeanNOccCalc(nloop, scn);
 		break;
+	case PixScan::FDAC_TUNING_CCPD:
+		endFDACTuning(nloop, scn);
+		break;
 	case PixScan::NO_ACTION:
 	default:
 		break;
@@ -3167,6 +3161,7 @@ void PixModuleGroup::setupScanVariable(int nloop, PixScan *scn){
 		if (par == PixScan::DISCBIAS)       level = 2;
 		//    if (par == PixScan::FEI3_GR)        level = 2;
 		if (par == PixScan::FEI4_GR)        level = 2;
+		if (par == PixScan::CCPD_GR)		level = 2;
 		if (par == PixScan::IF)             level = 2;
 		if (par == PixScan::FDACS)          level = 3; // 3 means pixel specific settings
 		if (par == PixScan::TDACS)          level = 3;
@@ -3313,7 +3308,6 @@ void PixModuleGroup::setupScanVariable(int nloop, PixScan *scn){
 						// 		  default:
 						// 		    break;
 						// 		  }
-
 						// 		}
 						// 	      }
 						// 	      switch (par) {
@@ -3353,6 +3347,7 @@ void PixModuleGroup::setupScanVariable(int nloop, PixScan *scn){
 								reloadCfg = true;
 								PixFe* fei4a = dynamic_cast<PixFeI4A*>(*fe);
 								PixFe* fei4b = dynamic_cast<PixFeI4B*>(*fe);
+								PixCcpd* ccpd = m_modules[pmod]->pixCCPD();
 								if(fei4a!=0 || fei4b!=0){ // FE-I4 register names
 									switch (par) {
 									case PixScan::FEI4_GR:
@@ -3361,6 +3356,19 @@ void PixModuleGroup::setupScanVariable(int nloop, PixScan *scn){
 											(*fe)->writeGlobRegister(scn->getLoopFEI4GR(nloop), ival);
 										}
 										break;
+									case PixScan::CCPD_GR: 
+									  if(PMG_DEBUG) cout << "PixModuleGroup::setupScanVariable: scn->getLoopCCPDGR(nloop) " << scn->getLoopCCPDGR(nloop) << endl;
+									  if(PMG_DEBUG) cout << "Writing " << ival << " to register " << scn->getLoopCCPDGR(nloop) << endl;
+									  
+									  if(ccpd!=0){
+									    if(PMG_DEBUG) cout<<"PixModuleGroup::setupScanVariable: CCPD found" << endl;
+									    Config &cfg = ccpd->config();
+									    std::string name = scn->getLoopCCPDGR(nloop);
+									    name.erase(0,std::string("global_").length());
+									    if(PMG_DEBUG) cout<<"PixModuleGroup::setupScanVariable: name of changed reg " << name << endl;
+									    ((ConfInt&)cfg["global"][name]).setValue(ival);
+									  }  
+									  break;
 									case PixScan::VCAL:
 										(*fe)->writeGlobRegister("PlsrDAC", ival);
 										break;
@@ -3400,7 +3408,7 @@ void PixModuleGroup::setupScanVariable(int nloop, PixScan *scn){
 								}else{ // FE-I2/3 register names
 									switch (par) {
 									case PixScan::GDAC:
-										if (scn->getLoopAction(nloop) != PixScan::GDAC_FAST_TUNING) {
+										if (scn->getLoopAction(nloop) != PixScan::TDAC_TUNING) {
 											(*fe)->writeGlobRegister("GLOBAL_DAC", ival);
 										}
 										break;
@@ -4214,7 +4222,9 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 						PixFe* fei4 = dynamic_cast<PixFeI4A*>(*fe);
 						if(fei4==0) fei4 = dynamic_cast<PixFeI4B*>(*fe);
 						if(fei4!=0) par[4] = fei4->getDelayCalib();
-					} else{
+					  } else if (!scn.getconvertToCharge()) {
+						par[4] = 1.;
+					  } else{
 						// get FE calib. and put into par[3...6]
 						par[3] = vcalG0*cInj;
 						par[4] = vcalG1*cInj;
@@ -4344,7 +4354,9 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 								PixFe* fei4 = dynamic_cast<PixFeI4A*>(*fe);
 								if(fei4==0) fei4 = dynamic_cast<PixFeI4B*>(*fe);
 								if(fei4!=0) par[4] = fei4->getDelayCalib();
-							} else{
+							  } else if (!scn.getconvertToCharge()) {
+								par[4] = 1.;
+							  } else{
 								// get FE calib. and put into par[3...6]
 								par[3] = vcalG0*cInj;
 								par[4] = vcalG1*cInj;

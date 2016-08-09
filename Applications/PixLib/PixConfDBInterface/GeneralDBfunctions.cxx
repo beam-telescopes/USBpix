@@ -655,7 +655,7 @@ void PixLib::fixModule(DBInquire *modInq, modData modDt_in){
   myDB->DBProcess(modInq,COMMITREPLACE);
 }
 
-DBInquire* PixLib::createEmptyModule(DBInquire *baseInq, std::string modName, int nFe, int nMcc){
+DBInquire* PixLib::createEmptyModule(DBInquire *baseInq, std::string modName, int nFe, int nMcc, int nCcpd){
   if(baseInq==0) return 0;
   // get some basic info from DB
   RootDB *myDB = dynamic_cast<RootDB*>(baseInq->getDB());
@@ -707,6 +707,16 @@ DBInquire* PixLib::createEmptyModule(DBInquire *baseInq, std::string modName, in
     myDB->DBProcess(subInq,COMMITREPLACE);
     myDB->DBProcess(dacInq,COMMIT);
     myDB->DBProcess(modInq,COMMITREPLACE);
+  }
+  for(int i=0;i<nCcpd;i++){
+    std::stringstream b;
+    b << i;
+    name="PixCcpd";
+    decName = modInq->getDecName() + "PixCcpd_"+b.str();
+    subInq = myDB->makeInquire(name, decName);
+    modInq->pushRecord(subInq);
+    myDB->DBProcess(modInq,COMMITREPLACE);
+    myDB->DBProcess(subInq,COMMIT);
   }
 
   myDB->DBProcess(modInq,COMMITREPLACE);

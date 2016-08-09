@@ -238,8 +238,8 @@ public:
                         FDAC_TUNE, IF_TUNE, TIMEWALK_MEASURE, INCREMENTAL_TDAC_SCAN, BOC_RX_DELAY_SCAN,
                         BOC_THR_RX_DELAY_SCAN, BOC_V0_RX_DELAY_SCAN, INTIME_THRESH_SCAN, T0_SCAN, CROSSTALK_SCAN,
                         IV_SCAN, DAC_SCAN, MONLEAK, HITBUS_SCALER, SOURCE_SCAN, EUDAQ, TOT_VERIF, NOISE_OCC, INJ_CALIB,
-						TDAC_FAST_TUNE, GDAC_FAST_TUNE, GDAC_FAST_TUNE2, HITOR_SCAN, FE_ST_SOURCE_SCAN, TOT_CALIB_LUT, CHARGE_CALIB_VERIF, 
-						DISCBIAS_TUNE};
+			TDAC_FAST_TUNE, GDAC_FAST_TUNE, GDAC_FAST_TUNE2, HITOR_SCAN, FE_ST_SOURCE_SCAN, TOT_CALIB_ALT, TOT_CALIB_LUT, CHARGE_CALIB_VERIF, ANALOG_TEST_CCPD,
+			DISCBIAS_TUNE,THRESHOLD_SCAN_CCPD,FDAC_TUNE_CCPD};
   enum ModConfigType  { PHYSICS, CALIB,
                         SPARE };
   enum MaskStageMode  { SEL_ENA, SEL,
@@ -291,7 +291,7 @@ public:
 			FIT_PAR0, FIT_PAR1, FIT_PAR2, FIT_PAR3, FIT_PAR4, FIT_CHI2, TDAC_OCC, SUM_OCC,
 			HIT_RATE, TRG_RATE, GDAC_OCC, CHARGE_MEAN, CHARGE_SIGMA, CHARGE_RECO_ERROR, MEAN_NOCC, NOCC, NUM_NOISY_PIXELS, DISCBIAS_T, DISCBIAS_TIMEWALK, MAX_HISTO_TYPES};
   enum DcsReadMode    { VOLTAGE, CURRENT, FE_ADC };
-  enum ScanParam      { NO_PAR,  VCAL, GDAC, IF, LATENCY, TDACS, FDACS, FEI4_GR, FEI3_GR, 
+  enum ScanParam      { NO_PAR,  VCAL, GDAC, IF, LATENCY, TDACS, FDACS, FEI4_GR, FEI3_GR, CCPD_GR,
                         TRIGGER_DELAY, STROBE_DURATION, STROBE_DELAY, TDACS_VARIATION,
 			DCS_VOLTAGE, DCS_PAR1, DCS_PAR2, DCS_PAR3, CAPMEAS, CAPSEL, 
 			AUXFREQ, IREF_PAD, INCR_LAT_TRGDEL, IOMUX_IN, STROBE_FINE_DELAY, DISCBIAS, STRBFREQ};
@@ -301,11 +301,11 @@ public:
   enum EndLoopAction  { NO_ACTION, SCURVE_FIT, TDAC_TUNING, GDAC_TUNING, T0_SET, FDAC_TUNING,
 			IF_TUNING, MIN_THRESHOLD, MCCDEL_FIT, TOTCAL_FIT, FDAC_TUNING_ALT, OFFSET_CALIB,
 			TDAC_FAST_TUNING, OCC_SUM, GDAC_FAST_TUNING, TOTCAL_FEI4, CLEAR_IOMUX_BITS, TOT_CHARGE_LUT, 
-			TOT_TO_CHARGE, CALC_MEAN_NOCC, SCURVE_FAST, DISCBIAS_TUNING};
+			TOT_TO_CHARGE, CALC_MEAN_NOCC, SCURVE_FAST, DISCBIAS_TUNING, FDAC_TUNING_CCPD};
   enum RunType        { NORMAL_SCAN, RAW_PATTERN, RAW_EVENT };
   enum CountType      {COUNT_TRIGGER, COUNT_DH, COUNT_DR, COUNT_SECS};
   enum TriggerType    {STROBE_SCAN=0, USBPIX_SELF_TRG=1, EXT_TRG=2, TLU_SIMPLE=3, TLU_DATA_HANDSHAKE=4, USBPIX_REPLICATION_SLAVE=5, 
-		       STROBE_EXTTRG=6, FE_SELFTRIGGER=7, STROBE_USBPIX_SELF_TRG=8, STROBE_FE_SELF_TRG=9};
+		       STROBE_EXTTRG=6, FE_SELFTRIGGER=7, STROBE_USBPIX_SELF_TRG=8, STROBE_FE_SELF_TRG=9, CCPD_STROBE_TRG=10};
 
 
 
@@ -394,6 +394,7 @@ private:
   bool m_innerLoopSwap;
   std::vector<float> m_loopVarValues[MAX_LOOPS];
   std::string m_loopFEI4GR[MAX_LOOPS];
+  std::string m_loopCCPDGR[MAX_LOOPS];
   int m_loopVarNSteps[MAX_LOOPS];
   float m_loopVarMin[MAX_LOOPS];
   float m_loopVarMax[MAX_LOOPS];
@@ -446,7 +447,8 @@ private:
   // S-curve fit quality
   float m_chicut;
   int m_nbadchicut;
-
+  // Charge convertion
+  bool m_convertToCharge;
 
   // Private methods
   void writeHistoLevel(DBInquire *dbi, PixScanHisto &sc, std::string lName, int lvl);
@@ -815,6 +817,14 @@ public:
     throw PixScanExc(PixControllerExc::ERROR, "Invalid loop index");
     return tmp;
   }
+  std::string& getLoopCCPDGR(int index){
+    static std::string tmp="unknown";
+    if (index >=0 && index < MAX_LOOPS) {
+      return m_loopCCPDGR[index];
+    }
+    throw PixScanExc(PixControllerExc::ERROR, "Invalid loop index");
+    return tmp;
+  }
   std::vector<float>& getLoopVarValues(int index) {
     static std::vector<float> tmp;
     if (index >=0 && index < MAX_LOOPS) {
@@ -1054,6 +1064,9 @@ public:
   }
   int getNbadchiCut(){
     return m_nbadchicut;
+  }
+  bool getconvertToCharge(){
+    return m_convertToCharge;
   }
 
   //! DataBase interaction

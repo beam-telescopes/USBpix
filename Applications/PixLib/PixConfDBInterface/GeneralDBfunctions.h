@@ -28,6 +28,7 @@ namespace PixLib{
     int pp0, slot;
     bool active;
     std::string fname, modname, connName;
+    std::string feName, cpixName;
     int assyType, assyID, pos_on_assy;
   };
   struct grpData{
@@ -52,7 +53,7 @@ namespace PixLib{
   DBInquire* newGroupWiz(rodData grpDt_in, DBInquire *startInq);
   void addBocToGroup(bocData bocDt_in, DBInquire *grpInq);
   std::vector<DBInquire*> newModWiz(std::vector<modData> modDt_in, DBInquire *grpInq, const char *plPath);
-  DBInquire* createEmptyModule(DBInquire *baseInq, std::string modName, int nFe, int nMcc);
+  DBInquire* createEmptyModule(DBInquire *baseInq, std::string modName, int nFe, int nMcc, int nCcpd);
   DBInquire* createEmptyBoc(DBInquire *baseInq, std::string bocName);
   void fixModule(DBInquire *modInq, modData modDt_in);
   /** fills vectors with input and output links corresponding to PP0 slot and BOC setup */
