@@ -134,7 +134,7 @@ PixModule::PixModule(DBInquire *dbInquire, PixModuleGroup *modGrp, std::string n
   if(m_fe.size()>2) m_feRows = 2;
 }
 
-PixModule::PixModule(PixModuleGroup *modGrp, unsigned int id, std::string name, std::string feType, int nFe, int nFeRows, std::string mccType) :
+PixModule::PixModule(PixModuleGroup *modGrp, unsigned int id, std::string name, std::string feType, int nFe, int nFeRows, std::string mccType, std::string ccpdType) :
   m_name(name), m_group(modGrp), m_feRows(nFeRows), m_inputLink(0),  
   m_outputLink1(1), m_outputLink2(1), m_outputLink3(1), m_outputLink4(1), 
   m_delay(750), m_latency(200), m_outputBandwidth(0),
@@ -180,6 +180,11 @@ PixModule::PixModule(PixModuleGroup *modGrp, unsigned int id, std::string name, 
       m_fe.push_back(new PixFeI4B(0, this, feLabel.str(),iFe));
       conf.addConfig(&(m_fe.back()->config()));
     }
+  }
+
+  if(ccpdType!="" && ccpdType!="NONE"){
+    m_ccpd = PixCcpd::make(0,ccpdType);
+    if(m_ccpd!=0) conf.addConfig(&(m_ccpd->config()));
   }
 }
 

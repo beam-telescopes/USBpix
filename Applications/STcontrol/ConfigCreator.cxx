@@ -4,6 +4,7 @@
 #include <PixController/PixController.h>
 #include <PixModule/PixModule.h>
 #include <PixFe/PixFe.h>
+#include <PixCcpd/PixCcpd.h>
 #include <Config/Config.h>
 #include <Config/ConfGroup.h>
 #include <Config/ConfObj.h>
@@ -52,6 +53,12 @@ ConfigCreator::ConfigCreator(QWidget *parent, Qt::WindowFlags f)
     if(it->second==PixLib::PixModule::PM_FE_I4B) 
       feTypeBox->setCurrentIndex(feTypeBox->count()-1);
   }
+  std::vector<std::string> ccpdList;
+  PixLib::PixCcpd::listTypes(ccpdList);
+  ccpdTypeBox->addItem("NONE");
+  for(std::vector<std::string>::iterator it = ccpdList.begin(); it!=ccpdList.end(); it++)
+    ccpdTypeBox->addItem(QString(it->c_str()));
+  ccpdTypeBox->setCurrentIndex(0);
 
   connect(finishButton, SIGNAL(pressed()), this, SLOT(createCfgDone()));
   connect(addButton, SIGNAL(pressed()), this, SLOT(createCfgNext()));
@@ -92,7 +99,7 @@ void ConfigCreator::createCfg(bool finished){
 							   std::string(vlist.at(0).toString().toLatin1().data()), mnames, 
 							   std::string(feTypeBox->currentText().toLatin1().data()), nfeSpinBox->value(), 
 							   nfeRowSpinBox->value(), std::string (mccTypeBox->currentText().toLatin1().data()),
-							   vlist.at(1).toInt());
+							   std::string (ccpdTypeBox->currentText().toLatin1().data()), vlist.at(1).toInt());
 
   if(FEcfgTypeBox->currentIndex()>0){
     for(int i=0;i<nmodSpinBox->value(); i++) {
@@ -203,12 +210,11 @@ void ConfigCreator::preset(){
       break;
     }
   }
-  for(int i=0;i<feTypeBox->count();i++){
-    if(feTypeBox->itemData(i).toInt()==feFlv){
-      feTypeBox->setCurrentIndex(i);
-      break;
-    }
-  }
+  QVariant feData((int)feFlv);
+  feTypeBox->setCurrentIndex(feTypeBox->findData(feData));
+  QVariant mccData((int)mccFlv);
+  mccTypeBox->setCurrentIndex(mccTypeBox->findData(mccData));
+  ccpdTypeBox->setCurrentIndex(0);// no CCPD
   nfeSpinBox->setValue(nFe);
   nfeRowSpinBox->setValue(nFeRows);
 }
@@ -226,6 +232,7 @@ void ConfigCreator::cfgLoadSelect(int type){
     nfeRowSpinBox->setEnabled(1);
     mccTypeBox->setEnabled(1);
     feTypeBox->setEnabled(1);
+    ccpdTypeBox->setEnabled(1);
 	feCombLabel->hide();
 	iFeComb->hide();
 	iFeComb->setMaximum(0);
@@ -241,6 +248,7 @@ void ConfigCreator::cfgLoadSelect(int type){
     nfeRowSpinBox->setEnabled(0);
     mccTypeBox->setEnabled(0);
     feTypeBox->setEnabled(0);
+    ccpdTypeBox->setEnabled(0);
 	feCombLabel->hide();
 	iFeComb->hide();
 	iFeComb->setMaximum(0);
@@ -256,6 +264,7 @@ void ConfigCreator::cfgLoadSelect(int type){
     nfeRowSpinBox->setEnabled(1);
     mccTypeBox->setEnabled(0);
     feTypeBox->setEnabled(0);
+    ccpdTypeBox->setEnabled(0);
 	feCombLabel->show();
 	iFeComb->show();
 	iFeComb->setMaximum(nfeSpinBox->value()-1);
@@ -344,6 +353,12 @@ void ConfigCreator::setFromFile(int modIt){
 	}
     QVariant feData((int)mod.getFEFlavour());
     feTypeBox->setCurrentIndex(feTypeBox->findData(feData));
+    std::string ccpdName = "NONE";
+    if(mod.pixCCPD()!=0 && mod.pixCCPD()->config()["ClassInfo"].name()!="__TrashConfGroup__" &&
+       mod.pixCCPD()->config()["ClassInfo"]["ClassName"].name()!="__TrashConfObj__"){
+      ccpdName = ((ConfString&)mod.pixCCPD()->config()["ClassInfo"]["ClassName"]).value();
+    }
+    ccpdTypeBox->setCurrentIndex(ccpdTypeBox->findText(ccpdName.c_str()));
   }
   
   delete confDBInterface; //closes file

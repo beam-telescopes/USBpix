@@ -111,7 +111,7 @@ PixModuleGroup::PixModuleGroup() :
 }
 
 PixModuleGroup::PixModuleGroup(std::string name, std::string ctrlType, std::vector<std::string> mnames, 
-			       std::string feType, int nFe, int nFeRows, std::string mccType, int ctrlOpt):
+			       std::string feType, int nFe, int nFeRows, std::string mccType, std::string ccpdType, int ctrlOpt):
 m_db(0), m_name(name), m_dbInquire(0){
 
 	readDbInquire();
@@ -126,7 +126,7 @@ m_db(0), m_name(name), m_dbInquire(0){
 	// create PixModule's from given names with specified FE/MCC flavour
 
 	for(unsigned int modId=0; modId<mnames.size(); modId++){
-		PixModule *tempModule = new PixModule(this, modId, mnames[modId], feType, nFe, nFeRows, mccType);
+	        PixModule *tempModule = new PixModule(this, modId, mnames[modId], feType, nFe, nFeRows, mccType, ccpdType);
 		m_modules.push_back(tempModule);
 		m_dcsChans.push_back(0);
 	}

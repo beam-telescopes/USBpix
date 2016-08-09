@@ -47,7 +47,7 @@ namespace PixLib {
 		PixModuleGroup();                                             //! Default constructor
 	        PixModuleGroup(std::string name, std::string ctrlType, std::vector<std::string> mnames, 
 			       std::string feType, int nFe, int nFeRows, 
-			       std::string mccType, int ctrlOpt=0);           //! custom-made constructor
+			       std::string mccType, std::string ccpdType="", int ctrlOpt=0);           //! custom-made constructor
 		~PixModuleGroup();                                            //! Destructor  
 
 		void initHW();                                                //! (re)initialize

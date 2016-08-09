@@ -90,7 +90,7 @@ namespace PixLib {
     
     PixModule(DBInquire *dbInquire, PixModuleGroup *modGrp, std::string name); // Constructor
     PixModule(PixModuleGroup *modGrp, unsigned int id, std::string name, std::string feType, 
-	      int nFe, int nFeRows, std::string mccType);                      // custom-made constructor
+	      int nFe, int nFeRows, std::string mccType, std::string ccpdType="");// custom-made constructor
     ~PixModule();                                                              // Destructor
     
     // Accessors
