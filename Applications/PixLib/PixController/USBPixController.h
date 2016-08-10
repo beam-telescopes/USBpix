@@ -19,6 +19,7 @@
 #include <queue>
 #include <memory>
 #include <vector>
+#include <thread>
 
 #include "PixController.h"
 #include "PixScan.h"
@@ -271,6 +272,8 @@ namespace PixLib {
     int getFECount();
     void initChipIds();
     int detectAdapterCard(unsigned int boadId);
+    void strobeScan(PixScan* scn);
+    void sourceScan();
 
     SiUSBDevice* m_BoardHandle[NBOARDS_MAX];        //! handle of one or two USB boards
 
@@ -354,6 +357,9 @@ namespace PixLib {
     bool m_upcScanBusy; // signal that is asserted during any kind of scan
     bool m_upcStartScanHasFinished; // signal that is asserted after startScan() has finished, only used for normal scan, used in nTrigger() method to assert m_scanDone
     bool m_upcScanCancelled; // signal that is asserted when a scan was successfully cancelled/stopped
+
+    std::thread m_scanThread;
+    std::exception_ptr m_scanExcept;
 
     //USB board class
     USBpix* m_USBpix;

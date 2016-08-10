@@ -2235,7 +2235,14 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
 	writeScanConfig(*scn);
 	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: finished writeScanConfig()"<<endl;
 
-	if(!m_sourceScanFlag) { // normal scan
+	if(m_sourceScanFlag)
+	  m_scanThread = std::thread(&USBPixController::sourceScan, this);//sourceScan();
+	else
+	  m_scanThread = std::thread(&USBPixController::strobeScan, this, scn);//strobeScan(scn);
+}
+void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
+
+  try{
 		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: starting normal scan"<<endl;
 
 		// set histogram mode in FPGA
@@ -2413,46 +2420,6 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
 		  if(scanret) m_errBuff += "USBpix::StartScan finished with an error\n";
 		}
 
-	} else { // source scan
-
-		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: starting source scan"<<endl;
-
-		// store raw data in SRAM
-		//m_USBpix->SetRunMode();
-		// write new raw file
-		m_newRawDataFile = true;
-
-		// clear SRAM
-		for (std::vector<int>::iterator it = m_chipIds.begin();
-		     it != m_chipIds.end(); it++)
-		  {
-		    if(*it==999) break;
-		    //m_USBpix->ClearSRAM(*it); // covered by setRunMode
-		    m_USBpix->ResetClusterCounters(*it); //reset the clusterizer counters for the actual scan
-		  }
-
-		// start source scan here
-		int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
-		m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
-		setRunMode();
-		setFERunMode();
- 		m_USBpix->StartMeasurement(); // 
-		m_USBpix->StartReadout();
-		m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
-		m_srcSecStart = clock()/CLOCKS_PER_SEC;  
-		m_sramReadoutReady = false;
-		m_sramFull = false;
-		m_tluVeto = false;
-		m_measurementPause = false;
-		m_measurementRunning = true;
-		m_sramFillLevel = 0;
-		m_collectedTriggers = 0;
-		m_collectedHits = 0;
-		m_triggerRate = 0;
-		m_eventRate = 0;
-
-	}
-
 	// setting m_upcScanInit to false to make readout of scan status information possible.
 	// now all scan status bits are set properly, race conditions are avoided
 	// normal scan needs a special treatment since not implemented as a thread
@@ -2461,6 +2428,57 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
 	// m_scanDone has to be asserted here, not in nTrigger()
 	// this is due to the bad implementation of strobe scan and because of USBpix::StartScan() is not a thread
 	m_upcStartScanHasFinished = true;
+
+  }catch(...){
+    m_upcScanInit = false;
+    m_upcStartScanHasFinished = true;
+    m_scanExcept = std::current_exception();
+  }
+}
+void USBPixController::sourceScan() { // Start a source scan
+
+  try{
+    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: starting source scan"<<endl;
+    
+    // write new raw file
+    m_newRawDataFile = true;
+    
+    // clear SRAM
+    for (std::vector<int>::iterator it = m_chipIds.begin();
+	 it != m_chipIds.end(); it++)
+      {
+	if(*it==999) break;
+	//m_USBpix->ClearSRAM(*it); // covered by setRunMode
+	m_USBpix->ResetClusterCounters(*it); //reset the clusterizer counters for the actual scan
+      }
+    
+    // start source scan here
+    int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
+    m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
+    setRunMode();
+    setFERunMode();
+    m_USBpix->StartMeasurement(); // 
+    m_USBpix->StartReadout();
+    m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
+    m_srcSecStart = clock()/CLOCKS_PER_SEC;  
+    m_sramReadoutReady = false;
+    m_sramFull = false;
+    m_tluVeto = false;
+    m_measurementPause = false;
+    m_measurementRunning = true;
+    m_sramFillLevel = 0;
+    m_collectedTriggers = 0;
+    m_collectedHits = 0;
+    m_triggerRate = 0;
+    m_eventRate = 0;
+    m_upcScanInit = false;
+    m_upcStartScanHasFinished = true;
+
+    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: source scan started"<<endl;
+
+  }catch(...){
+    m_scanExcept = std::current_exception();
+  }
 }
 
 void USBPixController::stopScan() {
@@ -3697,6 +3715,14 @@ void USBPixController::measureEvtTrgRate(PixScan *scn, int /*mod*/, double &erva
 
 void USBPixController::finalizeScan()
 {
+  if(UPC_DEBUG_GEN) cout << "USBPixController::finalizeScan" << endl;
+  
+  if (m_scanExcept)
+    std::rethrow_exception(m_scanExcept);
+  
+  if(m_scanThread.joinable()) 
+    m_scanThread.join();
+
   if (m_createdRawDataFile)
   {
     for (std::vector<int>::iterator it = m_chipIds.begin();
