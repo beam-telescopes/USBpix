@@ -47,7 +47,7 @@
 
 #include <cassert>
 
-#define UPC_DEBUG_GEN false
+#define UPC_DEBUG_GEN true
 #define UPC_DEBUG_FLAGS false
 
 using namespace PixLib;
@@ -2476,6 +2476,113 @@ void USBPixController::sourceScan() { // Start a source scan
 
     if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: source scan started"<<endl;
 
+    // now that we're in a separate thread, we can do the SRAM monitoring outside of ntrigger()
+    while(m_measurementRunning){
+      m_measurementRunning = false;
+//       m_sramFillLevel=9999999; 
+//       m_collectedTriggers = 0;
+//       m_triggerRate = 0;
+//       m_collectedHits = 0;
+//       m_eventRate = 0;
+      // TODO: to be implemented
+      m_sramReadoutReady = false;
+      m_measurementPause = false;
+      if(m_srcSecMax > 0){ // time-based source measurement: check if time is up
+	int now = clock()/CLOCKS_PER_SEC;
+	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: sec's now:" << now << endl;
+	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: sec's at start:" << m_srcSecStart << endl;
+	if((now-m_srcSecStart)>m_srcSecMax) stopScan();
+      }
+      // to do : check if the displayed quantities can be revised for >1 FE
+      int collectedTriggersTotal=0;
+      for (std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++){
+	// stop loop if no more meaningful chip IDs or after 1st chip if in multichip mode (always have one board then!)
+	if(*it==999 || (m_MultiChipWithSingleBoard && it != m_chipIds.begin())) break;
+	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->GetSourceScanStatus() board with chip ID "<< (*it) << endl;
+	bool measurementRunning=true; //, sramFull;
+	int sramFillLevel=0, collectedTriggers=0, triggerRate=0, eventRate=0;
+	
+	m_USBpix->GetSourceScanStatus(m_sramFull, measurementRunning, sramFillLevel, collectedTriggers, triggerRate, eventRate, m_tluVeto, *it);		// added m_tluVeto
+	
+	m_measurementRunning |= measurementRunning;
+// 	if(m_sramFillLevel > sramFillLevel) m_sramFillLevel = sramFillLevel;
+// 	if(m_triggerRate < triggerRate) m_triggerRate = triggerRate;
+// 	if(m_eventRate < eventRate) m_eventRate = eventRate;
+// 	collectedTriggersTotal += collectedTriggers;
+	if(!measurementRunning && !m_testBeamFlag /* && m_sramReadoutReady*/) { // TODO
+	  if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: MeasRunning(" << (*it) << ") = false => reading SRAM..."<<endl;
+	  m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
+	  m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
+	  m_SourceScanEventQuantity = 0;
+	  m_USBpix->ReadSRAM(*it);
+	  if (m_MultiChipWithSingleBoard)
+	    {
+	      if(m_fillSrcHistos)
+		m_USBpix->FillHistosFromRawData(*it);
+	      for (std::vector<int>::iterator it2 = m_chipIds.begin(); it2 != m_chipIds.end(); it2++)
+		{
+		  writeRawDataFile(false, *it2);
+		}
+	      // USBpix somehow doesn't make use of chipID in MutliChip mode
+	      if(m_fillClusterHistos)
+		ClusterRawData(*it);
+	    }
+	  else
+	    {
+	      if(m_fillSrcHistos)
+		m_USBpix->FillHistosFromRawData(*it);
+	      writeRawDataFile(false, *it);
+	      if(m_fillClusterHistos)//DLP
+		ClusterRawData(*it);
+	    }
+	  m_USBpix->ClearSRAM(*it);
+	} else if(measurementRunning  && !m_testBeamFlag && (m_sramFull || m_tluVeto) ){ // when using TLU, TLU veto seems to be raised before SRAM full flag, so must trigger on the former
+	  if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: SRAMFull(" << (*it) << ") => reading SRAM..."<<endl;
+	  int tbefore = clock()/CLOCKS_PER_SEC;
+	  int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
+	  m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
+	  m_USBpix->PauseMeasurement();
+	  m_USBpix->ReadSRAM(*it);
+	  int tafter = clock()/CLOCKS_PER_SEC;
+	  m_srcSecStart += tafter-tbefore;
+	  if (m_MultiChipWithSingleBoard)
+	    {
+	      if(m_fillSrcHistos)
+		m_USBpix->FillHistosFromRawData(*it);
+	      for (std::vector<int>::iterator it2 = m_chipIds.begin(); it2 != m_chipIds.end(); it2++)
+		{
+		  writeRawDataFile(false, *it2);
+		}
+	      // USBpix somehow doesn't make use of chipID in MutliChip mode
+	      if(m_fillClusterHistos)
+		ClusterRawData(*it);
+	    }
+	  else
+	    {
+	      if(m_fillSrcHistos)
+		m_USBpix->FillHistosFromRawData(*it);
+	      writeRawDataFile(false, *it);
+	      if(m_fillClusterHistos)//DLP
+		ClusterRawData(*it);
+	    }
+	  m_USBpix->ClearSRAM(*it);
+	  m_USBpix->ResumeMeasurement();
+	  m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
+	  //m_USBpix->StartReadout();
+	}
+	sleep(500);
+      }
+      if ((m_SourceScanEventQuantity != 0) && (collectedTriggersTotal >= m_SourceScanEventQuantity)){
+	if(UPC_DEBUG_GEN) cout<<"DEBUG: reached event limit, stopping scan" << std::endl;
+	stopScan();
+      }
+      if(UPC_DEBUG_GEN) cout<<"DEBUG: SRAMReadoutReady: "<<(m_sramReadoutReady?"true":"false")<<" SRAMFull: "<<(m_sramFull?"true":"false")<<" measurementPause: "<<(m_measurementPause?"true":"false")<<" measurementRunning: "<<(m_measurementRunning?"true":"false")<<" collectedTriggers: "<<m_collectedTriggers<<" collectedHits: "<<m_collectedHits<<" triggerRate: "<<m_triggerRate<<" eventRate: "<<m_eventRate<<" tluVeto: "<<m_tluVeto<<endl;
+      if(!m_measurementRunning && !m_testBeamFlag)
+	// m_sourceScanDone has to be asserted here, not in startScan()
+	// USBpix::StartMeasurement() is called once, but not active during source scan
+	// if in testbeam mode, taken care of by getSourceScanData
+	m_sourceScanDone=true;
+    }
   }catch(...){
     m_scanExcept = std::current_exception();
   }
@@ -3169,114 +3276,120 @@ int USBPixController::nTrigger() {                 //! Returns the number of tri
 			return 0;
 		} else if(m_sourceScanBusy && !m_upcScanInit) { // source scan
   
-			m_measurementRunning = false;
+// 			m_measurementRunning = false;
 			m_sramFillLevel=9999999; 
 			m_collectedTriggers = 0;
 			m_triggerRate = 0;
-			// TODO: to be implemented
-			m_sramReadoutReady = false;
-			m_measurementPause = false;
 			m_collectedHits = 0;
 			m_eventRate = 0;
-			if(m_srcSecMax > 0){ // time-based source measurement: check if time is up
-			  int now = clock()/CLOCKS_PER_SEC;
-			  if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: sec's now:" << now << endl;
-			  if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: sec's at start:" << m_srcSecStart << endl;
-			  if((now-m_srcSecStart)>m_srcSecMax) stopScan();
-			}
+// 			// TODO: to be implemented
+// 			m_sramReadoutReady = false;
+// 			m_measurementPause = false;
+// 			if(m_srcSecMax > 0){ // time-based source measurement: check if time is up
+// 			  int now = clock()/CLOCKS_PER_SEC;
+// 			  if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: sec's now:" << now << endl;
+// 			  if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: sec's at start:" << m_srcSecStart << endl;
+// 			  if((now-m_srcSecStart)>m_srcSecMax) stopScan();
+// 			}
 			// to do : check if the displayed quantities can be revised for >1 FE
 			int collectedTriggersTotal=0;
-			for (std::vector<int>::iterator it = m_chipIds.begin();
-			     it != m_chipIds.end(); it++){
+			for (std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++){
 			        // stop loop if no more meaningful chip IDs or after 1st chip if in multichip mode (always have one board then!)
 			        if(*it==999 || (m_MultiChipWithSingleBoard && it != m_chipIds.begin())) break;
 				if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->GetSourceScanStatus() board with chip ID "<< (*it) << endl;
-				bool measurementRunning=true; //, sramFull;
+				bool measurementRunning=true, tluVeto, sramFull;
 				int sramFillLevel=0, collectedTriggers=0, triggerRate=0, eventRate=0;
-				m_USBpix->GetSourceScanStatus(m_sramFull, measurementRunning, sramFillLevel, collectedTriggers, triggerRate, eventRate, m_tluVeto, *it);		// added m_tluVeto
+				m_USBpix->GetSourceScanStatus(sramFull, measurementRunning, sramFillLevel, collectedTriggers, triggerRate, eventRate, tluVeto, *it);
 
-				m_measurementRunning |= measurementRunning;
+// 				m_measurementRunning |= measurementRunning;
 				if(m_sramFillLevel > sramFillLevel) m_sramFillLevel = sramFillLevel;
 				if(m_triggerRate < triggerRate) m_triggerRate = triggerRate;
 				if(m_eventRate < eventRate) m_eventRate = eventRate;
 				collectedTriggersTotal += collectedTriggers;
-				if(!measurementRunning && !m_testBeamFlag /* && m_sramReadoutReady*/) { // TODO
-				        if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: MeasRunning(" << (*it) << ") = false => reading SRAM..."<<endl;
-					m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
-					m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
-					m_SourceScanEventQuantity = 0;
-					m_USBpix->ReadSRAM(*it);
-					if (m_MultiChipWithSingleBoard)
-					{
-						if(m_fillSrcHistos)
-						  m_USBpix->FillHistosFromRawData(*it);
-						for (std::vector<int>::iterator it2 = m_chipIds.begin(); it2 != m_chipIds.end(); it2++)
-						{
-							writeRawDataFile(false, *it2);
-						}
-						// USBpix somehow doesn't make use of chipID in MutliChip mode
-						if(m_fillClusterHistos)
-						  ClusterRawData(*it);
-					}
-					else
-					{
-						if(m_fillSrcHistos)
-							m_USBpix->FillHistosFromRawData(*it);
-						writeRawDataFile(false, *it);
-						if(m_fillClusterHistos)//DLP
-							ClusterRawData(*it);
-					}
-					m_USBpix->ClearSRAM(*it);
-				} else if(measurementRunning  && !m_testBeamFlag && (m_sramFull || m_tluVeto) ){ // when using TLU, TLU veto seems to be raised before SRAM full flag, so must trigger on the former
-				        if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: SRAMFull(" << (*it) << ") => reading SRAM..."<<endl;
-					int tbefore = clock()/CLOCKS_PER_SEC;
-					int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
-					m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
-					m_USBpix->PauseMeasurement();
-					m_USBpix->ReadSRAM(*it);
-					int tafter = clock()/CLOCKS_PER_SEC;
-					m_srcSecStart += tafter-tbefore;
-					if (m_MultiChipWithSingleBoard)
-					{
-						if(m_fillSrcHistos)
-						  m_USBpix->FillHistosFromRawData(*it);
-						for (std::vector<int>::iterator it2 = m_chipIds.begin(); it2 != m_chipIds.end(); it2++)
-						{
-							writeRawDataFile(false, *it2);
-						}
-						// USBpix somehow doesn't make use of chipID in MutliChip mode
-						if(m_fillClusterHistos)
-						  ClusterRawData(*it);
-					}
-					else
-					{
-						if(m_fillSrcHistos)
-							m_USBpix->FillHistosFromRawData(*it);
-						writeRawDataFile(false, *it);
-						if(m_fillClusterHistos)//DLP
-							ClusterRawData(*it);
-					}
-					m_USBpix->ClearSRAM(*it);
-					m_USBpix->ResumeMeasurement();
-					m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
-					//m_USBpix->StartReadout();
-				}
 			}
-			if ((m_SourceScanEventQuantity != 0) && (collectedTriggersTotal >= m_SourceScanEventQuantity)){
-			  if(UPC_DEBUG_GEN) cout<<"DEBUG: reached event limit, stopping scan" << std::endl;
-				stopScan();
-			}
-			if(UPC_DEBUG_GEN) cout<<"DEBUG: SRAMReadoutReady: "<<(m_sramReadoutReady?"true":"false")<<" SRAMFull: "<<(m_sramFull?"true":"false")<<" measurementPause: "<<(m_measurementPause?"true":"false")<<" measurementRunning: "<<(m_measurementRunning?"true":"false")<<" collectedTriggers: "<<m_collectedTriggers<<" collectedHits: "<<m_collectedHits<<" triggerRate: "<<m_triggerRate<<" eventRate: "<<m_eventRate<<" tluVeto: "<<m_tluVeto<<endl;
-			if(!m_measurementRunning && !m_testBeamFlag)
-				// m_sourceScanDone has to be asserted here, not in startScan()
-				// USBpix::StartMeasurement() is called once, but not active during source scan
-			        // if in testbeam mode, taken care of by getSourceScanData
-				m_sourceScanDone=true;
+ 			if(m_collectedTriggers < collectedTriggersTotal)
+ 				m_collectedTriggers = collectedTriggersTotal;
+			return m_collectedTriggers; // do not follow ROD convention in source scan mode
+
+
+
+// 				if(!measurementRunning && !m_testBeamFlag /* && m_sramReadoutReady*/) { // TODO
+// 				        if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: MeasRunning(" << (*it) << ") = false => reading SRAM..."<<endl;
+// 					m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
+// 					m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
+// 					m_SourceScanEventQuantity = 0;
+// 					m_USBpix->ReadSRAM(*it);
+// 					if (m_MultiChipWithSingleBoard)
+// 					{
+// 						if(m_fillSrcHistos)
+// 						  m_USBpix->FillHistosFromRawData(*it);
+// 						for (std::vector<int>::iterator it2 = m_chipIds.begin(); it2 != m_chipIds.end(); it2++)
+// 						{
+// 							writeRawDataFile(false, *it2);
+// 						}
+// 						// USBpix somehow doesn't make use of chipID in MutliChip mode
+// 						if(m_fillClusterHistos)
+// 						  ClusterRawData(*it);
+// 					}
+// 					else
+// 					{
+// 						if(m_fillSrcHistos)
+// 							m_USBpix->FillHistosFromRawData(*it);
+// 						writeRawDataFile(false, *it);
+// 						if(m_fillClusterHistos)//DLP
+// 							ClusterRawData(*it);
+// 					}
+// 					m_USBpix->ClearSRAM(*it);
+// 				} else if(measurementRunning  && !m_testBeamFlag && (m_sramFull || m_tluVeto) ){ // when using TLU, TLU veto seems to be raised before SRAM full flag, so must trigger on the former
+// 				        if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: SRAMFull(" << (*it) << ") => reading SRAM..."<<endl;
+// 					int tbefore = clock()/CLOCKS_PER_SEC;
+// 					int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
+// 					m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
+// 					m_USBpix->PauseMeasurement();
+// 					m_USBpix->ReadSRAM(*it);
+// 					int tafter = clock()/CLOCKS_PER_SEC;
+// 					m_srcSecStart += tafter-tbefore;
+// 					if (m_MultiChipWithSingleBoard)
+// 					{
+// 						if(m_fillSrcHistos)
+// 						  m_USBpix->FillHistosFromRawData(*it);
+// 						for (std::vector<int>::iterator it2 = m_chipIds.begin(); it2 != m_chipIds.end(); it2++)
+// 						{
+// 							writeRawDataFile(false, *it2);
+// 						}
+// 						// USBpix somehow doesn't make use of chipID in MutliChip mode
+// 						if(m_fillClusterHistos)
+// 						  ClusterRawData(*it);
+// 					}
+// 					else
+// 					{
+// 						if(m_fillSrcHistos)
+// 							m_USBpix->FillHistosFromRawData(*it);
+// 						writeRawDataFile(false, *it);
+// 						if(m_fillClusterHistos)//DLP
+// 							ClusterRawData(*it);
+// 					}
+// 					m_USBpix->ClearSRAM(*it);
+// 					m_USBpix->ResumeMeasurement();
+// 					m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
+// 					//m_USBpix->StartReadout();
+// 				}
+// 			}
+// 			if ((m_SourceScanEventQuantity != 0) && (collectedTriggersTotal >= m_SourceScanEventQuantity)){
+// 			  if(UPC_DEBUG_GEN) cout<<"DEBUG: reached event limit, stopping scan" << std::endl;
+// 				stopScan();
+// 			}
+// 			if(UPC_DEBUG_GEN) cout<<"DEBUG: SRAMReadoutReady: "<<(m_sramReadoutReady?"true":"false")<<" SRAMFull: "<<(m_sramFull?"true":"false")<<" measurementPause: "<<(m_measurementPause?"true":"false")<<" measurementRunning: "<<(m_measurementRunning?"true":"false")<<" collectedTriggers: "<<m_collectedTriggers<<" collectedHits: "<<m_collectedHits<<" triggerRate: "<<m_triggerRate<<" eventRate: "<<m_eventRate<<" tluVeto: "<<m_tluVeto<<endl;
+// 			if(!m_measurementRunning && !m_testBeamFlag)
+// 				// m_sourceScanDone has to be asserted here, not in startScan()
+// 				// USBpix::StartMeasurement() is called once, but not active during source scan
+// 			        // if in testbeam mode, taken care of by getSourceScanData
+// 				m_sourceScanDone=true;
 			// TODO
 			// for now it is fine
-			if(m_collectedTriggers < collectedTriggersTotal)
-				m_collectedTriggers = collectedTriggersTotal;
-			return m_collectedTriggers; // do not follow ROD convention in source scan mode
+// 			if(m_collectedTriggers < collectedTriggersTotal)
+// 				m_collectedTriggers = collectedTriggersTotal;
+// 			return m_collectedTriggers; // do not follow ROD convention in source scan mode
 			// for later implementation
 			//switch(m_srcCounterType){
 			//  case PixScan::COUNT_TRIGGER:
