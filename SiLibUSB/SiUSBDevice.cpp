@@ -550,7 +550,7 @@ bool TUSBDevice::GetDeviceInformation()
 
 	VendorId  = DeviceDescriptor.idVendor;
 	ProductId = DeviceDescriptor.idProduct;
-	BcdUSB = desc.bcdUSB;
+	BcdUSB = DeviceDescriptor.bcdUSB;
 	PipeInfoStringStream << "VID 0x" << hex << setfill ('0') << setw (4) << VendorId;
 	PipeInfoStringStream << "/PID 0x" << hex << setfill ('0') << setw (4) << ProductId << endl;
 
