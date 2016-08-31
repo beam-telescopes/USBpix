@@ -14,6 +14,7 @@ SUBDIRS += PixDbInterface
 SUBDIRS += PixMcc
 SUBDIRS += Config
 SUBDIRS += PixConfDBInterface
+SUBDIRS += Utility 
 
 CONFIG += ordered
 

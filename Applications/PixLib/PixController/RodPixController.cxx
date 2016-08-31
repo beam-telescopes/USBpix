@@ -1221,7 +1221,7 @@ void RodPixController::writeScanConfig(PixScan &scn) {  //! Write scan parameter
   }
 }
 
-void RodPixController::startScan() {                       //! Write scan parameters
+void RodPixController::startScanDelegated() {                       //! Write scan parameters
   //SLink off
   writeRegister(RTR_CMND_STAT, 3, 1, 0x1);
   writeRegister(RTR_CMND_STAT, 7, 1, 0x1);

@@ -19,12 +19,17 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include <math.h>
 
 #include "PixModuleGroup/PixModuleGroup.h"
 #include "BaseException.h"
 
+#include "Utility/CircularFifo.h"
+
 namespace PixLib {
+
+using UintCircBuff1MByte = CircularFifo<unsigned, 1000000/sizeof(unsigned)>;
 
 class Bits;
 class Histo;
@@ -134,8 +139,11 @@ public:
   
   virtual void readGADC(int type, std::vector<int> &GADCvalues, int FEindex) = 0;
 
-  virtual void writeScanConfig(PixScan &scn) = 0;                                           //! Write scan parameters
-  virtual void startScan(PixScan *scn) = 0;                                                 //! Start a scan
+  virtual void writeScanConfig(PixScan &scn) = 0;    
+
+  virtual void startScanDelegated(PixScan& scn) = 0;
+  void startScan(PixScan* scn);                                                 //! Start a scan
+
   virtual void finalizeScan()=0;                                                            //! finish undone issues after scan
   virtual void measureEvtTrgRate(PixScan *scn, int mod, double &erval, double &trval) = 0;  //! measure event and trigger rate - not a real occ./ToT-scan!
 
@@ -196,15 +204,20 @@ public:
   Config &config() { return *m_conf; };                       //! Configuration object accessor
   static void listTypes(std::vector<PixControllerInfo> &list);             //! available controller types
 
+  auto getCircularBufferPtr() const -> std::shared_ptr<UintCircBuff1MByte> {
+	return circularBuffer;
+  }
+
 protected:
   Config *m_conf;                  //! Configuration object
   PixModuleGroup &m_modGroup;      //! Pointer to the module group using this controller
+  std::shared_ptr<UintCircBuff1MByte> circularBuffer = nullptr;
 
 private:
   virtual void configInit() = 0;   //! Init configuration structure
   std::string m_name;              //! Name of the controller
   DBInquire *m_dbInquire;          //! DBInquire
-
+  bool m_inTBMode = false;
 };
 
 }

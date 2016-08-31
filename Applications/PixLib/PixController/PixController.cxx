@@ -22,7 +22,7 @@
 using namespace PixLib;
 
 PixController* PixController::make(PixModuleGroup &grp, DBInquire *dbInquire, std::string type) {
-  PixController *ctrl = NULL;
+  PixController *ctrl = nullptr;
   
   if (type == "USBPixController") {
     ctrl = new USBPixController(grp, dbInquire);
@@ -42,7 +42,7 @@ PixController* PixController::make(PixModuleGroup &grp, DBInquire *dbInquire, st
 }
 
 PixController* PixController::make(PixModuleGroup &grp, std::string type, int extraOption) {
-  PixController *ctrl = NULL;
+  PixController *ctrl = nullptr;
   
   if (type == "USBPixController") {
     ctrl = new USBPixController(grp, extraOption);
@@ -117,4 +117,9 @@ void PixController::listTypes(std::vector<PixControllerInfo> &list)
 #endif
 
   return;
+}
+
+void PixController::startScan(PixScan* scn) {
+  m_inTBMode = scn->getTestBeamFlag();
+  startScanDelegated(*scn);
 }

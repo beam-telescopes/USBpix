@@ -143,7 +143,7 @@ public:
 
   void writeScanConfig(PixScan &scn);                               //! Write scan parameters
 
-  void startScan(PixScan *scn);
+  void startScanDelegated(PixScan& scn);
   void finalizeScan();                                              //! finish undone issues after scan
 
   bool fitHistos();                                                 //! Fit collected histograms

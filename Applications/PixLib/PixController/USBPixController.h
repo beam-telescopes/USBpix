@@ -186,7 +186,7 @@ namespace PixLib {
     void readGADC(int type, std::vector<int> &GADCvalues, int FEindex=-1);
 
     void writeScanConfig(PixScan &scn);                               //! Write scan parameters
-    void startScan(PixScan *scn);
+    void startScanDelegated(PixScan& scn);
     void finalizeScan();
     void measureEvtTrgRate(PixScan *scn, int mod, double &erval, double &trval);
 
@@ -352,7 +352,7 @@ namespace PixLib {
     // any scan
     bool m_upcScanInit; // signal is used to avoid status readout in nTrigger() method during scan initialization
     bool m_upcScanBusy; // signal that is asserted during any kind of scan
-    bool m_upcStartScanHasFinished; // signal that is asserted after startScan() has finished, only used for normal scan, used in nTrigger() method to assert m_scanDone
+    bool m_upcStartScanHasFinished; // signal that is asserted after startScanDelegated() has finished, only used for normal scan, used in nTrigger() method to assert m_scanDone
     bool m_upcScanCancelled; // signal that is asserted when a scan was successfully cancelled/stopped
 
     //USB board class

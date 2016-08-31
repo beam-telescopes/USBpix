@@ -58,7 +58,7 @@ class USB3PixController : public PixController {
 		void readGADC(int type, std::vector<int> &GADCvalues, int FEindex);
 
 		void writeScanConfig(PixScan &scn);                                           //! Write scan parameters
-		void startScan(PixScan *scn);                                                 //! Start a scan
+		void startScanDelegated(PixScan& scn);                                                 //! Start a scan
 		void finalizeScan(void);                                                            //! finish undone issues after scan
 		void measureEvtTrgRate(PixScan *scn, int mod, double &erval, double &trval);  //! measure event and trigger rate - not a real occ./ToT-scan!
 

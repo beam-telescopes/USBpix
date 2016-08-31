@@ -118,7 +118,7 @@ public:
   virtual void readGADC(int , std::vector<int> &, int){};
 
   virtual void writeScanConfig(PixScan &scn);                               //! Write scan parameters
-  virtual void startScan(PixScan *scn){writeScanConfig(*scn); startScan();};
+  virtual void startScanDelegated(PixScan& scn){writeScanConfig(scn); startScanDelegated();};
   virtual void finalizeScan(){};
   virtual void measureEvtTrgRate(PixScan *scn, int mod, double &erval, double &trval);  //! measure event and trigger rate - not a real occ./ToT-scan!
 
@@ -240,7 +240,7 @@ public:
 
 private:
   virtual void configInit();         //! Init configuration structure
-  virtual void startScan();          //! Start a scan
+  virtual void startScanDelegated();          //! Start a scan
   
   SctPixelRod::RodModule *m_rod;     //! Pointer to RodModule
   SctPixelRod::VmeInterface *m_vme;  //! VME interface

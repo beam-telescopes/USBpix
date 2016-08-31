@@ -637,20 +637,20 @@ void USB3PixController::getMaskSettings(MaskSettings &m, PixScan &scn) {
 	}
 }
 
-void USB3PixController::startScan(PixScan *scn) {                                                 //! Start a scan
+void USB3PixController::startScanDelegated(PixScan& scn) {                                                 //! Start a scan
 	if(U3PC_DEBUG) cout << "startScan" << endl;
 
-	writeScanConfig(*scn);
+	writeScanConfig(scn);
 
 	current_scan = std::unique_ptr<Scan>(new Scan);
 
-	if(scn->getSrcTriggerType() == PixScan::STROBE_SCAN) {
+	if(scn.getSrcTriggerType() == PixScan::STROBE_SCAN) {
 		current_scan->source_scan = false;
-		strobeScan(scn);
+		strobeScan(&scn);
 	} else {
 		current_scan->source_scan = true;
-		initLoop(scn, current_scan->dec);
-		sourceScan(scn->getRepetitions(), scn->getSrcTriggerType(), scn->getSrcCountType(), scn->getStrobeLVL1Delay());
+		initLoop(&scn, current_scan->dec);
+		sourceScan(scn.getRepetitions(), scn.getSrcTriggerType(), scn.getSrcCountType(), scn.getStrobeLVL1Delay());
 
 		//std::packaged_task<void()> tsk(std::bind(&USB3PixController::sourceScan, this, scn->getRepetitions(), scn->getSrcTriggerType(), scn->getSrcCountType(), scn->getStrobeLVL1Delay()));
 

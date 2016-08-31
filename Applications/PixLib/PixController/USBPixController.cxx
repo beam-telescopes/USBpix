@@ -2205,9 +2205,9 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 	}
 }
 
-void USBPixController::startScan(PixScan* scn) { // Start a scan
+void USBPixController::startScanDelegated(PixScan& scn) { // Start a scan
 // 
-	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: entering startScan()"<<endl;
+	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: entering startScanDelegated()"<<endl;
 
 	if(UPC_DEBUG_FLAGS) cout<<"DEBUG USBPixCtrl: m_upcScanInit="<<(m_upcScanInit?"true":"false")<<endl;
 	if(UPC_DEBUG_FLAGS) cout<<"DEBUG USBPixCtrl: m_upcScanBusy="<<(m_upcScanBusy?"true":"false")<<endl;
@@ -2224,15 +2224,15 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
 	m_upcScanInit = true;
 	m_upcScanBusy = true;
 	m_upcScanCancelled = false;
-	m_sourceScanFlag = scn->getSourceScanFlag();
-        m_testBeamFlag = scn->getTestBeamFlag();
+	m_sourceScanFlag = scn.getSourceScanFlag();
+        m_testBeamFlag = scn.getTestBeamFlag();
 	if (!m_sourceScanFlag)
 		m_scanBusy = true;
 	else
 		m_sourceScanBusy = true;
 
 	// write scan configuration
-	writeScanConfig(*scn);
+	writeScanConfig(scn);
 	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: finished writeScanConfig()"<<endl;
 
 	if(!m_sourceScanFlag) { // normal scan
@@ -2240,7 +2240,7 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
 
 		// set histogram mode in FPGA
 		// clear histograms *here* and *before* calling USBpix::StartScan()
-		if (scn->getHistogramFilled(PixScan::TOT_MEAN) || scn->getHistogramFilled(PixScan::TOT_SIGMA) || scn->getHistogramFilled(PixScan::TOT)|| scn->getHistogramFilled(PixScan::TOT0) || scn->getHistogramFilled(PixScan::TOT1) || scn->getHistogramFilled(PixScan::TOT2) || scn->getHistogramFilled(PixScan::TOT3) || scn->getHistogramFilled(PixScan::TOT4) || scn->getHistogramFilled(PixScan::TOT5) || scn->getHistogramFilled(PixScan::TOT6) || scn->getHistogramFilled(PixScan::TOT7) || scn->getHistogramFilled(PixScan::TOT8) || scn->getHistogramFilled(PixScan::TOT9) || scn->getHistogramFilled(PixScan::TOT10) || scn->getHistogramFilled(PixScan::TOT11) || scn->getHistogramFilled(PixScan::TOT12) || scn->getHistogramFilled(PixScan::TOT13) || scn->getHistogramFilled(PixScan::TOT14) || scn->getHistogramFilled(PixScan::TOT15)) {
+		if (scn.getHistogramFilled(PixScan::TOT_MEAN) || scn.getHistogramFilled(PixScan::TOT_SIGMA) || scn.getHistogramFilled(PixScan::TOT)|| scn.getHistogramFilled(PixScan::TOT0) || scn.getHistogramFilled(PixScan::TOT1) || scn.getHistogramFilled(PixScan::TOT2) || scn.getHistogramFilled(PixScan::TOT3) || scn.getHistogramFilled(PixScan::TOT4) || scn.getHistogramFilled(PixScan::TOT5) || scn.getHistogramFilled(PixScan::TOT6) || scn.getHistogramFilled(PixScan::TOT7) || scn.getHistogramFilled(PixScan::TOT8) || scn.getHistogramFilled(PixScan::TOT9) || scn.getHistogramFilled(PixScan::TOT10) || scn.getHistogramFilled(PixScan::TOT11) || scn.getHistogramFilled(PixScan::TOT12) || scn.getHistogramFilled(PixScan::TOT13) || scn.getHistogramFilled(PixScan::TOT14) || scn.getHistogramFilled(PixScan::TOT15)) {
 			if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: Filling TOT histo"<<endl;
 			m_USBpix->SetTOTMode();
       for (std::vector<int>::iterator it = m_chipIds.begin();
@@ -2249,7 +2249,7 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
         if(*it==999) break;
 				m_USBpix->ClearTOTHisto(*it);
       }
-		} else if (scn->getHistogramFilled(PixScan::OCCUPANCY)) {
+		} else if (scn.getHistogramFilled(PixScan::OCCUPANCY)) {
 			m_USBpix->SetCalibrationMode();
 			if(UPC_DEBUG_GEN) cout << "DEBUG Malte: Set Hit histogramming mode.\n";
       for (std::vector<int>::iterator it = m_chipIds.begin();
@@ -2271,8 +2271,8 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
 		// reset scan status bits *before* calling the method USBpix::StartScan() and *before* setting m_upcScanInit to false
 		m_USBpix->ResetScanStatus();
 
-		if (scn->getMaskStageMode() == PixScan::XTALK) { //JW: run first step of scan here
-		  if(UPC_DEBUG_GEN) cout << "DEBUG: scn->getMaskStageMode() == PixScan::XTALK" << endl;
+		if (scn.getMaskStageMode() == PixScan::XTALK) { //JW: run first step of scan here
+		  if(UPC_DEBUG_GEN) cout << "DEBUG: scn.getMaskStageMode() == PixScan::XTALK" << endl;
 		  //do the first scan step - i.e. 6th arg. is 1, not m_scanConfigArray[6]
 		  if(UPC_DEBUG_GEN) cout << "DEBUG: Xtalk: m_USBPix->StartScan()" << endl;
 		  m_USBpix->StartScan(m_scanConfigArray[0], m_scanConfigArray[1], m_scanConfigArray[2],
@@ -2306,7 +2306,7 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
 		}
 
 		// TODO: there is a better way, need FPGA FSM that is capable to handle this mode
-		if(scn->getSrcTriggerType()!=PixScan::STROBE_SCAN){
+		if(scn.getSrcTriggerType()!=PixScan::STROBE_SCAN){
 			// start measuerement, otherwise ext. trigger is ignored
 			if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->StartMeasurement()"<<endl;
 			m_USBpix->StartMeasurement();
@@ -2402,7 +2402,7 @@ void USBPixController::startScan(PixScan* scn) { // Start a scan
       }
     }
 
-		if(scn->getSrcTriggerType()!=PixScan::STROBE_SCAN){
+		if(scn.getSrcTriggerType()!=PixScan::STROBE_SCAN){
 			// stop measuerement if it was started earlier on
 			if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->StopMeasurement()"<<endl;
 			m_USBpix->StopMeasurement();
@@ -3134,7 +3134,7 @@ int USBPixController::nTrigger() {                 //! Returns the number of tri
 			if(UPC_DEBUG_FLAGS) cout<<"DEBUG USBPixCtrl: m_USBpix->GetScanStatus()"<<endl;
 			if(UPC_DEBUG_FLAGS) cout<<"DEBUG USBPixCtrl: scanReady="<<(m_scanBusy?"true":"false")<<", scanCancelled="<<(m_scanCancelled?"true":"false")<<", scanError="<<(m_scanError?"true":"false")<<", scanStep="<<m_scanStep<<endl;
 
-			// m_scanDone has to asserted here, not in startScan()
+			// m_scanDone has to asserted here, not in startScanDelagted()
 			// m_upcStartScanHasFinished is used to be sure that normal scan has finished properly
 			if (m_scanReady && m_upcStartScanHasFinished)
 				m_scanDone = true;
@@ -3250,7 +3250,7 @@ int USBPixController::nTrigger() {                 //! Returns the number of tri
 			}
 			if(UPC_DEBUG_GEN) cout<<"DEBUG: SRAMReadoutReady: "<<(m_sramReadoutReady?"true":"false")<<" SRAMFull: "<<(m_sramFull?"true":"false")<<" measurementPause: "<<(m_measurementPause?"true":"false")<<" measurementRunning: "<<(m_measurementRunning?"true":"false")<<" collectedTriggers: "<<m_collectedTriggers<<" collectedHits: "<<m_collectedHits<<" triggerRate: "<<m_triggerRate<<" eventRate: "<<m_eventRate<<" tluVeto: "<<m_tluVeto<<endl;
 			if(!m_measurementRunning && !m_testBeamFlag)
-				// m_sourceScanDone has to be asserted here, not in startScan()
+				// m_sourceScanDone has to be asserted here, not in startScanDelegated()
 				// USBpix::StartMeasurement() is called once, but not active during source scan
 			        // if in testbeam mode, taken care of by getSourceScanData
 				m_sourceScanDone=true;
@@ -3666,7 +3666,7 @@ int USBPixController::getFECount()
 void USBPixController::measureEvtTrgRate(PixScan *scn, int /*mod*/, double &erval, double &trval){
   int nmeas = scn->getNptsRateAvg();
   if(UPC_DEBUG_GEN) cout << "USBPixController : starting src meas." << endl;
-  startScan(scn);
+  startScanDelegated(scn);
   erval = 0.;
   trval = 0.;
   if(UPC_DEBUG_GEN) cout << "USBPixController : starting rate meas." << endl;

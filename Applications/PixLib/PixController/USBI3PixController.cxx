@@ -960,7 +960,7 @@ void USBI3PixController::writeScanConfig(PixScan &scn) {                        
 void USBI3PixController::finalizeScan(){
   // needed at all?
 }
-void USBI3PixController::startScan(PixScan* scn) {                                                 //! Start a scan
+void USBI3PixController::startScanDelegated(PixScan& scn) {                                                 //! Start a scan
   int maskstages;
   int pixelmask[90], pixelmask2[90];
   m_srcCounterType = 0;
@@ -971,9 +971,9 @@ void USBI3PixController::startScan(PixScan* scn) {                              
     pixelmask2[i] = 0;
   }
   
-  if(UPC_DEBUG) cout << "N total mask steps: " << scn->getMaskStageTotalSteps() << endl;
+  if(UPC_DEBUG) cout << "N total mask steps: " << scn.getMaskStageTotalSteps() << endl;
 
-  switch(scn->getMaskStageTotalSteps()) {
+  switch(scn.getMaskStageTotalSteps()) {
   case PixScan::STEPS_32:   maskstages = 32;   break;
   case PixScan::STEPS_40:   maskstages = 40;   break;
   case PixScan::STEPS_64:   maskstages = 64;   break;
@@ -985,16 +985,16 @@ void USBI3PixController::startScan(PixScan* scn) {                              
   }
 
   //m_USBreg->SetCalibrationMode();
-  writeScanConfig(*scn);
-  if(!scn->getSourceScanFlag()) {
+  writeScanConfig(scn);
+  if(!scn.getSourceScanFlag()) {
     
     m_USBreg->ClearSRAM();
     
-    if (scn->getHistogramFilled(PixScan::TOT_MEAN) || scn->getHistogramFilled(PixScan::TOT_SIGMA)) {
+    if (scn.getHistogramFilled(PixScan::TOT_MEAN) || scn.getHistogramFilled(PixScan::TOT_SIGMA)) {
       m_USBreg->SetTOTMode();
       m_USBreg->ClearTOTHisto(); // JJ: need to clear tot histogram 
     }
-    else if (scn->getHistogramFilled(PixScan::OCCUPANCY)) {
+    else if (scn.getHistogramFilled(PixScan::OCCUPANCY)) {
       m_USBreg->SetCalibrationMode();
       m_USBreg->ClearConfHisto(); // JJ: need to clear conf data array
     }
@@ -1002,7 +1002,7 @@ void USBI3PixController::startScan(PixScan* scn) {                              
     // JW: DEBUGING source scan --> do it in raw data mode!
     //if(scn->getSourceScanFlag()) m_USBreg->SetRunMode();
     
-    if (scn->getMaskStageMode() == PixScan::XTALK) { // JW: XTALK: run first step of scan here
+    if (scn.getMaskStageMode() == PixScan::XTALK) { // JW: XTALK: run first step of scan here
       if(UPC_DEBUG) cout << "DEBUG: scn->getMaskStageMode() == PixScan::XTALK" << endl;
       // do the scan step
       if(UPC_DEBUG) cout << "DEBUG: m_FEconfig->StartuCScan()" << endl;
@@ -1050,10 +1050,10 @@ void USBI3PixController::startScan(PixScan* scn) {                              
     m_USBreg->SetRunMode();
     m_USBreg->ClearSRAM();
     m_globalHitcount = 0;
-    if(UPC_DEBUG) cout<<"DEBUG: source measurement trigger and count modes: " << scn->getSrcTriggerType() << " - " 
-		      << scn->getSrcCountType() <<endl;
+    if(UPC_DEBUG) cout<<"DEBUG: source measurement trigger and count modes: " << scn.getSrcTriggerType() << " - " 
+		      << scn.getSrcCountType() <<endl;
     int trgmod;
-    switch((PixScan::TriggerType)scn->getSrcTriggerType()){
+    switch((PixScan::TriggerType)scn.getSrcTriggerType()){
     default:
     case PixScan::EXT_TRG:
       trgmod = 1;
@@ -1066,7 +1066,7 @@ void USBI3PixController::startScan(PixScan* scn) {                              
       break;
     }
     m_USBreg->WriteRegister(CS_TRIGGER_MODE, trgmod); // select external trigger mode: 1:no handshake, 2:simple handshake, 3:trigger data handshake
-    m_USBreg->WriteRegister(CS_COUNTER_MODE, scn->getSrcCountType()); // select event counter mode: 0:triggers, 1:hits, 2:EOE
+    m_USBreg->WriteRegister(CS_COUNTER_MODE, scn.getSrcCountType()); // select event counter mode: 0:triggers, 1:hits, 2:EOE
     m_USBreg->WriteRegister(CS_TLU_TRIGGER_DATA_LENGTH, 32); // set TLU trigger data length (depends on TLU bit-file)
     m_USBreg->WriteRegister(CS_TLU_TRIGGER_DATA_DELAY, 0); // set additional wait cycles (depends on TLU trigger data length: 32 - CS_TLU_TRIGGER_DATA_LENGTH + additional delay = CS_TLU_TRIGGER_DATA_DELAY)
     m_USBreg->WriteRegister(CS_TLU_TRIGGER_LOW_TIME_OUT, 20); // set time out for TLU trigger for not going in low state
@@ -1074,7 +1074,7 @@ void USBI3PixController::startScan(PixScan* scn) {                              
     m_USBreg->WriteRegister(CS_MINIMUM_TRIGGER_LENGTH, 0);
     if(UPC_DEBUG) cout<<"DEBUG: setting RJ45 to " << ((m_enableRJ45||m_testBeamFlag)?"ON":"OFF") << endl;
     m_USBreg->WriteRegister(CS_ENABLE_RJ45, ((m_enableRJ45||m_testBeamFlag) ? 1 : 0)); // if in testbeam mode, *always* turn RJ45 on; anything else is pointless
-    m_srcCounterType = scn->getSrcCountType();
+    m_srcCounterType = scn.getSrcCountType();
     m_sramReadoutReady = false;
     m_sramFull = false;
     m_tluVeto = false;

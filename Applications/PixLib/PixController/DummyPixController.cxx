@@ -132,9 +132,9 @@ cout << "called writeScanConfig\n";
   nLoop2Parameters=scn.getLoopVarNSteps(2);
   printf ("%u %u %u %u %u\n",m_nTrigger,nmaskStage,nLoop0Parameters,nLoop1Parameters,nLoop2Parameters);
 }
-void DummyPixController::startScan(PixScan *scn)
+void DummyPixController::startScanDelegated(PixScan& scn)
 {
-    cout << "called startScan(Pixscan scn)\n";
+    cout << "called startScanDelegated(PixScan& scn)\n";
 loop0Parameter=nLoop0Parameters;
 loop1Parameter=nLoop1Parameters;
 loop2Parameter=nLoop2Parameters;
