@@ -14,7 +14,7 @@ class DllExport DataDecoder {
 		DataDecoder(void) {}
 		DataDecoder(std::initializer_list<Histogrammer*> il);
 
-		void decode(const std::vector<uint32_t> &data);
+		void decode(const std::vector<uint32_t> &data, std::function<void(uint32_t)> storedata_function = nullptr);
 		void addHistogrammer(Histogrammer *hist);
 		void clearHistogrammers(void);
 

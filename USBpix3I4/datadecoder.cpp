@@ -19,11 +19,12 @@ DataDecoder::DataDecoder(std::initializer_list<Histogrammer*> il) {
 	}
 }
 
-void DataDecoder::decode(const std::vector<uint32_t> &data) {
+void DataDecoder::decode(const std::vector<uint32_t> &data, std::function<void(uint32_t)> storedata_function) {
 	size += data.size();
 	for(auto i : data) {
 		uint8_t channel = selectBits(i, 24, 8);
 
+		if(storedata_function) storedata_function(i);
 		rawData(i);
 
 		if(channel >> 7) { //Trigger
