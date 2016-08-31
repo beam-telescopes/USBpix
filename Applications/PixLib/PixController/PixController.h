@@ -29,7 +29,7 @@
 
 namespace PixLib {
 
-using UintCircBuff1MByte = CircularFifo<unsigned, 1000000/sizeof(unsigned)>;
+using UintCircBuff1MByte = CircularFifo<uint32_t, 1000000/sizeof(uint32_t)>;
 
 class Bits;
 class Histo;
@@ -205,13 +205,13 @@ public:
   static void listTypes(std::vector<PixControllerInfo> &list);             //! available controller types
 
   auto getCircularBufferPtr() const -> std::shared_ptr<UintCircBuff1MByte> {
-	return circularBuffer;
+	return m_circularBuffer;
   }
 
 protected:
   Config *m_conf;                  //! Configuration object
   PixModuleGroup &m_modGroup;      //! Pointer to the module group using this controller
-  std::shared_ptr<UintCircBuff1MByte> circularBuffer = nullptr;
+  std::shared_ptr<UintCircBuff1MByte> m_circularBuffer = nullptr;
 
 private:
   virtual void configInit() = 0;   //! Init configuration structure

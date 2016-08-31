@@ -2238,7 +2238,7 @@ void USBPixController::startScanDelegated(PixScan& scn) { // Start a scan
 	if(m_sourceScanFlag)
 	  m_scanThread = std::thread(&USBPixController::sourceScan, this);//sourceScan();
 	else
-	  m_scanThread = std::thread(&USBPixController::strobeScan, this, scn);//strobeScan(scn);
+	  m_scanThread = std::thread(&USBPixController::strobeScan, this, &scn);//strobeScan(scn);
 }
 void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
 
@@ -2247,7 +2247,7 @@ void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
 
 		// set histogram mode in FPGA
 		// clear histograms *here* and *before* calling USBpix::StartScan()
-		if (scn.getHistogramFilled(PixScan::TOT_MEAN) || scn.getHistogramFilled(PixScan::TOT_SIGMA) || scn.getHistogramFilled(PixScan::TOT)|| scn.getHistogramFilled(PixScan::TOT0) || scn.getHistogramFilled(PixScan::TOT1) || scn.getHistogramFilled(PixScan::TOT2) || scn.getHistogramFilled(PixScan::TOT3) || scn.getHistogramFilled(PixScan::TOT4) || scn.getHistogramFilled(PixScan::TOT5) || scn.getHistogramFilled(PixScan::TOT6) || scn.getHistogramFilled(PixScan::TOT7) || scn.getHistogramFilled(PixScan::TOT8) || scn.getHistogramFilled(PixScan::TOT9) || scn.getHistogramFilled(PixScan::TOT10) || scn.getHistogramFilled(PixScan::TOT11) || scn.getHistogramFilled(PixScan::TOT12) || scn.getHistogramFilled(PixScan::TOT13) || scn.getHistogramFilled(PixScan::TOT14) || scn.getHistogramFilled(PixScan::TOT15)) {
+		if (scn->getHistogramFilled(PixScan::TOT_MEAN) || scn->getHistogramFilled(PixScan::TOT_SIGMA) || scn->getHistogramFilled(PixScan::TOT)|| scn->getHistogramFilled(PixScan::TOT0) || scn->getHistogramFilled(PixScan::TOT1) || scn->getHistogramFilled(PixScan::TOT2) || scn->getHistogramFilled(PixScan::TOT3) || scn->getHistogramFilled(PixScan::TOT4) || scn->getHistogramFilled(PixScan::TOT5) || scn->getHistogramFilled(PixScan::TOT6) || scn->getHistogramFilled(PixScan::TOT7) || scn->getHistogramFilled(PixScan::TOT8) || scn->getHistogramFilled(PixScan::TOT9) || scn->getHistogramFilled(PixScan::TOT10) || scn->getHistogramFilled(PixScan::TOT11) || scn->getHistogramFilled(PixScan::TOT12) || scn->getHistogramFilled(PixScan::TOT13) || scn->getHistogramFilled(PixScan::TOT14) || scn->getHistogramFilled(PixScan::TOT15)) {
 			if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: Filling TOT histo"<<endl;
 			m_USBpix->SetTOTMode();
       for (std::vector<int>::iterator it = m_chipIds.begin();
@@ -2256,7 +2256,7 @@ void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
         if(*it==999) break;
 				m_USBpix->ClearTOTHisto(*it);
       }
-		} else if (scn.getHistogramFilled(PixScan::OCCUPANCY)) {
+		} else if (scn->getHistogramFilled(PixScan::OCCUPANCY)) {
 			m_USBpix->SetCalibrationMode();
 			if(UPC_DEBUG_GEN) cout << "DEBUG Malte: Set Hit histogramming mode.\n";
       for (std::vector<int>::iterator it = m_chipIds.begin();
@@ -2278,8 +2278,8 @@ void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
 		// reset scan status bits *before* calling the method USBpix::StartScan() and *before* setting m_upcScanInit to false
 		m_USBpix->ResetScanStatus();
 
-		if (scn.getMaskStageMode() == PixScan::XTALK) { //JW: run first step of scan here
-		  if(UPC_DEBUG_GEN) cout << "DEBUG: scn.getMaskStageMode() == PixScan::XTALK" << endl;
+		if (scn->getMaskStageMode() == PixScan::XTALK) { //JW: run first step of scan here
+		  if(UPC_DEBUG_GEN) cout << "DEBUG: scn->getMaskStageMode() == PixScan::XTALK" << endl;
 		  //do the first scan step - i.e. 6th arg. is 1, not m_scanConfigArray[6]
 		  if(UPC_DEBUG_GEN) cout << "DEBUG: Xtalk: m_USBPix->StartScan()" << endl;
 		  m_USBpix->StartScan(m_scanConfigArray[0], m_scanConfigArray[1], m_scanConfigArray[2],
@@ -2313,7 +2313,7 @@ void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
 		}
 
 		// TODO: there is a better way, need FPGA FSM that is capable to handle this mode
-		if(scn.getSrcTriggerType()!=PixScan::STROBE_SCAN){
+		if(scn->getSrcTriggerType()!=PixScan::STROBE_SCAN){
 			// start measuerement, otherwise ext. trigger is ignored
 			if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->StartMeasurement()"<<endl;
 			m_USBpix->StartMeasurement();
@@ -2409,7 +2409,7 @@ void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
       }
     }
 
-		if(scn.getSrcTriggerType()!=PixScan::STROBE_SCAN){
+		if(scn->getSrcTriggerType()!=PixScan::STROBE_SCAN){
 			// stop measuerement if it was started earlier on
 			if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->StopMeasurement()"<<endl;
 			m_USBpix->StopMeasurement();
@@ -3798,7 +3798,7 @@ int USBPixController::getFECount()
 void USBPixController::measureEvtTrgRate(PixScan *scn, int /*mod*/, double &erval, double &trval){
   int nmeas = scn->getNptsRateAvg();
   if(UPC_DEBUG_GEN) cout << "USBPixController : starting src meas." << endl;
-  startScanDelegated(scn);
+  startScanDelegated(*scn);
   erval = 0.;
   trval = 0.;
   if(UPC_DEBUG_GEN) cout << "USBPixController : starting rate meas." << endl;

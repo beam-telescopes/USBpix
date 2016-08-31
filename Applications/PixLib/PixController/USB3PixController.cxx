@@ -652,7 +652,7 @@ void USB3PixController::startScanDelegated(PixScan& scn) {                      
 		//sourceScan(scn.getRepetitions(), scn.getSrcTriggerType(), scn.getSrcCountType(), scn.getStrobeLVL1Delay());
 	} else {
 		current_scan->source_scan = false;
-		current_scan->scan_thread = std::thread(&USB3PixController::strobeScan, this, scn);
+		current_scan->scan_thread = std::thread(&USB3PixController::strobeScan, this, &scn);
 		//current_scan->scan_thread.detach();
 		//strobeScan(scn);
 	}
@@ -806,8 +806,9 @@ void USB3PixController::sourceScan(int max_event, int trigger_type, int count_ty
 
   try{
 	Readout r([&](void) {
-		current_scan->dec.decode(board->getData());
-	}, m_readoutInterval);
+		current_scan->dec.decode(board->getData(),
+		[this](uint32_t a){ m_circularBuffer->push(a); }
+	); }, m_readoutInterval);
 
 	CommandBuffer c;
 
@@ -819,7 +820,7 @@ void USB3PixController::sourceScan(int max_event, int trigger_type, int count_ty
 	r.startReadout();
 
 	if(trigger_type == PixScan::FE_SELFTRIGGER) {
-		for(auto &i : frontends) {
+		for(auto& i : frontends) {
 			c += i.second.confMode();
 			i.second["GateHitOr"] = 1;
 			c += i.second.flushWrites();
