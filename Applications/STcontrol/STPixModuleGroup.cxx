@@ -295,7 +295,6 @@ STPixModuleGroup::CtrlThread::CtrlThread(STPixModuleGroup& group, QApplication *
 {
   threadtag = MTundecided;
   m_app = application;
-  m_scanThr = new STPixModuleGroup::ScanThread(group, application);
 };
 
 void STPixModuleGroup::ThreadExecute(ThreadTag tag)
@@ -911,17 +910,10 @@ void STPixModuleGroup::CtrlThread::scan()
 		getSTPixModuleGroup()->m_nSteps[i]=tmpScans[ife]->scanIndex(i);
 	      getSTPixModuleGroup()->m_nMasks=tmpScans[ife]->getMaskStageIndex();
 	      
-	      // call the main scan function in PixModuleGroup - in a separate thread in case PixController does not return immediately
-	      // if(tmpScans[ife]->getSourceScanFlag() || !tmpScans[ife]->getDspMaskStaging() || 
-		 // tmpScans[ife]->getRunType() != PixScan::NORMAL_SCAN || !histoOnCtrl){ 
-		// // run source scan or special scans as usual
-		// if(STEP_DEBUG) qDebug() << "Running scan in main thread!";
-		// getSTPixModuleGroup()->scanExecute(tmpScans[ife]);
-	      // } else { 
-		m_scanThr->setPixScan(tmpScans[ife]);
-		m_scanThr->start();
-	    //  }
-	      
+	      // run all scans as usual - requires PixController to return immediately after scan init
+	      if(STEP_DEBUG) qDebug() << "Running scan in main thread!";
+	      getSTPixModuleGroup()->scanExecute(tmpScans[ife]);
+
 	      // wait till the controller knows it is in scanning mode
 	      int timeoutCnt=0; 
 	      // get timeout cfg. par. - is in minutes, so convert to 0.1 s
@@ -2118,197 +2110,6 @@ void STPixModuleGroup::CtrlThread::setDcsScanVal(int loop, PixScan *scn)
 		}
 		getSTPixModuleGroup()->m_dcsStates.erase(myCmdIds[ic]);
 	}
-}
-
-STPixModuleGroup::ScanThread::ScanThread(STPixModuleGroup& group, QApplication* application)
-  : m_STPixModuleGroup(group), m_ps(0), m_app(application){
-}
-void STPixModuleGroup::ScanThread::run(){
-  if(m_ps==0){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    txt << "STPixModuleGroup::ScanThread::run() : PixScan pointer is NULL, can't start scan\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    return;
-  }
-  try{
-    m_STPixModuleGroup.scanExecute(m_ps);
-  }
-  catch(PixDBException &dbexc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt, exmsg;
-    dbexc.what(exmsg);
-    txt << "STPixModuleGroup::ScanThread::run() : PixDB-exception " <<exmsg.str() << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //    setThreadTag(MTundecided);
-    return;
-  }
-  catch (PixScanExc &psExc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    txt << "STPixModuleGroup::ScanThread::run() : PixScan-exception level " << psExc.dumpLevel() << 
-      " " << psExc << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }
-  catch (USBPixControllerExc &upcExc){
-    bool setProblem = (upcExc.getErrorLevel()==PixControllerExc::WARNING || upcExc.getErrorLevel()==PixControllerExc::INFO);
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(setProblem?tOK:tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    std::stringstream msg;
-    upcExc.dump(msg);
-    txt << "STPixModuleGroup::ScanThread::run() : USBPixController-exception (grp. " << m_STPixModuleGroup.getName() << "): " 
-	<< msg.str() << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }
-  catch (PixControllerExc &pcExc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    std::stringstream msg;
-    pcExc.dump(msg);
-    txt << "STPixModuleGroup::ScanThread::run() : PixController-exception (grp. " << m_STPixModuleGroup.getName() << "): " 
-	<< msg.str() << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }
-#ifndef NOTDAQ
-  catch (RodPixControllerExc &rpcExc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    std::stringstream msg;
-    rpcExc.dump(msg);
-    txt << "STPixModuleGroup::ScanThread::run() : RodPixController-exception (grp. " << m_STPixModuleGroup.getName() << "): " 
-	<< msg.str() << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }
-#endif
-  catch (PixModuleExc &mExc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    txt << "STPixModuleGroup::ScanThread::run() : PixModule-exception level " << mExc.dumpLevel() << 
-      " " << mExc << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }
-  catch (PixMccExc &mcExc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    txt << "STPixModuleGroup::ScanThread::run() : PixMcc-exception level " << mcExc.dumpLevel() << 
-      " " << mcExc.dumpType() << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }
-  catch (PixFeExc &fExc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    txt << "STPixModuleGroup::ScanThread::run() : PixFe-exception level " << fExc.dumpLevel() << 
-      " " << fExc.dumpType() << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }
-  catch (ConfigExc & cfExc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    txt << "STPixModuleGroup::ScanThread::run() : Config-exception " << cfExc << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }
-  catch (VmeException & vexc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    txt << "STPixModuleGroup::ScanThread::run() : VME-exception " << vexc << "\n";
-    ThreadErrorEvent* tle = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }
-  catch(BaseException & exc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    txt<<"STPixModuleGroup::ScanThread::run() : "<<exc<<"\n";
-    ThreadErrorEvent* tee = new ThreadErrorEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tee);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus=1;
-    // setThreadTag(MTundecided);
-    return;
-  }
-  catch(std::exception& sexc){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    std::stringstream txt;
-    txt << "STPixModuleGroup::ScanThread::run() : Std-lib-exception while scanning " << sexc.what() << "\n";
-    ThreadLogEvent* tle = new ThreadLogEvent(txt.str());
-    m_app->postEvent(&m_STPixModuleGroup, tle);
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus = 1;
-    //setThreadTag(MTundecided);
-    return;
-  }catch(...){
-    setCtrlStatusEvent* cse = new setCtrlStatusEvent(tproblem, &m_STPixModuleGroup);
-    m_app->postEvent(&m_STPixModuleGroup, cse);
-    ThreadErrorEvent* tee = new ThreadErrorEvent("STPixModuleGroup::ScanThread::run() :Unexpected exception. \n");
-    m_app->postEvent(&m_STPixModuleGroup, tee);
-    
-    m_STPixModuleGroup.processing = false;
-    m_STPixModuleGroup.ScanStatus=1;
-    //setThreadTag(MTundecided);
-    return;
-  }
 }
 
 int STPixModuleGroup::getNSteps(int i)

@@ -1,6 +1,5 @@
 
 #include "SiLibUSB.h"
-//#include "PixModuleGroup/PixModuleGroup.h"
 //#include "PixConfDBInterface/PixConfDBInterface.h"
 #include "USB3PixController.h"
 
@@ -21,7 +20,7 @@
 #include <thread>
 #include <algorithm>
 #include <list>
-
+#include <exception>
 #include <fstream>
 
 #define U3PC_DEBUG false
@@ -541,7 +540,7 @@ struct Scan {
 	int event_count = 0; //source scan
 	std::atomic<bool> source_scan = {false};
 	std::thread scan_thread;
-	std::future<void> thread_future;
+         std::exception_ptr scan_except;
 
 	std::list<ScanLoop> loops;
 	std::unique_ptr<RawFileWriter> raw_writer;
@@ -644,18 +643,18 @@ void USB3PixController::startScanDelegated(PixScan& scn) {                      
 
 	current_scan = std::unique_ptr<Scan>(new Scan);
 
-	if(scn.getSrcTriggerType() == PixScan::STROBE_SCAN) {
-		current_scan->source_scan = false;
-		strobeScan(&scn);
-	} else {
+	if(scn.getSourceScanFlag()){
 		current_scan->source_scan = true;
 		initLoop(&scn, current_scan->dec);
-		sourceScan(scn.getRepetitions(), scn.getSrcTriggerType(), scn.getSrcCountType(), scn.getStrobeLVL1Delay());
-
-		//std::packaged_task<void()> tsk(std::bind(&USB3PixController::sourceScan, this, scn->getRepetitions(), scn->getSrcTriggerType(), scn->getSrcCountType(), scn->getStrobeLVL1Delay()));
-
-		//current_scan->thread_future = tsk.get_future();
-		//current_scan->scan_thread = std::thread(std::move(tsk));
+		current_scan->scan_thread = std::thread(&USB3PixController::sourceScan, this, scn.getRepetitions(), scn.getSrcTriggerType(), 
+							scn.getSrcCountType(), scn.getStrobeLVL1Delay());
+		//current_scan->scan_thread.detach();
+		//sourceScan(scn.getRepetitions(), scn.getSrcTriggerType(), scn.getSrcCountType(), scn.getStrobeLVL1Delay());
+	} else {
+		current_scan->source_scan = false;
+		current_scan->scan_thread = std::thread(&USB3PixController::strobeScan, this, scn);
+		//current_scan->scan_thread.detach();
+		//strobeScan(scn);
 	}
 }
 
@@ -713,6 +712,8 @@ void USB3PixController::initLoop(PixScan *scn, DataDecoder &dec) {
 }
 
 void USB3PixController::strobeScan(PixScan *scn) {
+
+  try{
 	int lvl1_delay = scn->getStrobeLVL1Delay();
 
 	MaskSettings m;
@@ -795,11 +796,15 @@ void USB3PixController::strobeScan(PixScan *scn) {
 	current_scan->raw_writer.reset(); // flush raw data
 
 	if(U3PC_DEBUG) cout << "invalid DR: " << current_scan->dec.invalid_dr << endl;
-	
-	finished = true;
+  }catch(...){
+    current_scan->scan_except = std::current_exception();
+  }
+  finished = true;
 }
 
 void USB3PixController::sourceScan(int max_event, int trigger_type, int count_type, int lvl1_delay) {
+
+  try{
 	Readout r([&](void) {
 		current_scan->dec.decode(board->getData());
 	}, m_readoutInterval);
@@ -907,7 +912,10 @@ void USB3PixController::sourceScan(int max_event, int trigger_type, int count_ty
 
 	cout << "invalid DR: " << current_scan->dec.invalid_dr << endl;
 	
-	finished = true;
+  }catch(...){
+    current_scan->scan_except = std::current_exception();
+  }
+  finished = true;
 }
 
 void USB3PixController::scanLoop(Command &loop_cmd, int repeat, MaskSettings &m) {
@@ -959,9 +967,13 @@ void USB3PixController::scanLoop(Command &loop_cmd, int repeat, MaskSettings &m)
 void USB3PixController::finalizeScan(void) {                                                            //! finish undone issues after scan
 	if(U3PC_DEBUG) cout << "finalizeScan" << endl;
 
-	if(current_scan && current_scan->source_scan && current_scan->scan_thread.joinable()) {
+        if (current_scan && current_scan->scan_except) {
+            std::rethrow_exception(current_scan->scan_except);
+        }
+
+	//	if(current_scan && current_scan->source_scan && current_scan->scan_thread.joinable()) {
+	if(current_scan && current_scan->scan_thread.joinable()) {
 		current_scan->scan_thread.join();
-		current_scan->thread_future.get();
 	}
 }
 
@@ -1218,6 +1230,10 @@ void USB3PixController::resumeRun(void) {
 
 int USB3PixController::runStatus(void) {                                //! Check the status of the run
 	if(U3PC_DEBUG) cout << "runStatus" << endl;
+
+        if (current_scan && current_scan->scan_except) {
+            std::rethrow_exception(current_scan->scan_except);
+        }
 
 	if(running && !finished) {
 		if(U3PC_DEBUG) cout << 1 << endl;
