@@ -54,8 +54,8 @@ ToolPanel::ToolPanel( STControlEngine &engine_in, QWidget* parent ):
   QObject::connect(sendCommandButton, SIGNAL(clicked()), this, SLOT(sendCommand()));
   QObject::connect(stopButton, SIGNAL(clicked()), this, SLOT(setBreak()));
 #ifdef WITHEUDAQ
-  QObject::connect(eudaq_cmdStartStopProducer, SIGNAL(clicked()), this, SLOT(eudaq_cmdStartStopProducer_clicked()));
-  QObject::connect(engine_in.m_STeudaq, SIGNAL(ProducerStateChanged(STEUDAQ::CON_STATE)), this, SLOT(eudaq_ProducerStatusChangedSlot(STEUDAQ::CON_STATE)));
+//  QObject::connect(eudaq_cmdStartStopProducer, SIGNAL(clicked()), this, SLOT(eudaq_cmdStartStopProducer_clicked()));
+//  QObject::connect(engine_in.m_STeudaq, SIGNAL(ProducerStateChanged(STEUDAQ::CON_STATE)), this, SLOT(eudaq_ProducerStatusChangedSlot(STEUDAQ::CON_STATE)));
 #endif
   m_break = false;
   statusLabel->setText("idle");
@@ -68,14 +68,14 @@ ToolPanel::ToolPanel( STControlEngine &engine_in, QWidget* parent ):
   resetOpt->insertItem(9999,"event counter reset", QVariant(PixModuleGroup::PMG_CMD_ECR));
   resetOpt->insertItem(9999,"bunch counter reset", QVariant(PixModuleGroup::PMG_CMD_BCR));
 
-#ifdef WITHEUDAQ
-  eudaq_rcAddress->setText(engine_in.m_STeudaq->rc_address.section(":", 0, 0));
-  if (engine_in.m_STeudaq->rc_address.section(":", 1, 1)=="") eudaq_rcPort->setText("44000");
-  else eudaq_rcPort->setText(engine_in.m_STeudaq->rc_address.section(":", 1, 1));
-#else
+//#ifdef WITHEUDAQ
+//  eudaq_rcAddress->setText(engine_in.m_STeudaq->rc_address.section(":", 0, 0));
+//  if (engine_in.m_STeudaq->rc_address.section(":", 1, 1)=="") eudaq_rcPort->setText("44000");
+//  else eudaq_rcPort->setText(engine_in.m_STeudaq->rc_address.section(":", 1, 1));
+//#else
   eudaq_rcAddress->setText("NOT SUPPORTED");
   eudaq_groupBox->hide();
-#endif
+//#endif
 }
 ToolPanel::~ToolPanel(){
 }
@@ -246,7 +246,7 @@ void ToolPanel::setBreak(){
   m_break = true;
 }
 
-#ifdef WITHEUDAQ
+#ifdef WITHEUDAQ /*
 void ToolPanel::eudaq_cmdStartStopProducer_clicked(){
 	if (m_engine.m_STeudaq->getConnectionState() == STEUDAQ::disconnected || m_engine.m_STeudaq->getConnectionState() == STEUDAQ::connectionerror) {
 	  m_engine.m_STeudaq->setProducerId(pidBox->isChecked()?PIDVal->value():0);
@@ -288,5 +288,5 @@ void ToolPanel::eudaq_ProducerStatusChangedSlot(STEUDAQ::CON_STATE state){
 		eudaq_cmdStartStopProducer->setEnabled(false);
 		eudaq_status->setText("Connection Error");
 	}
-}
+} */
 #endif

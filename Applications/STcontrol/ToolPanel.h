@@ -43,8 +43,8 @@ public slots: // Public slots
   void setBusy();
   void setIdle();
 #ifdef WITHEUDAQ
-  void eudaq_cmdStartStopProducer_clicked();
-  void eudaq_ProducerStatusChangedSlot(STEUDAQ::CON_STATE state);
+//  void eudaq_cmdStartStopProducer_clicked();
+//  void eudaq_ProducerStatusChangedSlot(STEUDAQ::CON_STATE state);
 #endif
 
 private:
