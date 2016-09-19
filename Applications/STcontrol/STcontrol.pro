@@ -98,13 +98,9 @@ test_eudaq()
 contains(DEFINES, WITHEUDAQ) {
   TARGET = STcontrol_eudaq
   
-  HEADERS += STeudaq.h
-  HEADERS += STeudaq_producer.h 
+  HEADERS += STControlProducer.h
   
-  SOURCES += STeudaq.cxx
-  SOURCES += STeudaq_producer.cxx
-  SOURCES += STeudaq_producer_I4.cxx
-  SOURCES += STeudaq_producer_I3.cxx
+  SOURCES += STControlProducer.cxx
   
   INCLUDEPATH += $(EUDAQ)/main/include
 

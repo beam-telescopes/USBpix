@@ -54,11 +54,6 @@
 #include <unistd.h>
 #endif
 
-#ifdef WITHEUDAQ
-#include "STeudaq.h" 
-#include <QThread>
-#endif
-
 
 using namespace PixLib;
 using namespace SctPixelRod;
@@ -66,10 +61,7 @@ using namespace SctPixelRod;
 STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QObject * parent) :
   QObject( parent ), m_app(app), m_log(log_in), m_singleCrateMode(true), m_PixConfDBFname("") {
 #ifdef WITHEUDAQ
-  m_STeudaq = new STEUDAQ(*this);
-  qRegisterMetaType<extScanOptions>("extScanOptions");
-  qRegisterMetaType<QVector<int> >("QVector<int>");
-  qRegisterMetaType<std::string>("std::string");
+  m_STControlProducer = nullptr;
 #endif
 
   m_PixConfDBFname = "";
@@ -182,7 +174,7 @@ STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QO
   }
 
 #ifdef WITHEUDAQ
-  // Checking command line for producer id
+  //Checking command line for producer id
   QString eudaq_producer_id;
   int rc_pos = m_app->arguments ().indexOf ("-pid");
   if (rc_pos>=0 && m_app->arguments ().size() > rc_pos+1)
@@ -191,9 +183,10 @@ STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QO
   if (eudaq_producer_id.trimmed().left(1)=="-") // another option
 	eudaq_producer_id="0";
 
+  //TB:TODO producer ID?
   bool isInt=false;
   int producer_id=eudaq_producer_id.trimmed().toInt(&isInt);
-  if (isInt) m_STeudaq -> setProducerId(producer_id);
+  //if (isInt) m_STeudaq -> setProducerId(producer_id);
 
   // Checking Command Line for Run Control address
   QString eudaq_rc_address;
@@ -205,12 +198,8 @@ STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QO
 	eudaq_rc_address="";
 
   if (rc_pos>=0 && eudaq_rc_address!="") {
-	  m_STeudaq -> rc_address = eudaq_rc_address;
-	  QTimer::singleShot(2000, m_STeudaq, SLOT(start()));
+	  m_STControlProducer = std::unique_ptr<STControlProducer>(new STControlProducer(*this, "name", eudaq_rc_address.toStdString()) );
   }
-
-  std::cout << "Main-Thread-ID: " << QThread::currentThreadId() << std::endl;
-
 #endif
 }
 STControlEngine::~STControlEngine(){
@@ -285,11 +274,6 @@ STRodCrate& STControlEngine::addCrate(const char *SBCaddress){
   connect(m_sTRodCrates[crID],SIGNAL(sendRTStatus(const char*)), this, SIGNAL(sendRTStatus(const char*)));
   connect(m_sTRodCrates[crID],SIGNAL(currentModule(int, int, int)), this, SIGNAL(currentModule(int, int, int)));
   connect(m_sTRodCrates[crID],SIGNAL(statusChanged()), this, SIGNAL(statusChanged()));
-  // data from SRAM testbeam mode arrived
-#ifdef WITHEUDAQ
-  connect(m_sTRodCrates[crID],SIGNAL(dataPending(std::vector<unsigned int *>*, int)), m_STeudaq, SLOT(dataPending(std::vector<unsigned int *>*, int)));
-  connect(m_sTRodCrates[crID],SIGNAL(eudaqScanStatus(int, bool, int, int)), m_STeudaq, SLOT(ScanStatusSignal(int, bool, int, int)));
-#endif
   // get it working and add to list view
   m_sTRodCrates[crID]->setupVme();
   emit crateListChanged();

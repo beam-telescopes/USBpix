@@ -53,8 +53,9 @@ class QApplication;
 class QString;
 class QTime;
 class ChipTest;
+
 #ifdef WITHEUDAQ
-class STEUDAQ;
+#include "STControlProducer.h"
 #endif
 
 /**This class encapsulates most of the actual work of Stcontrol. This includes in particular the interaction with PixLib.
@@ -62,11 +63,6 @@ class STEUDAQ;
   */
 
 class STControlEngine : public QObject {
-
-  // Class that controls data taking in the TESTBEAM-mode
-#ifdef WITHEUDAQ
-  friend class STEUDAQ;
-#endif
 
   Q_OBJECT
 
@@ -240,10 +236,6 @@ public:
 public: // Public attributes
   // get application
   QApplication& getApp(){return *m_app;};
-#ifdef WITHEUDAQ
-  //Object of STeudaq for Testbeam-Mode
-  STEUDAQ *m_STeudaq;
-#endif
 
 public slots:
   /** read ROD text buffers and write to log display */
@@ -343,6 +335,8 @@ private: // Private attributes
   // global chip test options
   std::map<std::string, ChipTest*> m_chipTests;
   PixLib::Config *m_ctCfg;
+
+  std::unique_ptr<STControlProducer> m_STControlProducer;
 
   float readCurrent(float cutval); // dummy routine
   void processExecute();
