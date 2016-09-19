@@ -7,6 +7,7 @@ namespace PixLib{
 #include <QString>
 #include <QStringList>
 #include <string>
+#include <QMetaType>
 
 struct extScanOptions {
   // Fixed Parameters for the producer
