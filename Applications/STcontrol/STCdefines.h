@@ -16,14 +16,14 @@ struct extScanOptions {
   
   // Options in EUDAQ config file
   QString config_file;
+  QString fpga_file;
   QStringList config_files;
   QStringList config_modules;
   QStringList boards;
-  QStringList trigger_replication_modes;
+  QStringList fpga_files;
   bool UseSingleBoardConfig;
   QString rawdata_path;
   QString histogram_filename;
-  QString fpga_firmware;
   QString uc_firmware;
   bool SkipConfiguration;
   int SRAM_READOUT_AT;
