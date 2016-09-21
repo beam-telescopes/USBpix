@@ -20,6 +20,7 @@ public:
 	STControlProducer() = delete;
 	~STControlProducer() = default;
 	// EUDAQ methods, must be re-implemented here
+	void OnInitialise(const eudaq::Configuration &param);
 	void OnConfigure (const eudaq::Configuration & config);
 	void OnStartRun (unsigned param);
 	void OnStopRun ();
@@ -29,7 +30,7 @@ public:
 	void OnStatus();
 
 private:
-	bool InitControllers(extScanOptions ScanOptions);
+	bool InitControllers(extScanOptions& ScanOptions);
 	QString CreateMultiBoardConfig(extScanOptions& ScanOptions);
 	std::vector<PixLib::PixController*> getPixControllers();
 	STControlEngine& m_STControlEngine;

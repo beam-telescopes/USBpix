@@ -36,33 +36,26 @@ std::vector<PixLib::PixController*> STControlProducer::getPixControllers(){
 	return result; //NRVO will kick in
 }
  
-void STControlProducer::OnConfigure(const eudaq::Configuration& config){
-
-	SetStatus(eudaq::Status::LVL_BUSY, "Configuring");
+void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 
 	//Get Configuration Data
-	QStringList config_files, config_modules, trigger_replication_modes;
-	QString config_file, config_module, trigger_replication_mode;
+	QStringList config_files, config_modules, fpga_files;
+	QString config_file, config_module, fpga_file;
 
 	scan_options.boards = QString::fromStdString(config.Get("boards", "no")).split(",", QString::SkipEmptyParts);
-
-	for(size_t i=0; i < (size_t)scan_options.boards.size() ; i++) {
-		//Module configuration
-		QStringList chipsOnBoard = QString::fromStdString( config.Get((QString("modules[") + scan_options.boards[i] + QString("]")).toStdString(), "no") ).split(",", QString::SkipEmptyParts);
-		int boardID = scan_options.boards[i].toInt();	
-	}
 
 	//Check if the skip configuration was set
 	scan_options.SkipConfiguration = (QString::fromStdString(config.Get("SkipConfiguration", "no")).toLower()=="yes");	
 	if(scan_options.SkipConfiguration) {
 		//No configuration requested
-		SetStatus(eudaq::Status::LVL_OK, "Configured (" + config.Name() + ")");
+		SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configuration skipped");
 		return;
 	}
 
-	scan_options.SRAM_READOUT_AT = config.Get("SRAM_READOUT_AT", 30);
+	scan_options.SRAM_READOUT_AT = config.Get("SRAM_READOUT_AT", 7);
 	scan_options.UseSingleBoardConfig = (QString::fromStdString(config.Get("UseSingleBoardConfigs", "no")).toLower()=="yes");
 	scan_options.config_file = QString::fromStdString( config.Get("config_file", ""));
+	scan_options.fpga_file = QString::fromStdString( config.Get("fpga_file", ""));
      
 	if (scan_options.UseSingleBoardConfig || scan_options.config_file=="") {
 		scan_options.UseSingleBoardConfig = true;
@@ -70,50 +63,48 @@ void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 		bool send_error=false;
 
 		for(size_t i=0; i<(size_t)scan_options.boards.size(); i++) {
+
 			//config file for current board
 			config_file = QString::fromStdString(config.Get((QString("config_file[") + scan_options.boards[i] + QString("]")).toStdString().c_str(), "")).trimmed();
 			if(config_file=="") {
 				config_file=QString::fromStdString(config.Get("config_file[*]", "")).trimmed();
 			}
 			if(config_file=="" || !QFile::exists(config_file)) {
-				// No valid config
-				EUDAQ_ERROR((QString("No valid config for board ") + scan_options.boards[i]).toStdString().c_str());
+				EUDAQ_ERROR((QString("No valid config file for board ") + scan_options.boards[i]).toStdString().c_str());
 				send_error=true;
 			}
 
+			//fpga file for current board
+			fpga_file = QString::fromStdString(config.Get((QString("fpga_file[") + scan_options.boards[i] + QString("]")).toStdString().c_str(), "")).trimmed();
+			if(fpga_file=="") {
+				fpga_file=QString::fromStdString(config.Get("fpga_file[*]", "")).trimmed();
+			}
+			if(fpga_file=="" || !QFile::exists(fpga_file)) {
+				EUDAQ_ERROR((QString("No valid fpga file for board ") + scan_options.boards[i]).toStdString().c_str());
+				send_error=true;
+			}
 			//Module from Config file to use
 			config_module=QString::fromStdString(config.Get((QString("config_module[") + scan_options.boards[i] + QString("]")).toStdString().c_str(), "")).trimmed();
 			if(config_module=="") {
 				config_module=QString::fromStdString(config.Get("config_module[*]", "")).trimmed();
 			}
 
-			//Trigger replication mode
-			trigger_replication_mode=QString::fromStdString(config.Get((QString("trigger_replication[") + scan_options.boards[i] + QString("]")).toStdString().c_str(), "")).toLower();
-			if (trigger_replication_mode=="") {
-				trigger_replication_mode=QString::fromStdString(config.Get("trigger_replication[*]", "off")).toLower();
-			}
-			if (trigger_replication_mode!="off" && trigger_replication_mode!="master" && trigger_replication_mode!="slave") {
-				EUDAQ_ERROR((QString("Invalig trigger replication mode set for board ") + scan_options.boards[i]).toStdString().c_str());
-				send_error=true;
-			}
-
 			config_files += config_file;
+			fpga_files += fpga_file;
 			config_modules += config_module;
-			trigger_replication_modes += trigger_replication_mode;
 			if(STEP_DEBUG) std::cout << "Configfile for Board " << scan_options.boards[i].toStdString() << ": " << config_file.toStdString() << std::endl;
 		}
 
 		scan_options.config_files = config_files;
+		scan_options.fpga_files = fpga_files;
 		scan_options.config_modules = config_modules;
-		scan_options.trigger_replication_modes = trigger_replication_modes;
-
+		
 		if(send_error) {
-			SetStatus(eudaq::Status::LVL_ERROR, "Error during initialisation");
+			SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Error during initialisation");
 			return;
 		}
 	}
 
-	scan_options.fpga_firmware = QString::fromStdString(config.Get("fpga_firmware", ""));
 	scan_options.uc_firmware = QString::fromStdString(config.Get("uc_firmware", ""));
 	scan_options.adapterCardFlavour = config.Get("adapterCardFlavour", 0);
 	scan_options.rawdata_path = QString::fromStdString(config.Get("rawdata_path", ""));
@@ -129,50 +120,17 @@ void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 
 	if(initSuccess){
 		// set the status that will be displayed in the Run Control.
-		SetStatus(eudaq::Status::LVL_OK, "Configured (" + config.Name() + ")");
+		SetConnectionState(eudaq::ConnectionState::STATE_UNCONF, "Initialized (" + config.Name() + ")");
 	} else {
-		SetStatus(eudaq::Status::LVL_ERROR, "Error while initializing PixControllers");
-	}     
+		SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Error while initializing PixControllers");
+	} 
+
+
 }
 
-bool STControlProducer::InitControllers(extScanOptions ScanOptions) {
+void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 
-	m_STControlEngine.setShowErrorPopups(false);
-
-	// Load Config
-	if(m_STControlEngine.getPixConfDBFname()!=0) {
-		m_STControlEngine.clear();
-		m_STControlEngine.setPixConfDBFname("");
-	}
-	
-	if(ScanOptions.UseSingleBoardConfig || ScanOptions.config_file=="") {
-		CreateMultiBoardConfig(ScanOptions);
-	} else {
-		m_STControlEngine.loadDB(ScanOptions.config_file.toLatin1().data());
-	}
-	
-	//QApplication::processEvents();
-
-	m_STControlEngine.initRods();
-	m_STControlEngine.initDcs();
-
-	auto nRods = m_STControlEngine.CtrlStatusSummary(); 
- 
-	if(nRods<=0) {
-		//Error
-	//	configured = 2;
-	//	m_producer->configured(false);
-		return false;
-    }
-
-	//m_STControlEngine.processExecute();
-
-	//power up fe
-	emit m_STControlEngine.powerOn();
-	//Wait a second for the voltage to stabilize
-	std::this_thread::sleep_for(std::chrono::milliseconds(750));    
-
-	// configure modules
+ 	// configure modules
 	m_STControlEngine.configModules();
 
 	if(STE_DEBUG) std::cout << "EUDAQ: Modules configured, retrieving board IDs" << std::endl;
@@ -192,21 +150,55 @@ bool STControlProducer::InitControllers(extScanOptions ScanOptions) {
 		else if	(smff[myBoards[i]]=="FE_I4B") feint = 3;
 		feFlavours.push_back(feint);
 	}
-	ScanOptions.FEflavour = (myBoards.size()>0)?feFlavours[0]:3;
+	scan_options.FEflavour = (myBoards.size()>0)?feFlavours[0]:3;
 
 	if(STE_DEBUG) std::cout << "EUDAQ: got FE flavours, setting scan options now!" << std::endl;
 
-	emit m_STControlEngine.setScanOptions(ScanOptions);
-//	QApplication::processEvents();
-
-//	configured = 1;
+	emit m_STControlEngine.setScanOptions(scan_options);
 
 	if(STE_DEBUG) std::cout << "EUDAQ: Scan options set" << std::endl;
 	
 	auto tot_mode = m_STControlEngine.GetHitDiscCnfg();
 
-//	m_producer->configured(true, myBoards, feFlavours, tot_mode);
-//	initializing=false;
+	auto pixControllers = getPixControllers();
+	for(auto& controller: pixControllers) {
+		std::cout << "Got controller: " << controller->getBoardID() << std::endl;
+	}
+
+	if(true){
+		// set the status that will be displayed in the Run Control.
+		SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (" + config.Name() + ")");
+	} else {
+		SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Error while configuring");
+	}    
+}
+
+bool STControlProducer::InitControllers(extScanOptions& ScanOptions) {
+
+	m_STControlEngine.setShowErrorPopups(false);
+
+	// Load Config
+	if(m_STControlEngine.getPixConfDBFname()!=0) {
+		m_STControlEngine.clear();
+		m_STControlEngine.setPixConfDBFname("");
+	}
+	
+	if(ScanOptions.UseSingleBoardConfig || ScanOptions.config_file=="") {
+		CreateMultiBoardConfig(ScanOptions);
+	} else {
+		m_STControlEngine.loadDB(ScanOptions.config_file.toLatin1().data());
+	}
+
+	m_STControlEngine.initRods();
+	m_STControlEngine.initDcs();
+
+	auto nRods = m_STControlEngine.CtrlStatusSummary(); 
+ 
+	if(nRods<=0) {
+		return false;
+    }
+
+	emit m_STControlEngine.powerOn();
 	return true;
 }
 
@@ -230,8 +222,16 @@ QString STControlProducer::CreateMultiBoardConfig(extScanOptions& ScanOptions) {
 	return my_fname;
 }
 
-void STControlProducer::OnStartRun (unsigned param){}
-void STControlProducer::OnStopRun (){}
+void STControlProducer::OnStartRun (unsigned param){
+	SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running?!");
+	emit m_STControlEngine.startCurrentScan(QString("RunXX"), QString(""));
+}
+
+
+void STControlProducer::OnStopRun (){
+	m_STControlEngine.stopPixScan();
+}
+
 void STControlProducer::OnTerminate (){}
 void STControlProducer::OnUnrecognised(const std::string & cmd, const std::string & param){}
 void STControlProducer::OnPrepareRun(unsigned runnumber){}
