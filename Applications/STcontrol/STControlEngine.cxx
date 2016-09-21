@@ -15,6 +15,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+#include<memory>
 
 #include <PixConfDBInterface/RootDB.h>
 #include <PixConfDBInterface/TurboDaqDB.h>
@@ -4588,7 +4589,7 @@ void STControlEngine::createMultiBoardConfig(QString filename, extScanOptions Sc
       myGrpData.myBOC.mode = -1;
       myGrpData.myBOC.haveBoc = false;
       myGrpData.cfgType = 1;
-      myGrpData.myROD.IPfile = ScanParameters.fpga_firmware.toLatin1().data();
+      myGrpData.myROD.IPfile = ScanParameters.fpga_files[i].toLatin1().data();
       myGrpData.myROD.IDfile = ScanParameters.uc_firmware.toLatin1().data();
       modData myModD;
       myModD.fname = ScanParameters.config_files[i].toLatin1().data();
@@ -4671,15 +4672,10 @@ void STControlEngine::createMultiBoardConfig(QString filename, extScanOptions Sc
 		  confDBInterface->DBProcess(field, COMMIT, dbval);
 		}
 		
+		// TODO TB: This feature has been removed, trigger replication mode is always "Disabled"
 		// Set trigger replication mode
 		field = (*pmIter)->findField("general_TriggerReplication");
-		std::string rep_mode;
-		if (ScanParameters.trigger_replication_modes[board_index]=="master")
-		  rep_mode="Master";
-		else if (ScanParameters.trigger_replication_modes[board_index]=="slave")
-		  rep_mode="Slave";
-		else
-		  rep_mode="Disabled";
+		std::string rep_mode = "Disabled";
 		
 		if (field==(*pmIter)->fieldEnd()) {
 		  PixLib::DBField *new_field = confDBInterface->makeField("general_TriggerReplication");
