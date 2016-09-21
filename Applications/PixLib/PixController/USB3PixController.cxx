@@ -42,6 +42,7 @@ USB3PixController::USB3PixController(PixModuleGroup &modGrp, int cardFlavour) : 
 	configInit();
 	m_cardFlavour = cardFlavour;
 	if(m_cardFlavour>9) m_outputMode = CmdSeq::MANCHESTER_THOMAS; // works for MCC3, but apparently not (yet?) for MIO3
+	m_circularBuffer.emplace_back(std::make_shared<UintCircBuff1MByte>());	
 }
 
 USB3PixController::~USB3PixController(void) {
@@ -807,7 +808,7 @@ void USB3PixController::sourceScan(int max_event, int trigger_type, int count_ty
   try{
 	Readout r([&](void) {
 		current_scan->dec.decode(board->getData(),
-		[this](uint32_t a){ m_circularBuffer->push(a); }
+		[this](uint32_t a){ m_circularBuffer.front()->push(a); }
 	); }, m_readoutInterval);
 
 	CommandBuffer c;

@@ -383,7 +383,7 @@ namespace PixLib {
     // for internal use: FE geometry - should be updated when cfg, is written
     unsigned int m_nColFe;
     unsigned int m_nRowFe;
-
+	bool m_ringbuffersInit;
   private:
     std::unique_ptr<gpac::logical> m_gpac;
   public:

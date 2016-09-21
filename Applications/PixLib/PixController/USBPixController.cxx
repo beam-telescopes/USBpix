@@ -73,7 +73,7 @@ const int RCA_AUTOSAVE = -1;
 
 // ***************** Constructors *********************
 USBPixController::USBPixController(PixModuleGroup &modGrp, DBInquire *dbInquire) :
-PixController(modGrp, dbInquire), m_readoutChannelReadsChip(4) { 
+PixController(modGrp, dbInquire), m_readoutChannelReadsChip(4), m_ringbuffersInit(false) { 
 	initChipIds();
 	configInit();
 	m_conf->read(dbInquire);
@@ -2586,6 +2586,7 @@ void USBPixController::sourceScan() { // Start a source scan
   }catch(...){
     m_scanExcept = std::current_exception();
   }
+	if(UPC_DEBUG_GEN) cout<<"DEBUG: SRAMReadoutReady: ending scan loop!" << std::endl;
 }
 
 void USBPixController::stopScan() {
@@ -3424,7 +3425,7 @@ bool USBPixController::getSourceScanData(std::vector<unsigned int *>* data, bool
 
 	if(m_sourceScanBusy && !m_upcScanInit) 
 	{
-    		bool caseA = (m_measurementRunning && m_sramFull) || (!m_measurementRunning && forceReadSram)/* && m_sramReadoutReady*/;  // TODO
+    	bool caseA = (m_measurementRunning && m_sramFull) || (!m_measurementRunning && forceReadSram)/* && m_sramReadoutReady*/;  // TODO
 		bool caseB = !m_measurementRunning/* && m_sramReadoutReady*/ && !caseA; // TODO
 
 		if(caseA || caseB)
@@ -3449,13 +3450,23 @@ bool USBPixController::getSourceScanData(std::vector<unsigned int *>* data, bool
 
 				if(m_testBeamFlag)
 				{
+					if(!m_ringbuffersInit) {
+						if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Creating ringbuffer for FE: " << it - m_chipIds.begin() << std::endl;
+						m_circularBuffer.emplace_back(std::make_shared<UintCircBuff1MByte>());
+					}
 					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Copying data"<<std::endl;
 					unsigned int* di = new unsigned int[data_size];
 					m_USBpix->GetSRAMWordsRB(di, data_size, it - m_chipIds.begin());
+        	  		for(size_t index = 0; index < data_size; ++index){
+						std::cout << di[index] << ", ";
+						if(di[index] == 0) break;
+						m_circularBuffer[it - m_chipIds.begin()]->push(di[index]);
+					}
+					std::cout << std::endl;	
+					delete[] di;
+       			}
 
-        	  			data->push_back(di);
-       				}
-        			if(m_fillSrcHistos)
+        		if(m_fillSrcHistos)
 				{
         	  			m_USBpix->FillHistosFromRawData(*it);
 				}
@@ -3466,7 +3477,8 @@ bool USBPixController::getSourceScanData(std::vector<unsigned int *>* data, bool
 				{
 					ClusterRawData(*it);
 				}
-      			}
+      		}
+			m_ringbuffersInit=true;
 
 			//clear SRAM loop
 			for(std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++)
