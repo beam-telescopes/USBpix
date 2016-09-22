@@ -165,10 +165,6 @@ class STPixModuleGroup : public QObject, public PixLib::PixModuleGroup {
 
   PixLib::Config& getOptions(){return m_options;};
 
-  //static functions used for global testbeam readout
-  static bool getGlobalReadout() {return STPixModuleGroup::global_readout; }
-  static void disableGlobalReadout(){STPixModuleGroup::global_readout=false;}
-  static QMutex* readoutFlagMutex;
   // needed for handling of ThreadErrorEvents and ThreadLogEvents
   void customEvent( QEvent * e );
 
@@ -281,10 +277,6 @@ class STPixModuleGroup : public QObject, public PixLib::PixModuleGroup {
   bool m_pixScanLoop[3];  
   bool m_abortScan, m_forceRead;
   PixLib::Config &m_options;
-
-//global readout flag and local pause flag
-  bool m_testbeam_pause;
-  static bool global_readout;
 
   QApplication* m_app;
 
@@ -492,27 +484,4 @@ class getDcsEvent : public QEvent
   STPixModuleGroup * m_group;
 };
 
-class dataPendingEvent : public QEvent
-{
- public:
-  dataPendingEvent(std::vector<unsigned int *>* data, int boardid /*STPixModuleGroup * mg, pixScanRunOptions opts*/)
-    : QEvent((QEvent::Type)2010), m_data(data), m_boardid(boardid) {};
-  
- public:
-  std::vector<unsigned int *>* m_data;
-  int m_boardid;
-};
-
-class eudaqScanStatusEvent : public QEvent
-{
- public:
-  eudaqScanStatusEvent(int boardid, bool SRAMFullSignal, int SRAMFillingLevel, int TriggerRate)
-    : QEvent((QEvent::Type)2015), m_boardid(boardid), m_SRAMFullSignal(SRAMFullSignal), m_SRAMFillingLevel(SRAMFillingLevel), m_TriggerRate(TriggerRate) {};
-  
- public:
-  int m_boardid;
-  bool m_SRAMFullSignal;
-  int m_SRAMFillingLevel;
-  int m_TriggerRate;
-};
 #endif // STPIXMODULEGROUP_H

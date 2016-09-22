@@ -119,15 +119,11 @@ int solveCubic(double par[], double *res){
   
 }
 
-bool STPixModuleGroup::global_readout = false;
-
-QMutex* STPixModuleGroup::writeToFileMutex = new QMutex();
-QMutex* STPixModuleGroup::readoutFlagMutex =  new QMutex();
+QMutex* STPixModuleGroup::writeToFileMutex =  new QMutex();
 
 STPixModuleGroup::STPixModuleGroup(int ID, PixConfDBInterface *db, DBInquire *dbInquire, QApplication* application, bool &filebusy, 
 				   PixLib::Config &options, QObject *parent)
   : QObject(parent), PixModuleGroup(db, dbInquire), m_ID(ID), m_filebusy(filebusy), m_options(options), m_decName(""){
-  m_testbeam_pause = false;
   m_CtrlStatus=tblocked;
   m_BocStatus=tblocked;
   m_PixScan = new PixScan();
@@ -195,7 +191,6 @@ STPixModuleGroup::STPixModuleGroup(int ID, PixConfDBInterface *db, DBInquire *db
 
 STPixModuleGroup::STPixModuleGroup(int ID, QApplication* application, bool &filebusy, PixLib::Config &options, QObject *parent)
   : QObject(parent), PixModuleGroup(), m_ID(ID), m_filebusy(filebusy), m_options(options), m_decName(""){
-  m_testbeam_pause = false;
   m_CtrlStatus=tblocked;
   m_BocStatus=tblocked;
   m_PixScan = new PixScan();  
@@ -2724,14 +2719,6 @@ void STPixModuleGroup::customEvent( QEvent * event )
   if (event->type() == 2007){ // set DCS value
     emit setDcs(dynamic_cast<setDcsEvent*>(event)->getChanName(), dynamic_cast<setDcsEvent*>(event)->getParName(), dynamic_cast<setDcsEvent*>(event)->getValue(),
 		dynamic_cast<setDcsEvent*>(event)->getCmdId(), dynamic_cast<setDcsEvent*>(event)->getGroup());
-  }
-
-  if(event->type()==2010){ // process scan writing
-    emit dataPending (dynamic_cast<dataPendingEvent*>(event)->m_data, dynamic_cast<dataPendingEvent*>(event)->m_boardid);
-  }
-
-  if(event->type()==2015){ // process scan writing
-    emit eudaqScanStatus (dynamic_cast<eudaqScanStatusEvent*>(event) -> m_boardid, dynamic_cast<eudaqScanStatusEvent*>(event) -> m_SRAMFullSignal, dynamic_cast<eudaqScanStatusEvent*>(event) -> m_SRAMFillingLevel, dynamic_cast<eudaqScanStatusEvent*>(event) -> m_TriggerRate);
   }
 }
 int STPixModuleGroup::setTFDACs(const char *fname, bool isTDAC)
