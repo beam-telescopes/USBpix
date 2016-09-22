@@ -2574,21 +2574,21 @@ void USBPixController::sourceScan() { // Start a source scan
 			m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
 	  		m_USBpix->PauseMeasurement();
 			const int data_size = SRAM_WORDSIZE/MAX_CHIP_COUNT;
-			std::vector<int> ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
+			auto ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
 
 			//for(auto it = m_chipIds.begin(); it != m_chipIds.end(); it++) {
 				// stop loop if no more meaningful chip IDs
 				if(*it==999){	
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
+					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::sourceScan: no meaningfull ID" << std::endl;
 					break;
 				}
 				m_USBpix->ReadSRAM(*it);
 
 				if(!m_ringbuffersInit) {
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Creating ringbuffer for FE: " << it - m_chipIds.begin() << std::endl;
+					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::sourceScan: Creating ringbuffer for FE: " << it - m_chipIds.begin() << std::endl;
 					m_circularBuffer.emplace_back(std::make_shared<UintCircBuff1MByte>());
 				}
-				if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Copying data"<<std::endl;
+				if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::sourceScan: Copying data"<<std::endl;
 				unsigned int* di = new unsigned int[data_size];
 				m_USBpix->GetSRAMWordsRB(di, data_size, it - m_chipIds.begin());
         		for(size_t index = 0; index < data_size; ++index){
@@ -2599,15 +2599,13 @@ void USBPixController::sourceScan() { // Start a source scan
 				std::cout << std::endl;	
 				delete[] di;
 
-        		if(m_fillSrcHistos)
-				{
+        		if(m_fillSrcHistos){
         	  			m_USBpix->FillHistosFromRawData(*it);
 				}
 
 				writeRawDataFile(false, *it);
 
-				if(m_fillClusterHistos)
-				{
+				if(m_fillClusterHistos){
 					ClusterRawData(*it);
 				}
       		//}
