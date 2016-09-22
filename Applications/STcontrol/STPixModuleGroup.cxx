@@ -51,7 +51,7 @@
 
 #include <TMath.h>
 
-#define STEP_DEBUG false
+#define STEP_DEBUG 1 
 
 using namespace PixLib;
 using namespace SctPixelRod;
@@ -984,82 +984,15 @@ void STPixModuleGroup::CtrlThread::scan()
 		    getSTPixModuleGroup()->m_currTriggerRate = pc->getTriggerRate();
 		    getSTPixModuleGroup()->m_currEvtRate = pc->getEventRate();
 		   
-			//TB: Testbeam read-out uses the static variable STPixModuleGroup::global_readout as a global read-out flag. This will cause the threads of all
-			//boards to send a data event to the EUDAQProducer and halt the run. It is the producers task to check if it received data from all boards and
-			//then unlock the threads by setting STPixModuleGroup::global_readout to flase again.
-
-		    if(cfg.getTestBeamFlag()) //USBpix Source Scan in test beam mode
-		      {	
-			if(STEP_DEBUG)
-			  {
-			    if(debug_counter1%5==0)
-			      {
-				qDebug() << "Board("<< pc->getBoardID() << ") SRAM_READOUT_AT: " <<cfg.getSramReadoutAt()<< "%, Currently at: " <<getSTPixModuleGroup()->m_currSRAMFillLevel<<"%";
-			      }
-			    debug_counter1++;	
-			  }
-			
-			//Check if SRAMfull-flag is set 
-			if(getSTPixModuleGroup()->m_currSRAMFull)
-			  {
-			    QMutexLocker locker(readoutFlagMutex);
-			    //Send an event to the EUDAQProducer to display a warning message
-			    eudaqScanStatusEvent* sse =  new eudaqScanStatusEvent( pc->getBoardID(), getSTPixModuleGroup()->m_currSRAMFull, 
-										   getSTPixModuleGroup()->m_currSRAMFillLevel, getSTPixModuleGroup()->m_currTriggerRate);
-			    m_app->postEvent(getSTPixModuleGroup(), sse);
-			    STPixModuleGroup::global_readout =true;
-			  }
-			
-			// Check if TLU veto is set due to SRAM filled to desired threshold
-			if(getSTPixModuleGroup()->m_currTluVeto == true && !STPixModuleGroup::global_readout)
-			  {
-			    QMutexLocker locker(readoutFlagMutex);
-			    if(STEP_DEBUG) qDebug() << "SRAM reached read-out level, read it out!";
-			    STPixModuleGroup::global_readout =true;
-			  }
-			
-			//If this or some other thread (or a different board) triggered a read out, and our controller is not paused yet, pause and set read-out flag
-			if(STPixModuleGroup::global_readout && !getSTPixModuleGroup()->m_testbeam_pause)
-			  {
-			    qDebug() << "Pausing Run!";
-			    pc->pauseRun();
-			    getSTPixModuleGroup()->m_testbeam_pause=true;
-			    getSTPixModuleGroup()->m_readSram = true;
-			  }				
-			
-			//Check if we got data, if yes, send it to the EUDAQProducer
-			std::vector<unsigned int*>* data = new std::vector<unsigned int*>;
-			
-			if(pc->getSourceScanData(data, getSTPixModuleGroup()->m_readSram))
-			  {
-			    dataPendingEvent* dpe =  new dataPendingEvent(data, pc->getBoardID());
-			    m_app->postEvent(getSTPixModuleGroup(), dpe);
-			    getSTPixModuleGroup()->m_readSram = false;
-			  }
-			
-			//While the controller is paused and we don"t need to read out anymore, pause the ctrl thread
-			if(getSTPixModuleGroup()->m_testbeam_pause && !getSTPixModuleGroup()->m_readSram)
-			  {
-			    //Wait until the EUDAQProducer unlocks the controllers by setting STPixModuleGroup::global_readout to false
-			    while(STPixModuleGroup::global_readout)
-			      {
-				if(STEP_DEBUG)
-				  {
-				    if(debug_counter2%10==0)
-				      {
-					qDebug() << "Waiting for run to resume!";
-				      }
-				    debug_counter2++;	
-				  }
-				
-				PixLib::sleep(200);
-			      }
-			    pc->resumeRun();
-			    qDebug() << "Resuming run!";			
-			    getSTPixModuleGroup()->m_testbeam_pause=false;
-			  }
-		      }
-		    
+		    if(cfg.getTestBeamFlag()) {	
+				if(STEP_DEBUG) {
+			    	if(debug_counter1%5==0) {
+						qDebug() << "Board("<< pc->getBoardID() << ") SRAM_READOUT_AT: " <<cfg.getSramReadoutAt()
+						<< "%, Currently at: " <<getSTPixModuleGroup()->m_currSRAMFillLevel<<"%";
+					}
+			    	debug_counter1++;	
+				}
+			}
 		}
 
 		else if(cfg.getDspMaskStaging()) {
