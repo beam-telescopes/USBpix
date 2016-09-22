@@ -2569,6 +2569,61 @@ void USBPixController::sourceScan() { // Start a source scan
 	  m_USBpix->ResumeMeasurement();
 	  m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
 	  //m_USBpix->StartReadout();
+	} else if(measurementRunning  && m_testBeamFlag && (m_sramFull || m_tluVeto)) {
+		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: Testbeam(" << (*it) << ") => reading SRAM..."<<endl;
+			m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
+	  		m_USBpix->PauseMeasurement();
+			const int data_size = SRAM_WORDSIZE/MAX_CHIP_COUNT;
+			std::vector<int> ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
+
+			//for(auto it = m_chipIds.begin(); it != m_chipIds.end(); it++) {
+				// stop loop if no more meaningful chip IDs
+				if(*it==999){	
+					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
+					break;
+				}
+				m_USBpix->ReadSRAM(*it);
+
+				if(!m_ringbuffersInit) {
+					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Creating ringbuffer for FE: " << it - m_chipIds.begin() << std::endl;
+					m_circularBuffer.emplace_back(std::make_shared<UintCircBuff1MByte>());
+				}
+				if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Copying data"<<std::endl;
+				unsigned int* di = new unsigned int[data_size];
+				m_USBpix->GetSRAMWordsRB(di, data_size, it - m_chipIds.begin());
+        		for(size_t index = 0; index < data_size; ++index){
+					std::cout << di[index] << ", ";
+					if(di[index] == 0) break;
+					m_circularBuffer[it - m_chipIds.begin()]->push(di[index]);
+				}
+				std::cout << std::endl;	
+				delete[] di;
+
+        		if(m_fillSrcHistos)
+				{
+        	  			m_USBpix->FillHistosFromRawData(*it);
+				}
+
+				writeRawDataFile(false, *it);
+
+				if(m_fillClusterHistos)
+				{
+					ClusterRawData(*it);
+				}
+      		//}
+			m_ringbuffersInit=true;
+
+			//clear SRAM loop
+			//for(std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++){
+        			// stop loop if no more meaningful chip IDs
+				if(*it==999){	
+					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
+					break;
+				}
+				m_USBpix->ClearSRAM(*it);
+	  			m_USBpix->ResumeMeasurement();
+	  			m_USBpix->WriteRegister(CS_ENABLE_RJ45, true);
+			//}
 	}
 	sleep(500);
       }
