@@ -90,6 +90,7 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   connect( rodBox, SIGNAL(activated(int)), this , SLOT(observedRodChanged(int)));
   connect( crateBox, SIGNAL(activated(int)), this , SLOT(observedCrateChanged(int)));
   connect( &m_engine, SIGNAL(startCurrentScan(QString, QString)), this , SLOT(extStartScan(QString, QString)));
+  qRegisterMetaType<extScanOptions>("extScanOptions");
   connect( &m_engine, SIGNAL(setScanOptions(extScanOptions)), this , SLOT(extScanConfig(extScanOptions)));
 
   // set default data path/name
