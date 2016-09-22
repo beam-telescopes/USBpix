@@ -204,7 +204,7 @@ public:
   Config &config() { return *m_conf; };                       //! Configuration object accessor
   static void listTypes(std::vector<PixControllerInfo> &list);             //! available controller types
 
-  auto getCircularBufferPtr() const -> std::vector<std::shared_ptr<UintCircBuff1MByte>> const & {
+  auto getCircularBufferVec() const -> std::vector<std::shared_ptr<UintCircBuff1MByte>> const & {
 	return m_circularBuffer;
   }
 
