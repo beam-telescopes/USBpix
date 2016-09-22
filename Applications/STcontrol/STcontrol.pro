@@ -99,8 +99,10 @@ contains(DEFINES, WITHEUDAQ) {
   TARGET = STcontrol_eudaq
   
   HEADERS += STControlProducer.h
+  HEADERS += STEUDAQDataSender.h
   
   SOURCES += STControlProducer.cxx
+  SOURCES += STEUDAQDataSender.cxx
   
   INCLUDEPATH += $(EUDAQ)/main/include
 

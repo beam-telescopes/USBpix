@@ -2,10 +2,15 @@
 #define STCONTROLPRODUCER_H
 
 
-#include <eudaq/Producer.hh>
-#include <eudaq/Configuration.hh>
+#include "eudaq/Producer.hh"
+#include "eudaq/Configuration.hh"
+
 #include "STCdefines.h"
+#include "STEUDAQDataSender.h"
+
 #include <QString>
+
+#include <memory>
 
 namespace PixLib {
 class PixController; 
@@ -36,5 +41,8 @@ private:
 	STControlEngine& m_STControlEngine;
 	std::string m_rcAddress;
 	extScanOptions scan_options;
+	
+	std::vector<std::unique_ptr<STEUDAQDataSender>> m_dataSenders;
+
 };
 #endif

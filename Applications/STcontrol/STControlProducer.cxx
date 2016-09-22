@@ -124,12 +124,24 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 	} else {
 		SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Error while initializing PixControllers");
 	} 
-
+	
+	std::cout << "Initialised" << std::endl;
+	auto pixControllers = getPixControllers();
+	for(auto& controller: pixControllers) {
+		std::cout << "Got controller: " << controller->getBoardID() << std::endl;
+	}
 
 }
 
 void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 
+	std::cout << "Configuring" << std::endl;
+	auto pixControllers = getPixControllers();
+	for(auto& controller: pixControllers) {
+		m_dataSenders.emplace_back(std::unique_ptr<STEUDAQDataSender>(new STEUDAQDataSender(controller->getCircularBufferVec(), m_rcAddress)));
+		std::cout << "Added data sender for board: " << controller->getBoardID() << std::endl;
+		std::cout << "Added data sender for board: " << &controller->getCircularBufferVec() << std::endl;
+	}	
  	// configure modules
 	m_STControlEngine.configModules();
 
@@ -159,11 +171,6 @@ void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 	if(STE_DEBUG) std::cout << "EUDAQ: Scan options set" << std::endl;
 	
 	auto tot_mode = m_STControlEngine.GetHitDiscCnfg();
-
-	auto pixControllers = getPixControllers();
-	for(auto& controller: pixControllers) {
-		std::cout << "Got controller: " << controller->getBoardID() << std::endl;
-	}
 
 	if(true){
 		// set the status that will be displayed in the Run Control.
@@ -223,6 +230,11 @@ QString STControlProducer::CreateMultiBoardConfig(extScanOptions& ScanOptions) {
 }
 
 void STControlProducer::OnStartRun (unsigned param){
+	for(auto& dataSender: m_dataSenders){
+		std::cout << "Strating data sender!" << std::endl;
+		auto workThread = dataSender->startThread();
+		workThread.detach();
+	}
 	SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running?!");
 	emit m_STControlEngine.startCurrentScan(QString("RunXX"), QString(""));
 }
