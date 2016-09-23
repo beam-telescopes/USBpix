@@ -4,6 +4,7 @@
 
 #include "eudaq/Producer.hh"
 #include "eudaq/Configuration.hh"
+#include "eudaq/CommandReceiver.hh"
 
 #include "STCdefines.h"
 #include "STEUDAQDataSender.h"
@@ -17,7 +18,7 @@ class PixController;
 }
 class STControlEngine;
 
-class STControlProducer : public eudaq::Producer {
+class STControlProducer : public eudaq::CommandReceiver {
 
 
 public:

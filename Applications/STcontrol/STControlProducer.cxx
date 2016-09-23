@@ -18,7 +18,7 @@
 #define STEP_DEBUG 1
 
 STControlProducer::STControlProducer(STControlEngine& engine, std::string const& prdname, std::string const& runctrl): 
-eudaq::Producer(prdname, runctrl),
+eudaq::CommandReceiver("CommandReceiver", prdname, runctrl),
 m_STControlEngine(engine),
 m_rcAddress(runctrl) {
 	std::cout << "Started STControlProducer" << std::endl;
@@ -52,7 +52,7 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 		return;
 	}
 
-	scan_options.SRAM_READOUT_AT = config.Get("SRAM_READOUT_AT", 7);
+	scan_options.SRAM_READOUT_AT = config.Get("SRAM_READOUT_AT", 2);
 	scan_options.UseSingleBoardConfig = (QString::fromStdString(config.Get("UseSingleBoardConfigs", "no")).toLower()=="yes");
 	scan_options.config_file = QString::fromStdString( config.Get("config_file", ""));
 	scan_options.fpga_file = QString::fromStdString( config.Get("fpga_file", ""));
@@ -230,18 +230,23 @@ QString STControlProducer::CreateMultiBoardConfig(extScanOptions& ScanOptions) {
 }
 
 void STControlProducer::OnStartRun (unsigned param){
-	for(auto& dataSender: m_dataSenders){
-		std::cout << "Strating data sender!" << std::endl;
-		auto workThread = dataSender->startThread();
-		workThread.detach();
-	}
+//	for(auto& dataSender: m_dataSenders){
+//		std::cout << "Strating data sender!" << std::endl;
+//		auto workThread = dataSender->startThread();
+//		workThread.detach();
+//	}
 	SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running?!");
 	emit m_STControlEngine.startCurrentScan(QString("RunXX"), QString(""));
 }
 
 
 void STControlProducer::OnStopRun (){
-	m_STControlEngine.stopPixScan();
+	SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Confg?!");
+	auto pixControllers = getPixControllers();
+	for(auto& controller: pixControllers) {
+		controller->stopScan();
+	}	
+//	m_STControlEngine.stopPixScan();
 }
 
 void STControlProducer::OnTerminate (){}
