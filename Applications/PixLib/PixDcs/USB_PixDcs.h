@@ -67,6 +67,7 @@ namespace PixLib {
     USBPixDCS *m_USBADC;
     PixController *m_USBPC;
     bool m_problemInit;
+    std::string m_ctrlName;
 
   private:
     virtual void configInit();   //! Init configuration structure
