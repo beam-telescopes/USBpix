@@ -48,7 +48,7 @@ namespace PixLib {
   public:
     
     // Constructor
-    USBPixDcs(DBInquire *dbInquire, void *interface);
+    USBPixDcs(DBInquire *dbInquire, void *interface, bool dep=false);
     
     // Destructor
     virtual ~USBPixDcs();
