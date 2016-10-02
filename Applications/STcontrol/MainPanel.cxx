@@ -847,15 +847,17 @@ void MainPanel::newConfigGeneric(){
       }
       // add regulators if requested
       std::vector<PixDcs*> dcs = cc.getDcs();
-      for(std::vector<PixDcs*>::iterator it = dcs.begin(); it!=dcs.end(); it++){
+      for(unsigned int dcsId=0; dcsId<dcs.size(); dcsId++){
 	std::string name, decName;
+	std::stringstream a;
+	a<<dcsId;
 	name="PixDcs";
-	decName = appInq->getDecName() + (*it)->name();
+	decName = appInq->getDecName() + dcs[dcsId]->config().name() + "_"+a.str();
 	DBInquire *dcsInq = myDB->makeInquire(name, decName);
 	appInq->pushRecord(dcsInq);
 	myDB->DBProcess(appInq,COMMITREPLACE);
 	myDB->DBProcess(dcsInq,COMMIT);
-	(*it)->config().write(dcsInq);
+	dcs[dcsId]->config().write(dcsInq);
       }
       delete myDB;
       m_engine.loadDB(my_fname.toLatin1().data());

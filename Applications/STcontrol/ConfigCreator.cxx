@@ -184,7 +184,7 @@ void ConfigCreator::createCfg(bool finished){
       Config &conf = dcs->config();
       std::stringstream a;
       a << m_dcs.size();
-      ((ConfString&)conf["general"]["DeviceName"]).m_value = (dcsType+"_"+a.str());
+      ((ConfString&)conf["general"]["DeviceName"]).m_value = ("USB regulators "+a.str());
       ((ConfInt&)conf["general"]["Index"]).setValue(m_dcs.size());
       m_dcs.push_back(dcs);
     }
