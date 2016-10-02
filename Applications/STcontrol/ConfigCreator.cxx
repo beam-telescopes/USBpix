@@ -4,6 +4,7 @@
 #include <PixController/PixController.h>
 #include <PixModule/PixModule.h>
 #include <PixFe/PixFe.h>
+#include <PixDcs/PixDcs.h>
 #include <Config/Config.h>
 #include <Config/ConfGroup.h>
 #include <Config/ConfObj.h>
@@ -80,6 +81,10 @@ ConfigCreator::~ConfigCreator(){
     delete m_pmg[i]; m_pmg[i]=0;
   }
   m_pmg.clear();
+  for(unsigned int i=0;i<m_dcs.size(); i++){
+    delete m_dcs[i]; m_dcs[i]=0;
+  }
+  m_dcs.clear();
 }
 
 void ConfigCreator::createCfg(bool finished){
@@ -88,12 +93,15 @@ void ConfigCreator::createCfg(bool finished){
     mnames.push_back(mnameList->item(i)->text().toLatin1().data());
 
   QList<QVariant> vlist = controllerTypeBox->currentData().toList();
+
+  // create module group from default constructor
   PixLib::PixModuleGroup *pmg = new PixLib::PixModuleGroup(std::string(groupNameEdit->text().toLatin1().data()),
 							   std::string(vlist.at(0).toString().toLatin1().data()), mnames, 
 							   std::string(feTypeBox->currentText().toLatin1().data()), nfeSpinBox->value(), 
 							   nfeRowSpinBox->value(), std::string (mccTypeBox->currentText().toLatin1().data()),
 							   vlist.at(1).toInt());
 
+  // add individual modules to group as per chip layout requested
   if(FEcfgTypeBox->currentIndex()>0){
     for(int i=0;i<nmodSpinBox->value(); i++) {
 		PixLib::PixModule *mod = pmg->module(i);
@@ -146,11 +154,41 @@ void ConfigCreator::createCfg(bool finished){
 		}
 	}
   }
+
+  // polish and store configuration
   m_pmg.push_back(pmg);
   pmg->config().addConfig(&(pmg->getPixController()->config()));
   for(PixLib::PixModuleGroup::moduleIterator it = pmg->modBegin(); it!=pmg->modEnd(); it++)
     pmg->config().addConfig(&((*it)->config()));
-  m_makeRegs.push_back(addUsbDcs->isChecked()?vlist.at(1).toInt():-1);
+
+  // create regulators as PixDcs device if requested
+  if(addUsbDcs->isChecked()){
+    std::string dcsType = "";
+    switch(vlist.at(1).toInt()){
+    case 0:
+      dcsType = "USBPixDcs";
+      break;
+    case 1:
+    case 3:
+      dcsType = "USBBIPixDcs";
+      break;
+    case 2:
+      dcsType = "USBGpacPixDcs";
+      break;
+    default:
+      dcsType = "";
+    }	    
+    if(dcsType != ""){
+      // new DCS object for regulators
+      PixDcs *dcs = PixDcs::make((DBInquire*) 0, (void*) pmg->getPixController(), dcsType);
+      Config &conf = dcs->config();
+      std::stringstream a;
+      a << m_dcs.size();
+      ((ConfString&)conf["general"]["DeviceName"]).m_value = (dcsType+"_"+a.str());
+      ((ConfInt&)conf["general"]["Index"]).setValue(m_dcs.size());
+      m_dcs.push_back(dcs);
+    }
+  }
  
   if(finished) accept();
   else{
@@ -287,7 +325,7 @@ void ConfigCreator::browseConfigFile(){
 		emptyNames.resize(nfeSpinBox->value());
 		m_dbFnames[mnameList->currentRow()] = emptyNames;
 		m_dbMnames[mnameList->currentRow()] = emptyNames;
-	} else if(m_dbFnames[mnameList->currentRow()].size()!=nfeSpinBox->value()){
+	} else if((int)m_dbFnames[mnameList->currentRow()].size()!=nfeSpinBox->value()){
 		m_dbFnames[mnameList->currentRow()].resize(nfeSpinBox->value());
 		m_dbMnames[mnameList->currentRow()].resize(nfeSpinBox->value());
 	}
