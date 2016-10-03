@@ -334,16 +334,18 @@ void ConfigCreator::browseConfigFile(){
 
     rootModCfgName->clear();
     std::vector<std::string> mnames;
-    ConfigCreatorHelper::listModuleNames(std::string(cfgName.toLatin1().data()), mnames);
-    for(std::vector<std::string>::iterator it = mnames.begin(); it!=mnames.end(); it++){
-      QVariant vdn(QString(it->c_str()));
-      rootModCfgName->addItem(it->c_str(), vdn);
+    std::vector<std::string> mDecNames;
+    ConfigCreatorHelper::listModuleNames(std::string(cfgName.toLatin1().data()), mnames, mDecNames);
+    for(unsigned int i = 0; i <mnames.size(); i++){
+      QVariant vdn(QString(mDecNames[i].c_str()));
+      rootModCfgName->addItem(mnames[i].c_str(), vdn);
     }
   }
   setFromFile(0);
 }
 void ConfigCreator::setFromFile(int modIt){
-  m_dbMnames[mnameList->currentRow()][iFeComb->value()] = rootModCfgName->itemData(rootModCfgName->currentIndex()).toString();
+  //  m_dbMnames[mnameList->currentRow()][iFeComb->value()] = rootModCfgName->itemData(rootModCfgName->currentIndex()).toString();
+  m_dbMnames[mnameList->currentRow()][iFeComb->value()] = rootModCfgName->itemData(modIt).toString();
   PixConfDBInterface * confDBInterface = DBEdtEngine::openFile(rootCfgFile->text().toLatin1().data(), false); 
   DBInquire *root = confDBInterface->readRootRecord(1);
   std::vector<DBInquire*> inqVec;
@@ -352,6 +354,7 @@ void ConfigCreator::setFromFile(int modIt){
 						 std::string(rootModCfgName->itemData(modIt).toString().toLatin1().data())+"/PixModule");
   }catch(...){
     inqVec.clear();
+    std::cerr << "Error searching DB entry for module " << std::string(rootModCfgName->itemData(modIt).toString().toLatin1().data()) << " taken from list item " << modIt << std::endl;
   }
   if(inqVec.size()==1){
     PixModule mod(inqVec[0], 0, "tmpmod");
@@ -369,7 +372,8 @@ void ConfigCreator::setFromFile(int modIt){
 	}
     QVariant feData((int)mod.getFEFlavour());
     feTypeBox->setCurrentIndex(feTypeBox->findData(feData));
-  }
+  } else
+    std::cerr << "Can't find DB entry for module " << std::string(rootModCfgName->itemData(modIt).toString().toLatin1().data()) << " taken from list item " << modIt << std::endl;
   
   delete confDBInterface; //closes file
 }
