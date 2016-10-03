@@ -1,4 +1,5 @@
 #include "ConfigCreator.h"
+#include "ConfigCreatorHelper.h"
 
 #include <PixModuleGroup/PixModuleGroup.h>
 #include <PixController/PixController.h>
@@ -332,26 +333,12 @@ void ConfigCreator::browseConfigFile(){
     m_dbFnames[mnameList->currentRow()][iFeComb->value()] = cfgName;
 
     rootModCfgName->clear();
-    PixConfDBInterface * confDBInterface = DBEdtEngine::openFile(cfgName.toLatin1().data(), false); 
-    DBInquire *root = confDBInterface->readRootRecord(1);
-    for(recordIterator appIter = root->recordBegin();appIter!=root->recordEnd();appIter++){
-      if((int)(*appIter)->getName().find("application")!=(int)std::string::npos){
-	// loop over inquires in crate inquire and create a PixModuleGroup when an according entry is found
-	for(recordIterator pmgIter = (*appIter)->recordBegin();pmgIter!=(*appIter)->recordEnd();pmgIter++){
-	  if((*pmgIter)->getName().find("PixModuleGroup")!=std::string::npos){
-	    for(recordIterator pmIter = (*pmgIter)->recordBegin();pmIter!=(*pmgIter)->recordEnd();pmIter++){
-	      if((*pmIter)->getName().find("PixModule")!=std::string::npos){
-		std::string modName = (*pmIter)->getDecName();
-		QVariant vdn(QString(modName.c_str()));
-		getDecNameCore(modName);
-		rootModCfgName->addItem(modName.c_str(), vdn);
-	      }
-	    }
-	  }
-	}
-      }
+    std::vector<std::string> mnames;
+    ConfigCreatorHelper::listModuleNames(std::string(cfgName.toLatin1().data()), mnames);
+    for(std::vector<std::string>::iterator it = mnames.begin(); it!=mnames.end(); it++){
+      QVariant vdn(QString(it->c_str()));
+      rootModCfgName->addItem(it->c_str(), vdn);
     }
-    delete confDBInterface; //closes file
   }
   setFromFile(0);
 }
