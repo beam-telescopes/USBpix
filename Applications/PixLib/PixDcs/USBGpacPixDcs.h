@@ -113,8 +113,6 @@ namespace PixLib {
 
   class USBGpacPixDcs : public PixDcs 
   {
-    private:
-      USBPixController *m_upc;
     public:
       USBGpacPixDcs(DBInquire *dbInquire, void *interface);
       
@@ -132,6 +130,8 @@ namespace PixLib {
     protected:
       bool m_problemInit;
       float m_currentLimit;
+      USBPixController *m_upc;
+      std::string m_ctrlName;
 
     private:
       virtual void configInit();   //! Init configuration structure
