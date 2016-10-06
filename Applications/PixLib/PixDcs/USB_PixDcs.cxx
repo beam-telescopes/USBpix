@@ -20,7 +20,7 @@
 #include <USBPixI4DCS.h>
 #include <typeinfo>
 
-#define UDCS_DEB true
+#define UDCS_DEB false
 
 using namespace PixLib;
 
