@@ -275,17 +275,22 @@ void ConfigCreator::browseConfigFile(){
 }
 void ConfigCreator::setFromFile(int modIt){
   m_dbMnames[mnameList->currentRow()][iFeComb->value()] = rootModCfgName->itemData(modIt).toString();
-  int mccFlv, feFlv, nFe, nFeRows;
+  std::string mccFlv, feFlv;
+  int nFe, nFeRows;
   ConfigCreatorHelper::readModuleInfo(std::string(rootCfgFile->text().toLatin1().data()), std::string(rootModCfgName->itemData(modIt).toString().toLatin1().data()),
 				      mccFlv, feFlv, nFe, nFeRows);
   if(FEcfgTypeBox->currentIndex()==1){ 
     nfeSpinBox->setValue(nFe);
     nfeRowSpinBox->setValue(nFeRows);
-    QVariant mccData(mccFlv);
-    mccTypeBox->setCurrentIndex(mccTypeBox->findData(mccData));
+//     QVariant mccData(mccFlv);
+//     mccTypeBox->setCurrentIndex(mccTypeBox->findData(mccData));
+    QString mccData(mccFlv.c_str());
+    mccTypeBox->setCurrentIndex(mccTypeBox->findText(mccData));
   }
-  QVariant feData(feFlv);
-  feTypeBox->setCurrentIndex(feTypeBox->findData(feData));
+//   QVariant feData(feFlv);
+//   feTypeBox->setCurrentIndex(feTypeBox->findData(feData));
+  QString feData(feFlv.c_str());
+  feTypeBox->setCurrentIndex(feTypeBox->findText(feData));
 }
 
 void ConfigCreator::setDbInfo(int modListRow){
