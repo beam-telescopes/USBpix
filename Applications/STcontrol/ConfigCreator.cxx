@@ -95,100 +95,42 @@ void ConfigCreator::createCfg(bool finished){
 
   QList<QVariant> vlist = controllerTypeBox->currentData().toList();
 
-  // create module group from default constructor
-  PixLib::PixModuleGroup *pmg = new PixLib::PixModuleGroup(std::string(groupNameEdit->text().toLatin1().data()),
-							   std::string(vlist.at(0).toString().toLatin1().data()), mnames, 
-							   std::string(feTypeBox->currentText().toLatin1().data()), nfeSpinBox->value(), 
-							   nfeRowSpinBox->value(), std::string (mccTypeBox->currentText().toLatin1().data()),
-							   vlist.at(1).toInt());
-
-  // add individual modules to group as per chip layout requested
+  // prepare names to add individual modules to group as per chip layout requested
+  std::map<int, std::vector<std::string> > dbFnames;
+  std::map<int, std::vector<std::string> > dbMnames;
   if(FEcfgTypeBox->currentIndex()>0){
     for(int i=0;i<nmodSpinBox->value(); i++) {
-		PixLib::PixModule *mod = pmg->module(i);
-		if(mod!=0){
-			unsigned int jmax = m_dbFnames[i].size();
-			if(FEcfgTypeBox->currentIndex()==1 && jmax>1){
-				jmax = 1;
-				std::cout << "Inconsistent FE file reading mode information for module " << i << std::endl;
-			}
-			// remember for later - will be overwritten when reading from DB, but we need this group's IDs
-			int mid = mod->moduleId();
-			int gid = mod->groupId();
-			for(unsigned int j = 0; j<jmax; j++){
-				// open and read from DB file
-				PixConfDBInterface * confDBInterface = DBEdtEngine::openFile(m_dbFnames[i][j].toLatin1().data(), false); 
-				DBInquire *root = confDBInterface->readRootRecord(1);
-				std::vector<DBInquire*> inqVec;
-				try{
-				  inqVec = confDBInterface->DBFindRecordByName(PixLib::BYDECNAME, root->getDecName()+
-										   std::string(m_dbMnames[i][j].toLatin1().data())+"/PixModule");
-				}catch(...){
-				  inqVec.clear();
-				}
-				if(inqVec.size()==1){
-					if(FEcfgTypeBox->currentIndex()==1){
-						// read DB info into module config.
-						mod->config().read(inqVec[0]);
-						// problem with old cfg. files: MCC_I2 set for 1 FE_I2, which is wrong
-						if(mod->getMCCFlavour()==PixModule::PM_MCC_I2 && mod->getFEFlavour()==PixModule::PM_FE_I2 &&
-							mod->getFECount()==1){
-							PixLib::ConfList mccFlv = (ConfList&)mod->config()["general"]["MCC_Flavour"];
-							mccFlv.setValue((int)PixModule::PM_NO_MCC);
-						}
-					} else if(FEcfgTypeBox->currentIndex()==2){
-						for(recordIterator feIter = inqVec[0]->recordBegin();feIter!=inqVec[0]->recordEnd();feIter++){
-							if((*feIter)->getName().find("PixFe")!=std::string::npos){
-								// read DB info into module's j-th FE config.
-								mod->pixFE(j)->config().read(*feIter);
-							}
-						}
-					}
-				} else{
-					std::cout << "Can't find module " << std::string(m_dbMnames[i][j].toLatin1().data()) << " in file " << 
-								std::string(m_dbFnames[i][j].toLatin1().data()) << std::endl;
-				}
-				delete confDBInterface; //closes file// restore IDs
-				((ConfInt&)mod->config()["general"]["ModuleId"]).setValue(mid);
-				((ConfInt&)mod->config()["general"]["GroupId"]).setValue(gid);
-			}
-		}
-	}
+      std::vector<std::string> tmpMnames, tmpFnames;
+      unsigned int jmax = m_dbFnames[i].size();
+      if(FEcfgTypeBox->currentIndex()==1 && jmax>1){
+	jmax = 1;
+	std::cout << "Inconsistent FE file reading mode information for module " << i << std::endl;
+      }
+      for(unsigned int j = 0; j<jmax; j++){
+	tmpFnames.push_back(m_dbFnames[i][j].toLatin1().data());
+	tmpMnames.push_back(m_dbMnames[i][j].toLatin1().data());
+      }
+      dbFnames[i] = tmpFnames;
+      dbMnames[i] = tmpMnames;
+    }
   }
 
-  // polish and store configuration
+  // create module group from default constructor
+  PixLib::PixModuleGroup *pmg = ConfigCreatorHelper::createPixModGrp(std::string(groupNameEdit->text().toLatin1().data()),
+								     std::string(vlist.at(0).toString().toLatin1().data()), mnames, 
+								     std::string(feTypeBox->currentText().toLatin1().data()), nfeSpinBox->value(), 
+								     nfeRowSpinBox->value(), std::string (mccTypeBox->currentText().toLatin1().data()),
+								     vlist.at(1).toInt(), dbFnames, dbMnames);
+
+  // store configuration
   m_pmg.push_back(pmg);
-  pmg->config().addConfig(&(pmg->getPixController()->config()));
-  for(PixLib::PixModuleGroup::moduleIterator it = pmg->modBegin(); it!=pmg->modEnd(); it++)
-    pmg->config().addConfig(&((*it)->config()));
 
   // create regulators as PixDcs device if requested
   if(addUsbDcs->isChecked()){
-    std::string dcsType = "";
-    switch(vlist.at(1).toInt()){
-    case 0:
-      dcsType = "USBPixDcs";
-      break;
-    case 1:
-    case 3:
-      dcsType = "USBBIPixDcs";
-      break;
-    case 2:
-      dcsType = "USBGpacPixDcs";
-      break;
-    default:
-      dcsType = "";
-    }	    
-    if(dcsType != ""){
-      // new DCS object for regulators
-      PixDcs *dcs = PixDcs::make((DBInquire*) 0, (void*) pmg->getPixController(), dcsType);
-      Config &conf = dcs->config();
-      std::stringstream a;
-      a << m_dcs.size();
-      ((ConfString&)conf["general"]["DeviceName"]).m_value = ("USB regulators "+a.str());
-      ((ConfInt&)conf["general"]["Index"]).setValue(m_dcs.size());
-      m_dcs.push_back(dcs);
-    }
+    std::stringstream a;
+    a << m_dcs.size();
+    PixLib::PixDcs *dcs = ConfigCreatorHelper::createPixDcs(vlist.at(1).toInt(), ("USB regulators "+a.str()), m_dcs.size(), (void*) pmg->getPixController());
+    if(dcs!=0) m_dcs.push_back(dcs);
   }
  
   if(finished) accept();
