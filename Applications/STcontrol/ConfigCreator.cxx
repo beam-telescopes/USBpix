@@ -344,38 +344,18 @@ void ConfigCreator::browseConfigFile(){
   setFromFile(0);
 }
 void ConfigCreator::setFromFile(int modIt){
-  //  m_dbMnames[mnameList->currentRow()][iFeComb->value()] = rootModCfgName->itemData(rootModCfgName->currentIndex()).toString();
   m_dbMnames[mnameList->currentRow()][iFeComb->value()] = rootModCfgName->itemData(modIt).toString();
-  PixConfDBInterface * confDBInterface = DBEdtEngine::openFile(rootCfgFile->text().toLatin1().data(), false); 
-  DBInquire *root = confDBInterface->readRootRecord(1);
-  std::vector<DBInquire*> inqVec;
-  try{
-    inqVec = confDBInterface->DBFindRecordByName(PixLib::BYDECNAME, root->getDecName()+
-						 std::string(rootModCfgName->itemData(modIt).toString().toLatin1().data())+"/PixModule");
-  }catch(...){
-    inqVec.clear();
-    std::cerr << "Error searching DB entry for module " << std::string(rootModCfgName->itemData(modIt).toString().toLatin1().data()) << " taken from list item " << modIt << std::endl;
+  int mccFlv, feFlv, nFe, nFeRows;
+  ConfigCreatorHelper::readModuleInfo(std::string(rootCfgFile->text().toLatin1().data()), std::string(rootModCfgName->itemData(modIt).toString().toLatin1().data()),
+				      mccFlv, feFlv, nFe, nFeRows);
+  if(FEcfgTypeBox->currentIndex()==1){ 
+    nfeSpinBox->setValue(nFe);
+    nfeRowSpinBox->setValue(nFeRows);
+    QVariant mccData(mccFlv);
+    mccTypeBox->setCurrentIndex(mccTypeBox->findData(mccData));
   }
-  if(inqVec.size()==1){
-    PixModule mod(inqVec[0], 0, "tmpmod");
-    // problem with old cfg. files: MCC_I2 set for 1 FE_I2, which is wrong
-    if(mod.getMCCFlavour()==PixModule::PM_MCC_I2 && mod.getFEFlavour()==PixModule::PM_FE_I2 &&
-       mod.getFECount()==1){
-      PixLib::ConfList mccFlv = (ConfList&)mod.config()["general"]["MCC_Flavour"];
-      mccFlv.setValue((int)PixModule::PM_NO_MCC);
-    }
-	if(FEcfgTypeBox->currentIndex()==1){ 
-		nfeSpinBox->setValue(mod.getFECount());
-		nfeRowSpinBox->setValue((mod.nRowsMod()/mod.nRowsFe()));
-		QVariant mccData((int)mod.getMCCFlavour());
-		mccTypeBox->setCurrentIndex(mccTypeBox->findData(mccData));
-	}
-    QVariant feData((int)mod.getFEFlavour());
-    feTypeBox->setCurrentIndex(feTypeBox->findData(feData));
-  } else
-    std::cerr << "Can't find DB entry for module " << std::string(rootModCfgName->itemData(modIt).toString().toLatin1().data()) << " taken from list item " << modIt << std::endl;
-  
-  delete confDBInterface; //closes file
+  QVariant feData(feFlv);
+  feTypeBox->setCurrentIndex(feTypeBox->findData(feData));
 }
 
 void ConfigCreator::setDbInfo(int modListRow){

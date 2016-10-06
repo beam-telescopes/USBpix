@@ -1,4 +1,8 @@
 #include "ConfigCreatorHelper.h"
+#include <PixModule/PixModule.h>
+#include <Config/Config.h>
+#include <Config/ConfGroup.h>
+#include <Config/ConfObj.h>
 #include <PixConfDBInterface/PixConfDBInterface.h>
 #include <DBEdtEngine.h>
 #include <GeneralDBfunctions.h>
@@ -27,4 +31,31 @@ void ConfigCreatorHelper::listModuleNames(std::string fname, std::vector<std::st
   }
   delete confDBInterface; //closes file
   return;
+}
+void ConfigCreatorHelper::readModuleInfo(std::string fname, std::string mDecName, int &mccFlv, int &feFlv, int &nFe, int &nFeRows){
+  PixLib::PixConfDBInterface * confDBInterface = DBEdtEngine::openFile(fname.c_str(), false); 
+  PixLib::DBInquire *root = confDBInterface->readRootRecord(1);
+  std::vector<PixLib::DBInquire*> inqVec;
+  try{
+    inqVec = confDBInterface->DBFindRecordByName(PixLib::BYDECNAME, root->getDecName()+ mDecName +"/PixModule");
+  }catch(...){
+    inqVec.clear();
+    std::cerr << "Error searching DB entry for module " << mDecName << std::endl;
+  }
+  if(inqVec.size()==1){
+    PixLib::PixModule mod(inqVec[0], 0, "tmpmod");
+    // problem with old cfg. files: MCC_I2 set for 1 FE_I2, which is wrong
+    if(mod.getMCCFlavour()==PixLib::PixModule::PM_MCC_I2 && mod.getFEFlavour()==PixLib::PixModule::PM_FE_I2 &&
+       mod.getFECount()==1){
+      PixLib::ConfList mccFlvCfg = (PixLib::ConfList&)mod.config()["general"]["MCC_Flavour"];
+      mccFlvCfg.setValue((int)PixLib::PixModule::PM_NO_MCC);
+    }
+    nFe = mod.getFECount();
+    nFeRows = mod.nRowsMod()/mod.nRowsFe();
+    mccFlv = (int)mod.getMCCFlavour();
+    feFlv = (int)mod.getFEFlavour();
+  } else
+    std::cerr << "Can't find DB entry for module " << mDecName << std::endl;
+  
+  delete confDBInterface; //closes file
 }
