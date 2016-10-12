@@ -82,8 +82,8 @@ MainPanel::MainPanel( STControlEngine &engine_in, STCLogContainer &log_in, QWidg
   QObject::connect(currModuleCfgEdit, SIGNAL(triggered()), this, SLOT(editCurrentModule()));
   QObject::connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(loadConfig()));
   QObject::connect(optionsReload_defaultAction, SIGNAL(triggered()), this, SLOT(loadOptions()));
-  QObject::connect(actionNew_cfg, SIGNAL(triggered()), this, SLOT(newConfig()));
-  QObject::connect(actionNew_cfg_generic, SIGNAL(triggered()), this, SLOT(newConfigGeneric()));
+  //  QObject::connect(actionNew_cfg, SIGNAL(triggered()), this, SLOT(newConfig()));
+  QObject::connect(actionNew_cfg, SIGNAL(triggered()), this, SLOT(newConfigGeneric()));
   QObject::connect(fileReopenAction, SIGNAL(triggered()), this, SLOT(reopenConfig()));
   QObject::connect(fileSaveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
   QObject::connect(fileSaveAction, SIGNAL(triggered()), this, SLOT(saveConfig()));
@@ -1328,8 +1328,8 @@ void MainPanel::setShowMenues(){
 }
 void MainPanel::setScanBusy(){
   // file menu
-  menuNew_config->setEnabled(false);
-  //actionNew_cfg->setEnabled(false);
+  //  menuNew_config->setEnabled(false);
+  actionNew_cfg->setEnabled(false);
   fileOpenAction->setEnabled(false);
   fileCloseAction->setEnabled(false);
   fileReopenAction->setEnabled(false);
@@ -1357,8 +1357,8 @@ void MainPanel::setScanDone(){
   m_scanActive = false;
   setCurrentModule(0); // takes care of top part of edit menu
   // file menu
-  menuNew_config->setEnabled(true);
-  //  actionNew_cfg->setEnabled(true);
+  //menuNew_config->setEnabled(true);
+  actionNew_cfg->setEnabled(true);
   fileOpenAction->setEnabled(true);
   fileCloseAction->setEnabled(true);
   fileReopenAction->setEnabled(true);
