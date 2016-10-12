@@ -201,7 +201,7 @@ void USBPixController::configInit(){
 	conf["general"].addBool("enaManCode", m_enaManCode, false, "enable Machnester Coding", true);
 	conf["general"].addInt("manCodePhase", m_manCodePhase, 0, "Clk phase when Manchester coding is used", true);
 	conf["general"].addBool("MultiChipWithSingleBoard", 
-			m_MultiChipWithSingleBoard, false, 
+			m_MultiChipWithSingleBoard, true, 
 			"Use only a single USBpix unit to read out multiple "
 			"chips as opposted to multiple parallel units.", true);
 	conf["general"].addBool("OverrideEnableDemux", 
