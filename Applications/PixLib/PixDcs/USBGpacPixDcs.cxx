@@ -30,7 +30,7 @@ USBGpacPixDcs::USBGpacPixDcs(DBInquire *dbInquire, void *interface, std::string 
   if (m_devType == SUPPLY) {
     Config& conf = *m_conf;
     conf.addGroup("settings");
-    conf["settings"].addFloat("CurrentLimit", m_currentLimit, 0.0, 
+    conf["settings"].addFloat("CurrentLimit", m_currentLimit, 1.0, 
 			      "Current limit per channel for all channels in A", true);
     conf.reset();
     m_devType = SUPPLY;
@@ -835,9 +835,9 @@ void USBGpacInjectPixDcsChan::configInit()
 		  "GPAC channel index", true);
   
   conf.addGroup("settings");
-  conf["settings"].addFloat("High", m_nominalHigh, 0.0, 
+  conf["settings"].addFloat("High", m_nominalHigh, 1.0, 
       "Voltage when pulser is high in V", true);
-  conf["settings"].addFloat("Low", m_nominalLow, 0.0, 
+  conf["settings"].addFloat("Low", m_nominalLow, 0.5, 
       "Voltage when pulser is low in V", true);
   conf.reset();
 }
