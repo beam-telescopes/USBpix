@@ -18,6 +18,7 @@
 #include "PixController/USB3PixController.h"
 #include "PixConfDBInterface/PixConfDBInterface.h"
 #include <USBPixI4DCS.h>
+#include <typeinfo>
 
 #define UDCS_DEB false
 
@@ -36,6 +37,7 @@ USBPixDcsChan::USBPixDcsChan(PixDcs *parent, DBInquire *dbInquire) : PixDcsChan(
     // set config name to DBInquire's decorated name to allow automatc saving
     m_conf->m_confName = myDecName;
   }
+
   if(m_rtype==PixDcsChan::FE_GADC){
     (*m_conf)["general"]["AdcType"].setVisible(true);
     (*m_conf)["general"]["FeIndex"].setVisible(true);
@@ -220,7 +222,7 @@ void USBPixDcsChan::SetState(std::string new_state){
     throw PixDcsExc(PixDcsExc::WARNING, "unknown channel type requested: "+ 
 		    ((ConfList&)conf["general"]["ChannelDescr"]).sValue());}
 }
-USBPixDcs::USBPixDcs(DBInquire *dbInquire, void *interface)
+USBPixDcs::USBPixDcs(DBInquire *dbInquire, void *interface, bool dep)
   : PixDcs(dbInquire, interface){
 
   m_USBPC = (PixController*)interface; //dynamic_cast<PixUSB>(interface);
@@ -228,33 +230,63 @@ USBPixDcs::USBPixDcs(DBInquire *dbInquire, void *interface)
   				"interface provided to PixDcs::make is either NULL or not USB although USB was requested");
   
   configInit();
-  m_conf->read(dbInquire);
-
   m_problemInit = false;
 
-  std::string dcsName="";
-  fieldIterator f = dbInquire->findField("ActualClassName");
-  if(f!=dbInquire->fieldEnd()) dbInquire->getDB()->DBProcess(f,READ, dcsName);
-  if(dcsName=="USBPixDcs"){ // if called from inherited classes, don't create own-type channels
-    for(recordIterator it = dbInquire->recordBegin(); it != dbInquire->recordEnd(); it++){
-      // Look for DCS channel inquire
-      if((*it)->getName() == "PixDcsChan") {
-	USBPixDcsChan *uch = new USBPixDcsChan(this, *it);
-	if(UDCS_DEB) cout << "created USBPixDcsChan " << uch->name()<< endl;
+  if(!dep){ // if called from inheriting classes, don't create own-type channels
+    if(dbInquire!=0){
+
+      m_conf->read(dbInquire);
+    
+//     std::string dcsName="";
+//     fieldIterator f = dbInquire->findField("ActualClassName");
+//     if(f!=dbInquire->fieldEnd()) dbInquire->getDB()->DBProcess(f,READ, dcsName);
+//     if(dcsName=="USBPixDcs"){ // if called from inherited classes, don't create own-type channels
+      for(recordIterator it = dbInquire->recordBegin(); it != dbInquire->recordEnd(); it++){
+	// Look for DCS channel inquire
+	if((*it)->getName() == "PixDcsChan") {
+	  USBPixDcsChan *uch = new USBPixDcsChan(this, *it);
+	  if(UDCS_DEB) cout << "created USBPixDcsChan " << uch->name()<< endl;
+	  m_channels.push_back(uch);
+	  m_conf->addConfig(uch->m_conf);
+	  // set default name and channel ID if none given yet
+	  int chID = (int)m_channels.size()-1;
+	  std::stringstream a;
+	  a << chID;
+	  if(uch->m_name=="unknown"){
+	    uch->m_name = m_name+"_Ch"+a.str();
+	    //uch->m_channelDescr = VDDA1;
+	  }
+	}    
+      }
+    } else { // default contructor type: create default channels
+      for(int chID=0; chID<4; chID++){
+	USBPixDcsChan *uch = new USBPixDcsChan(this, (DBInquire*) 0);
 	m_channels.push_back(uch);
-	m_conf->addConfig(uch->m_conf);
-	// set default name and channel ID if none given yet
-	int chID = (int)m_channels.size()-1;
+	// set default name and channel ID
 	std::stringstream a;
 	a << chID;
-	if(uch->m_name=="unknown"){
-	  uch->m_name = m_name+"_Ch"+a.str();
-	  //uch->m_channelDescr = VDDA1;
+	uch->m_name = m_name+"_Ch"+a.str();
+	uch->m_conf->m_confName = "USBPixDcsChan_"+a.str()+"/PixDcsChan";
+	m_conf->addConfig(uch->m_conf);
+	std::map<std::string, int> chantypes = ((ConfList&)(*uch->m_conf)["general"]["ChannelDescr"]).symbols();
+	int ctID = 0;
+	for(std::map<std::string, int>::iterator it = chantypes.begin(); it!=chantypes.end(); it++){
+	  if(ctID==chID){
+	    uch->m_name = it->first;
+	    ((ConfList&)(*uch->m_conf)["general"]["ChannelDescr"]).setValue(it->second);
+	    float volts = 1.2f;
+	    if(it->first.find("VDDA")!=std::string::npos) volts = 1.5f;
+	    ((ConfFloat&)(*uch->m_conf)["settings"]["NomVolts"]).m_value = volts;
+	    break;
+	  }
+	  ctID++;
 	}
-      }    
+	if(UDCS_DEB) cout << "created USBPixDcsChan " << uch->name() << " with config. name " << uch->m_conf->name() << endl;
+      }
     }
   }
 
+  m_ctrlName = m_USBPC->getModGroup().getName();
   m_USBADC = 0;
 }
 USBPixDcs::~USBPixDcs(){
@@ -326,10 +358,11 @@ void USBPixDcs::configInit(){
   
   // Group general
   conf.addGroup("general");
-  conf["general"].addString("DeviceName", m_name, "unknown",
+  conf["general"].addString("DeviceName", m_name, "USBPixDcs",
 		  "name of PixDcs device", true);
-  conf["general"].addList("DeviceType", (int &)m_devType, ADCMETER, m_typeMap, "Type of device", false); 
+  conf["general"].addList("DeviceType", (int &)m_devType, SUPPLY, m_typeMap, "Type of device", false); 
   conf["general"].addInt("Index", m_index, -1, "Index - order in which device is used amongst other DCS devices", false);
+  conf["general"].addString("USBPixController", m_ctrlName, "???", "Name of PixController to which adapter is attached", false);
   conf.reset();
 }
 void USBPixDcs::initHW(){

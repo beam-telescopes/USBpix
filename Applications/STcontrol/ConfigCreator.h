@@ -7,6 +7,7 @@
 
 namespace PixLib{
   class PixModuleGroup;
+  class PixDcs;
 }
 class QString;
 
@@ -19,7 +20,7 @@ class ConfigCreator : public QDialog, public Ui::ConfigCreator {
   ~ConfigCreator();
 
   std::vector<PixLib::PixModuleGroup*> getCfg(){return m_pmg;};
-  std::vector<int> getMakeRegs(){return m_makeRegs;};
+  std::vector<PixLib::PixDcs*> getDcs(){return m_dcs;};
 
   public slots:
     void createCfg(bool);
@@ -31,13 +32,13 @@ class ConfigCreator : public QDialog, public Ui::ConfigCreator {
     void browseConfigFile();
     void setFromFile(int modIt);
     void setDbInfo(int modListRow);
-	void selectFileDisp(int);
-	void setFecombMax(int val);
-	void ctrlTypeSelected(const QString & text);
+    void selectFileDisp(int);
+    void setFecombMax(int val);
+    void ctrlTypeSelected(const QString & text);
 
  private:
     std::vector<PixLib::PixModuleGroup*> m_pmg;
-    std::vector<int> m_makeRegs;
+    std::vector<PixLib::PixDcs*> m_dcs;
     std::map<int, std::vector<QString> > m_dbFnames;
     std::map<int, std::vector<QString> > m_dbMnames;
 };

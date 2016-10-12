@@ -116,6 +116,7 @@ class PixDcs {
   DeviceType getDevType(){return m_devType;};
   int  getIndex(){return m_index;};
   void setIndex(int index){m_index = index;};
+  void getTypeMap(std::map<std::string, int> &typeMap){typeMap = m_typeMap;return;};
   static void listTypes(std::vector<std::string> &list);  //! available controller types
   static PixDcsChan* copyChan(PixDcsChan *chan);
 
