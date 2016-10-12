@@ -123,10 +123,22 @@ void ConfigCreator::createCfg(bool finished){
 
   // create regulators as PixDcs device if requested
   if(addUsbDcs->isChecked()){
-    std::stringstream a;
-    a << m_dcs.size();
-    PixLib::PixDcs *dcs = ConfigCreatorHelper::createPixDcs(vlist.at(1).toInt(), ("USB regulators "+a.str()), m_dcs.size(), (void*) pmg->getPixController());
-    if(dcs!=0) m_dcs.push_back(dcs);
+    std::map<std::string, int> subTypes;
+    if(vlist.at(1).toInt()==2){
+      PixDcs *dd = new DummyPixDcs();
+      dd->getTypeMap(subTypes);
+    } else
+      subTypes["dummy"] = 1;
+    for(std::map<std::string, int>::iterator it=subTypes.begin(); it!=subTypes.end(); it++){
+      if(it->first=="CHILLER" || it->first=="POSITION") continue; // skip types not available on GPAC
+      int type = vlist.at(1).toInt();
+      if(type == 2) type = 20+it->second;
+      std::stringstream a;
+      a << m_dcs.size();
+      std::string devName = ((type>19)?("GPAC_"+it->first):("USB_regulators_"+a.str()));
+      PixLib::PixDcs *dcs = ConfigCreatorHelper::createPixDcs(type, devName, m_dcs.size(), (void*) pmg->getPixController());
+      if(dcs!=0) m_dcs.push_back(dcs);
+    }
   }
  
   if(finished) accept();

@@ -125,7 +125,10 @@ PixLib::PixModuleGroup* ConfigCreatorHelper::createPixModGrp(std::string name, s
 }
 PixLib::PixDcs* ConfigCreatorHelper::createPixDcs(int type, std::string name, int index, void *controller){
   PixDcs *dcs = 0;
-  std::string dcsType = "";
+  std::string dcsType = "", subType = "";
+  std::map<std::string, int> subTypes;
+  PixDcs *dd = new DummyPixDcs();
+  dd->getTypeMap(subTypes);
   switch(type){
   case 0:
     dcsType = "USBPixDcs";
@@ -138,7 +141,19 @@ PixLib::PixDcs* ConfigCreatorHelper::createPixDcs(int type, std::string name, in
     dcsType = "USBGpacPixDcs";
     break;
   default:
-    dcsType = "";
+    {
+      dcsType = "";
+      if(type>19){
+	for(std::map<std::string, int>::iterator it=subTypes.begin(); it!=subTypes.end(); it++){
+	  if(it->second==(type-20)){
+	    dcsType = "USBGpacPixDcs:"+it->first;
+	    subType = "_"+it->first;
+	    break;
+	  }
+	}
+      }
+      break;
+    }
   }	    
   if(dcsType != ""){
     // new DCS object for regulators
