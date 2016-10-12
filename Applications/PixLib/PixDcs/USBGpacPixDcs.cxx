@@ -7,7 +7,7 @@
 
 using namespace PixLib;
 
-USBGpacPixDcs::USBGpacPixDcs(DBInquire *dbInquire, void *interface):
+USBGpacPixDcs::USBGpacPixDcs(DBInquire *dbInquire, void *interface, std::string extDevType):
   PixDcs(dbInquire, interface)
 {
   m_upc = (USBPixController *) (interface); //dynamic_cast<PixUSB>(interface);
@@ -19,19 +19,25 @@ USBGpacPixDcs::USBGpacPixDcs(DBInquire *dbInquire, void *interface):
   }
 
   configInit();
-  if(dbInquire!=0){
-
-    m_conf->read(dbInquire);
+  if(dbInquire!=0) m_conf->read(dbInquire);
+  else{
+    if(m_typeMap.find(extDevType)!=m_typeMap.end())
+      m_devType = (DeviceType)m_typeMap[extDevType];
+    else
+      m_devType = SUPPLY;
+  }
     
-    if (m_devType == SUPPLY)
-      {
-	Config& conf = *m_conf;
-	conf.addGroup("settings");
-	conf["settings"].addFloat("CurrentLimit", m_currentLimit, 0.0, 
-				  "Current limit per channel for all channels in A", true);
-	conf.reset();
-	m_conf->read(dbInquire);
-      }
+  if (m_devType == SUPPLY) {
+    Config& conf = *m_conf;
+    conf.addGroup("settings");
+    conf["settings"].addFloat("CurrentLimit", m_currentLimit, 0.0, 
+			      "Current limit per channel for all channels in A", true);
+    conf.reset();
+    m_devType = SUPPLY;
+    if(dbInquire!=0) m_conf->read(dbInquire);
+  }
+  
+  if(dbInquire!=0){
     
     for(recordIterator it = dbInquire->recordBegin(); 
 	it != dbInquire->recordEnd(); it++){
@@ -149,6 +155,103 @@ USBGpacPixDcs::USBGpacPixDcs(DBInquire *dbInquire, void *interface):
 	  }
       }
     }
+  } else { // create default channels
+    switch (m_devType)
+      {
+      case SUPPLY:
+	{
+	  for(int chID=0; chID<4; chID++){
+	    USBGpacSupplyPixDcsChan *uch = new USBGpacSupplyPixDcsChan(this, (DBInquire*) 0);
+	    m_channels.push_back(uch);
+	  
+	    // set default name and channel ID if none given yet
+	    std::stringstream a;
+	    a << "PWR";
+	    a << chID;
+	    uch->m_name = a.str();
+	    uch->m_gpac_channel = chID;
+	    uch->m_conf->m_confName = "USBGpacSupplyPixDcsChan_"+a.str()+"/PixDcsChan";
+
+	    m_conf->addConfig(uch->m_conf);
+	  }
+	  break;
+	}
+      case ADCMETER:
+	{
+	  for(int chID=0; chID<4; chID++){
+	    USBGpacAuxAdcPixDcsChan *uch = new USBGpacAuxAdcPixDcsChan(this, (DBInquire*) 0);
+	    m_channels.push_back(uch);
+	    
+	    // set default name and channel ID if none given yet
+	    std::stringstream a;
+	    a << "AUXADC";
+	    a << chID;
+	    uch->m_name = a.str();
+	    uch->m_gpac_channel = chID;
+	    uch->m_conf->m_confName = "USBGpacAuxAdcPixDcsChan_"+a.str()+"/PixDcsChan";
+
+	    m_conf->addConfig(uch->m_conf);
+	  }
+	  break;
+	}
+      case VOLTAGE_SOURCE:
+	{
+	  for(int chID=0; chID<4; chID++){
+	    USBGpacVoltageSourcePixDcsChan *uch = new USBGpacVoltageSourcePixDcsChan(this, (DBInquire*) 0);
+	    m_channels.push_back(uch);
+	    
+	    // set default name and channel ID if none given yet
+	    std::stringstream a;
+	    a << "VSRC";
+	    a << chID;
+	    uch->m_name = a.str();
+	    uch->m_gpac_channel = chID;
+	    uch->m_conf->m_confName = "USBGpacVoltageSourcePixDcsChan_"+a.str()+"/PixDcsChan";
+
+	    m_conf->addConfig(uch->m_conf);
+	  }
+	  break;
+	}
+      case CURRENT_SOURCE:
+	{
+	  for(int chID=0; chID<12; chID++){
+	    USBGpacCurrentSourcePixDcsChan *uch = new USBGpacCurrentSourcePixDcsChan(this, (DBInquire*) 0);
+	    m_channels.push_back(uch);
+	    
+	    // set default name and channel ID if none given yet
+	    std::stringstream a;
+	    a << "ISRC";
+	    a << chID;
+	    uch->m_name = a.str();
+	    uch->m_gpac_channel = chID;
+	    uch->m_conf->m_confName = "USBGpacCurrentSourcePixDcsChan_"+a.str()+"/PixDcsChan";
+
+	    m_conf->addConfig(uch->m_conf);
+	  }
+	  break;
+	}
+      case PULSER:
+	{
+	  int chID = 0;
+	  USBGpacInjectPixDcsChan *uch = new USBGpacInjectPixDcsChan(this, (DBInquire*) 0);
+	  m_channels.push_back(uch);
+	  
+	  // set default name and channel ID if none given yet
+	  std::stringstream a;
+	  a << "INJECT";
+	  a << chID;
+	  uch->m_name = a.str();
+	  uch->m_gpac_channel = chID;
+	  uch->m_conf->m_confName = "USBGpacInjectPixDcsChan_"+a.str()+"/PixDcsChan";
+
+	  m_conf->addConfig(uch->m_conf);
+
+	  break;
+	}
+      default:
+	throw PixDcsExc(PixDcsExc::FATAL, "An unsupported device type was "
+			"requested from USBGpacPixDcs.");
+      }
   }
   m_ctrlName = m_upc->getModGroup().getName();
 }
