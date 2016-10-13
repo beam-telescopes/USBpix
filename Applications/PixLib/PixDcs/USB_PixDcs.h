@@ -48,7 +48,7 @@ namespace PixLib {
   public:
     
     // Constructor
-    USBPixDcs(DBInquire *dbInquire, void *interface);
+    USBPixDcs(DBInquire *dbInquire, void *interface, bool dep=false);
     
     // Destructor
     virtual ~USBPixDcs();
@@ -67,6 +67,7 @@ namespace PixLib {
     USBPixDCS *m_USBADC;
     PixController *m_USBPC;
     bool m_problemInit;
+    std::string m_ctrlName;
 
   private:
     virtual void configInit();   //! Init configuration structure
