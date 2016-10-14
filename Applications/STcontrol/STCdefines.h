@@ -21,6 +21,7 @@ struct extScanOptions {
   QStringList config_modules;
   QStringList boards;
   QStringList fpga_files;
+  QStringList adapterCardFlavours;
   bool UseSingleBoardConfig;
   QString rawdata_path;
   QString histogram_filename;

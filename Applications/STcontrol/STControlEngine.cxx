@@ -4546,7 +4546,7 @@ void STControlEngine::createMultiBoardConfig(QString filename, extScanOptions Sc
     ConfigCreatorHelper::readModuleInfo(ScanParameters.config_files[i].toLatin1().data(), decName, mccFlv, feFlv, nFe, nFeRows);
     mnames.clear();
     mnames.push_back(mname);
-    int ctrlOpt = ScanParameters.adapterCardFlavour;
+    int ctrlOpt = ScanParameters.adapterCardFlavours[i].toInt();
     std::string type = "USBPixController";
     if(ctrlOpt>9) type = "USB3PixController";
     if(ctrlOpt>19) ctrlOpt = ctrlOpt%10;
