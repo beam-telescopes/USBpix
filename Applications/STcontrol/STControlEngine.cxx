@@ -35,6 +35,7 @@
 #include "STRodCrate.h"
 #include "ChipTest.h"
 #include "PrimListItem.h"
+#include "ConfigCreatorHelper.h"
 
 #include <TGraph.h>
 
@@ -4487,264 +4488,396 @@ void STControlEngine::createMultiBoardConfig(QString filename, extScanOptions Sc
 {
   //  std::cout << "STControlEngine::createMultiBoardConfig: filename = " << std::string(filename.toLatin1().data()) << std::endl;
 
-  // create config
-  std::vector<grpData> myGrpDataV;
-  std::string fullModDecName;
-  std::string requestedModDecName;
-  QStringList modNames;
-  bool found;
-  std::map< int, std::vector<int> > roChanInput;
-  std::map< int, std::vector<int> > roChanFeid;
-  for (int i=0; i<ScanParameters.boards.count(); i++)
-    {
-      // Search Module
-      requestedModDecName = "";
-      found=false;
-      std::string flvValue = "FE_I4A";
+  // create config as new PixModuleGroup+PixDcs(for reg's)
 
-      PixConfDBInterface * confDBInterface = DBEdtEngine::openFile(ScanParameters.config_files[i].toLatin1().data(), false); 
-      DBInquire *root = confDBInterface->readRootRecord(1);
-      for(recordIterator appIter = root->recordBegin();appIter!=root->recordEnd();appIter++){
-	if((int)(*appIter)->getName().find("application")!=(int)std::string::npos){
-	  // loop over inquires in crate inquire and create a PixModuleGroup when an according entry is found
-	  for(recordIterator pmgIter = (*appIter)->recordBegin();pmgIter!=(*appIter)->recordEnd();pmgIter++){
-	    if((*pmgIter)->getName().find("PixModuleGroup")!=std::string::npos){
-	      for(recordIterator pmIter = (*pmgIter)->recordBegin();pmIter!=(*pmgIter)->recordEnd();pmIter++){
-		if((*pmIter)->getName().find("PixController")!=std::string::npos && ScanParameters.adapterCardFlavour==1){
-		  std::vector<int> storeval_in(4,0);
-		  std::vector<int> storeval_fe(4,0);
-		  for(int iFe=0; iFe<4; iFe++){
-		    std::stringstream sv;
-		    sv << "general_readoutChannelsInput";
-		    sv << iFe;
-		    fieldIterator field = (*pmIter)->findField(sv.str());
-		    int dbval = 0;
-		    if (field!=(*pmIter)->fieldEnd()) {
-		      confDBInterface->DBProcess((*field),PixLib::READ,dbval);
-		      storeval_in.at(iFe)=dbval;
-		    }
-		    std::stringstream sv2;
-		    sv2 << "general_readoutChannelReadsChip";
-		    sv2 << iFe;
-		    field = (*pmIter)->findField(sv2.str());
-		    if (field!=(*pmIter)->fieldEnd()) {
-		      confDBInterface->DBProcess((*field),PixLib::READ,dbval);
-		      storeval_fe.at(iFe)=dbval;
-		    }
-		  }
-		  roChanInput[ScanParameters.boards[i].toInt()]=storeval_in;
-		  roChanFeid [ScanParameters.boards[i].toInt()]=storeval_fe;
-		}
-		if((*pmIter)->getName().find("PixModule")!=std::string::npos && !found){
-		  fullModDecName = (*pmIter)->getDecName();
-		  requestedModDecName = (*pmIter)->getDecName();
-		  getDecNameCore(requestedModDecName);
-		  // if specific module was requested, just accept this
-		  // otherwise use first module found
-		  if (requestedModDecName==ScanParameters.config_modules[i].toStdString() || ScanParameters.config_modules[i]==""){
-		    found=true;
-		    // read FE flavour to use it for USBPixDcs channel settings
-		    fieldIterator f;
-		    f = (*pmIter)->findField("general_FE_Flavour");
-		    if(f!=(*pmIter)->fieldEnd()) confDBInterface->DBProcess(*f,READ,flvValue);
-		    break;
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-      }
-      delete confDBInterface; //closes file
-      
-      if (requestedModDecName=="") return;
-      
-      bool new_mod_name=false;
-      int mod_counter=1;
-      std::string modBaseName=requestedModDecName;
-      while (!new_mod_name)
-	{
-	  new_mod_name = true;
-	  for (int i = 0; i < modNames.size(); ++i)
-	    {
-	      if (modNames.at(i).toStdString() == requestedModDecName) 
-		{
-		  new_mod_name=false;
-		  break;
-		}
-	    }
-	  
-	  if (!new_mod_name)
-	    {
-	      requestedModDecName=modBaseName + QString::number(mod_counter).toStdString();
-	      mod_counter++;
-	    }
-	}
-      
-      modNames.push_back(QString::fromStdString(requestedModDecName));
-      
-      grpData myGrpData;
-      myGrpData.myROD.slot = ScanParameters.boards[i].toInt();
-      myGrpData.myROD.mode = (ScanParameters.adapterCardFlavour==1)?2:0;
-      myGrpData.myBOC.mode = -1;
-      myGrpData.myBOC.haveBoc = false;
-      myGrpData.cfgType = 1;
-      myGrpData.myROD.IPfile = ScanParameters.fpga_files[i].toLatin1().data();
-      myGrpData.myROD.IDfile = ScanParameters.uc_firmware.toLatin1().data();
-      modData myModD;
-      myModD.fname = ScanParameters.config_files[i].toLatin1().data();
-      myModD.modname= requestedModDecName;
-      myModD.connName= fullModDecName;
-      myGrpData.cfgType = 2; // read cfg. from file as is
-      myModD.modID   = 0;
-      myModD.grpID   = 0;
-      myModD.active  = true;
-      myModD.roType  = 0;
-      myModD.inLink  = 0;
-      for(int olID=0;olID<4;olID++)
-	myModD.outLink[olID]  = 0;
-      myModD.slot = 0;
-      myModD.pp0 = -1;
-      myModD.assyType = 1;
-      myModD.assyID = 1;
-      if(flvValue == "FE_I4B")
-	myModD.assyID = 2;
-      myModD.pos_on_assy = 0;
-      myGrpData.myMods.push_back(myModD);
-      myGrpDataV.push_back(myGrpData);
-    }
-  
-  // Create Multiboard Config
-  addCrateToDB("TestApp", myGrpDataV, filename.toLatin1().data(), tUSBSys);
-  loadDB(filename.toLatin1().data());
-  
-  QApplication::processEvents();
-  
   // unload config
   clear();
   setPixConfDBFname("");
 
-  // alter settings as requested from scan config
-  std::string channel;
-  PixConfDBInterface * confDBInterface = DBEdtEngine::openFile(filename.toLatin1().data(), true); 
-  DBInquire *root = confDBInterface->readRootRecord(1);
-  for(recordIterator appIter = root->recordBegin();appIter!=root->recordEnd();appIter++){
-    if((int)(*appIter)->getName().find("application")!=(int)std::string::npos){
-      // loop over inquires in crate inquire and create a PixModuleGroup when an according entry is found
-      for(recordIterator pmgIter = (*appIter)->recordBegin();pmgIter!=(*appIter)->recordEnd();pmgIter++){
-	if((*pmgIter)->getName().find("PixModuleGroup")!=std::string::npos)
-	  {
-	    // Add TriggerDelay if neccessary
-	    fieldIterator field = (*pmgIter)->findField("general_TriggerDelay");
-	    if (field==(*pmgIter)->fieldEnd()) {
-	      int dbval=0;
-	      PixLib::DBField *new_field = confDBInterface->makeField("general_TriggerDelay");
-	      confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
-	      (*pmgIter)->pushField(new_field);
-	      confDBInterface->DBProcess((*pmgIter), PixLib::COMMITREPLACE);
-	    }
-	    
-	    for(recordIterator pmIter = (*pmgIter)->recordBegin();pmIter!=(*pmgIter)->recordEnd();pmIter++){
-	      if((*pmIter)->getName().find("PixController")!=std::string::npos){
-		
-		// get board id
-		fieldIterator field = (*pmIter)->findField("general_BoardID");
-		int boardid;
-		int board_index=0;
-		if (field!=(*pmIter)->fieldEnd())
-		  {
-		    confDBInterface->DBProcess(field, PixLib::READ, boardid);
-		    
-		    // board index for this id
-		    while (board_index < ScanParameters.boards.count() && ScanParameters.boards[board_index]!=QString::number(boardid))
-		      board_index++;
-		    //std::cout << "boardid: " << boardid << " with index " << board_index << std::endl;
-		  }
-		
-		// Set RJ45 to on
-		field = (*pmIter)->findField("general_enableRJ45");
-		bool dbval=true;
-		if (field==(*pmIter)->fieldEnd()) {
-		  PixLib::DBField *new_field = confDBInterface->makeField("general_enableRJ45");
-		  confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
-		  (*pmIter)->pushField(new_field);
-		} else {
-		  confDBInterface->DBProcess(field, COMMIT, dbval);
-		}
-		
-		// TODO TB: This feature has been removed, trigger replication mode is always "Disabled"
-		// Set trigger replication mode
-		field = (*pmIter)->findField("general_TriggerReplication");
-		std::string rep_mode = "Disabled";
-		
-		if (field==(*pmIter)->fieldEnd()) {
-		  PixLib::DBField *new_field = confDBInterface->makeField("general_TriggerReplication");
-		  confDBInterface->DBProcess(new_field,PixLib::COMMIT,rep_mode);
-		  (*pmIter)->pushField(new_field);
-		} else {
-		  confDBInterface->DBProcess(field, COMMIT, rep_mode);
-		}
-		
-		// Add general_enableCmdLvl1 if needed
-		field = (*pmIter)->findField("general_enableCmdLvl1");
-		if (field==(*pmIter)->fieldEnd()) {
-		  // field not existing!
-		  bool dbval=true;
-		  //		  std::cout << "Add general_enableCmdLvl1" << std::endl;
-		  PixLib::DBField *new_field = confDBInterface->makeField("general_enableCmdLvl1");
-		  confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
-		  (*pmIter)->pushField(new_field);
-		} else {
-		  bool dbval=true;
-		  confDBInterface->DBProcess(field, COMMIT, dbval);
-		}
+  QApplication::processEvents();
+  
+  // create config of PixDcs and PixModuleGroup objects
+  std::vector<PixModuleGroup*> grps;
+  std::vector<PixDcs*> regs;
 
-		// set channel mode for BIC config
-		if(ScanParameters.adapterCardFlavour==1){
-		  for(int iFe=0; iFe<4; iFe++){
-		    int dbval = 0;
-		    if(roChanInput.find(boardid)!=roChanInput.end())
-		      dbval = roChanInput[boardid].at(iFe);
-		    std::stringstream sv;
-		    sv << "general_readoutChannelsInput";
-		    sv << iFe;
-		    field = (*pmIter)->findField(sv.str());
-		    if (field==(*pmIter)->fieldEnd()) {
-		      // field not existing!
-		      PixLib::DBField *new_field = confDBInterface->makeField(sv.str());
-		      confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
-		      (*pmIter)->pushField(new_field);
-		    } else{
-		      confDBInterface->DBProcess((*field),PixLib::COMMIT,dbval);
-		    }
-		    dbval=0;
-		    if(roChanFeid.find(boardid)!=roChanFeid.end())
-		      dbval = roChanFeid[boardid].at(iFe);
-		    std::stringstream sv2;
-		    sv2 << "general_readoutChannelReadsChip";
-		    sv2 << iFe;
-		    field = (*pmIter)->findField(sv2.str());
-		    if (field==(*pmIter)->fieldEnd()) {
-		      // field not existing!
-		      PixLib::DBField *new_field = confDBInterface->makeField(sv2.str());
-		      confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
-		      (*pmIter)->pushField(new_field);
-		    } else{
-		      confDBInterface->DBProcess((*field),PixLib::COMMIT,dbval);
-		    }
-		  }
-		}
-		confDBInterface->DBProcess((*pmIter), PixLib::COMMITREPLACE);
-	      }
-	    }
+  for (int i=0; i<ScanParameters.boards.count(); i++){
+    // get list of modules: should be exactly one!
+    std::vector<std::string> mnames;
+    std::vector<std::string> mDecNames;
+    std::string mname="", decName="";
+    ConfigCreatorHelper::listModuleNames(ScanParameters.config_files[i].toStdString(), mnames, mDecNames);
+    if(mnames.size()==0){
+      std::stringstream msg;
+      msg << "STControlEngine::createMultiBoardConfig : file " 
+          << ScanParameters.config_files[i].toStdString() << " doesn't contain any module entry; skip to next board,";
+      toErrLog(msg.str().c_str());
+    } else {
+      // compare to ScanParameters.config_modules[i].toStdString()
+      if(ScanParameters.config_modules[i]!=""){
+	for(unsigned int k=0; k<mnames.size(); k++){
+	  if(mnames.at(k) == ScanParameters.config_modules[i].toStdString()){
+	    mname = mnames.at(k);
+	    decName = mDecNames.at(k);
+	    break;
 	  }
-	
+	}
+      } else if (mnames.size()==1) {
+	// no name specified and no choice, so take what is in the file
+	mname = mnames.at(0);
+	decName = mDecNames.at(0);
+      }
+      if(mname==""){
+	// if no match: warning message and continue with 0th entry
+	mname = mnames.at(0);
+	decName = mDecNames.at(0);
+	std::stringstream msg;
+	msg << "STControlEngine::createMultiBoardConfig : multiple modules found in " << ScanParameters.config_files[i].toStdString() 
+	    << " but none specified or given name doesn't match: will used 1st module (" << mname << ").";
+	toLog(msg.str().c_str());
       }
     }
+
+    // no module name: nothing to do
+    if(mname=="") continue;
+
+    // read module info from each org. config. file
+    std::string mccFlv, feFlv;
+    int nFe, nFeRows;
+    ConfigCreatorHelper::readModuleInfo(ScanParameters.config_files[i].toLatin1().data(), decName, mccFlv, feFlv, nFe, nFeRows);
+    mnames.clear();
+    mnames.push_back(mname);
+    int ctrlOpt = ScanParameters.adapterCardFlavour;
+    std::string type = "USBPixController";
+    if(ctrlOpt>9) type = "USB3PixController";
+    if(ctrlOpt>19) ctrlOpt = ctrlOpt%10;
+    if(ctrlOpt==30){
+      type = "USBI3PixController";
+      ctrlOpt = -1;
+    }
+    std::stringstream a;
+    a << grps.size();
+    std::map<int, std::vector<std::string> > dbFnames;
+    std::map<int, std::vector<std::string> > dbMnames;
+    std::vector<std::string> tmpVec;
+    tmpVec.push_back(ScanParameters.config_files[i].toLatin1().data());
+    dbFnames[0] = tmpVec;
+    tmpVec.clear();
+    tmpVec.push_back(mDecNames[0]);
+    dbMnames[0] = tmpVec;    
+    PixLib::PixModuleGroup* grp = ConfigCreatorHelper::createPixModGrp("ModuleGroup"+a.str(), type, mnames, feFlv, nFe, nFeRows, mccFlv, 
+								       ctrlOpt, dbFnames, dbMnames);
+    Config &cfg = grp->getPixController()->config();
+    if(cfg["general"].name()!="__TrashConfGroup__"){
+      if(cfg["general"]["BoardID"].name()!="__TrashConfObj__")
+	((ConfInt&)cfg["general"]["BoardID"]).setValue(ScanParameters.boards[i].toInt());
+      if(cfg["general"]["FirmwareFile"].name()!="__TrashConfObj__")
+	((ConfString&)cfg["general"]["FirmwareFile"]).m_value = ScanParameters.fpga_files[i].toLatin1().data();
+      if(cfg["general"]["uCFirmwareFile"].name()!="__TrashConfObj__")
+	((ConfString&)cfg["general"]["uCFirmwareFile"]).m_value = ScanParameters.uc_firmware.toLatin1().data();
+    }
+    grps.push_back(grp);
+    std::stringstream b;
+    b << regs.size();
+    PixLib::PixDcs *dcs = ConfigCreatorHelper::createPixDcs(ctrlOpt, ("USB regulators "+b.str()), regs.size(), (void*) grp->getPixController());
+    if(dcs!=0) regs.push_back(dcs);
   }
 
-  delete confDBInterface;
+  PixConfDBInterface *myDB = PixLib::createDefaultDB(filename.toLatin1().data(), 0);
+  DBInquire *appInq = findAppInq(myDB, 0);
+  for(unsigned int iGrp=0; iGrp<grps.size(); iGrp++){
+    std::cout << "Multiboard: processing group " << grps[iGrp]->getName() << std::endl;
+    std::string name, decName;
+    // new module group inquire
+    name="PixModuleGroup";
+    decName = appInq->getDecName() + std::string(grps[iGrp]->getName());
+    DBInquire *grpInq = myDB->makeInquire(name, decName);
+    appInq->pushRecord(grpInq);
+    myDB->DBProcess(appInq,COMMITREPLACE);
+    myDB->DBProcess(grpInq,COMMIT);
+    grps[iGrp]->config().write(grpInq);
+  }
+  // add regulators as DCS inquire
+  for(unsigned int dcsId=0; dcsId<regs.size(); dcsId++){
+    std::string name, decName;
+    std::stringstream a;
+    a<<dcsId;
+    name="PixDcs";
+    decName = appInq->getDecName() + regs[dcsId]->config().name() + "_"+a.str();
+    DBInquire *dcsInq = myDB->makeInquire(name, decName);
+    appInq->pushRecord(dcsInq);
+    myDB->DBProcess(appInq,COMMITREPLACE);
+    myDB->DBProcess(dcsInq,COMMIT);
+    regs[dcsId]->config().write(dcsInq);
+  }
+  delete myDB;
+  // load from RootDB
   loadDB(filename.toLatin1().data());
+
+// JGK: these functions should eventually be removed entirely
+//   addCrateToDB("TestApp", myGrpDataV, filename.toLatin1().data(), tUSBSys);
+//   addUsbDcs
+
+
+//   //  std::cout << "STControlEngine::createMultiBoardConfig: filename = " << std::string(filename.toLatin1().data()) << std::endl;
+
+//   // create config
+//   std::vector<grpData> myGrpDataV;
+//   std::string fullModDecName;
+//   std::string requestedModDecName;
+//   QStringList modNames;
+//   bool found;
+//   std::map< int, std::vector<int> > roChanInput;
+//   std::map< int, std::vector<int> > roChanFeid;
+//   for (int i=0; i<ScanParameters.boards.count(); i++)
+//     {
+//       // Search Module
+//       requestedModDecName = "";
+//       found=false;
+//       std::string flvValue = "FE_I4A";
+
+//       PixConfDBInterface * confDBInterface = DBEdtEngine::openFile(ScanParameters.config_files[i].toLatin1().data(), false); 
+//       DBInquire *root = confDBInterface->readRootRecord(1);
+//       for(recordIterator appIter = root->recordBegin();appIter!=root->recordEnd();appIter++){
+// 	if((int)(*appIter)->getName().find("application")!=(int)std::string::npos){
+// 	  // loop over inquires in crate inquire and create a PixModuleGroup when an according entry is found
+// 	  for(recordIterator pmgIter = (*appIter)->recordBegin();pmgIter!=(*appIter)->recordEnd();pmgIter++){
+// 	    if((*pmgIter)->getName().find("PixModuleGroup")!=std::string::npos){
+// 	      for(recordIterator pmIter = (*pmgIter)->recordBegin();pmIter!=(*pmgIter)->recordEnd();pmIter++){
+// 		if((*pmIter)->getName().find("PixController")!=std::string::npos && ScanParameters.adapterCardFlavour==1){
+// 		  std::vector<int> storeval_in(4,0);
+// 		  std::vector<int> storeval_fe(4,0);
+// 		  for(int iFe=0; iFe<4; iFe++){
+// 		    std::stringstream sv;
+// 		    sv << "general_readoutChannelsInput";
+// 		    sv << iFe;
+// 		    fieldIterator field = (*pmIter)->findField(sv.str());
+// 		    int dbval = 0;
+// 		    if (field!=(*pmIter)->fieldEnd()) {
+// 		      confDBInterface->DBProcess((*field),PixLib::READ,dbval);
+// 		      storeval_in.at(iFe)=dbval;
+// 		    }
+// 		    std::stringstream sv2;
+// 		    sv2 << "general_readoutChannelReadsChip";
+// 		    sv2 << iFe;
+// 		    field = (*pmIter)->findField(sv2.str());
+// 		    if (field!=(*pmIter)->fieldEnd()) {
+// 		      confDBInterface->DBProcess((*field),PixLib::READ,dbval);
+// 		      storeval_fe.at(iFe)=dbval;
+// 		    }
+// 		  }
+// 		  roChanInput[ScanParameters.boards[i].toInt()]=storeval_in;
+// 		  roChanFeid [ScanParameters.boards[i].toInt()]=storeval_fe;
+// 		}
+// 		if((*pmIter)->getName().find("PixModule")!=std::string::npos && !found){
+// 		  fullModDecName = (*pmIter)->getDecName();
+// 		  requestedModDecName = (*pmIter)->getDecName();
+// 		  getDecNameCore(requestedModDecName);
+// 		  // if specific module was requested, just accept this
+// 		  // otherwise use first module found
+// 		  if (requestedModDecName==ScanParameters.config_modules[i].toStdString() || ScanParameters.config_modules[i]==""){
+// 		    found=true;
+// 		    // read FE flavour to use it for USBPixDcs channel settings
+// 		    fieldIterator f;
+// 		    f = (*pmIter)->findField("general_FE_Flavour");
+// 		    if(f!=(*pmIter)->fieldEnd()) confDBInterface->DBProcess(*f,READ,flvValue);
+// 		    break;
+// 		  }
+// 		}
+// 	      }
+// 	    }
+// 	  }
+// 	}
+//       }
+//       delete confDBInterface; //closes file
+      
+//       if (requestedModDecName=="") return;
+      
+//       bool new_mod_name=false;
+//       int mod_counter=1;
+//       std::string modBaseName=requestedModDecName;
+//       while (!new_mod_name)
+// 	{
+// 	  new_mod_name = true;
+// 	  for (int i = 0; i < modNames.size(); ++i)
+// 	    {
+// 	      if (modNames.at(i).toStdString() == requestedModDecName) 
+// 		{
+// 		  new_mod_name=false;
+// 		  break;
+// 		}
+// 	    }
+	  
+// 	  if (!new_mod_name)
+// 	    {
+// 	      requestedModDecName=modBaseName + QString::number(mod_counter).toStdString();
+// 	      mod_counter++;
+// 	    }
+// 	}
+      
+//       modNames.push_back(QString::fromStdString(requestedModDecName));
+      
+//       grpData myGrpData;
+//       myGrpData.myROD.slot = ScanParameters.boards[i].toInt();
+//       myGrpData.myROD.mode = (ScanParameters.adapterCardFlavour==1)?2:0;
+//       myGrpData.myBOC.mode = -1;
+//       myGrpData.myBOC.haveBoc = false;
+//       myGrpData.cfgType = 1;
+//       myGrpData.myROD.IPfile = ScanParameters.fpga_files[i].toLatin1().data();
+//       myGrpData.myROD.IDfile = ScanParameters.uc_firmware.toLatin1().data();
+//       modData myModD;
+//       myModD.fname = ScanParameters.config_files[i].toLatin1().data();
+//       myModD.modname= requestedModDecName;
+//       myModD.connName= fullModDecName;
+//       myGrpData.cfgType = 2; // read cfg. from file as is
+//       myModD.modID   = 0;
+//       myModD.grpID   = 0;
+//       myModD.active  = true;
+//       myModD.roType  = 0;
+//       myModD.inLink  = 0;
+//       for(int olID=0;olID<4;olID++)
+// 	myModD.outLink[olID]  = 0;
+//       myModD.slot = 0;
+//       myModD.pp0 = -1;
+//       myModD.assyType = 1;
+//       myModD.assyID = 1;
+//       if(flvValue == "FE_I4B")
+// 	myModD.assyID = 2;
+//       myModD.pos_on_assy = 0;
+//       myGrpData.myMods.push_back(myModD);
+//       myGrpDataV.push_back(myGrpData);
+//     }
+  
+//   // Create Multiboard Config
+//   addCrateToDB("TestApp", myGrpDataV, filename.toLatin1().data(), tUSBSys);
+//   loadDB(filename.toLatin1().data());
+  
+//   QApplication::processEvents();
+  
+//   // unload config
+//   clear();
+//   setPixConfDBFname("");
+
+//   // alter settings as requested from scan config
+//   std::string channel;
+//   PixConfDBInterface * confDBInterface = DBEdtEngine::openFile(filename.toLatin1().data(), true); 
+//   DBInquire *root = confDBInterface->readRootRecord(1);
+//   for(recordIterator appIter = root->recordBegin();appIter!=root->recordEnd();appIter++){
+//     if((int)(*appIter)->getName().find("application")!=(int)std::string::npos){
+//       // loop over inquires in crate inquire and create a PixModuleGroup when an according entry is found
+//       for(recordIterator pmgIter = (*appIter)->recordBegin();pmgIter!=(*appIter)->recordEnd();pmgIter++){
+// 	if((*pmgIter)->getName().find("PixModuleGroup")!=std::string::npos)
+// 	  {
+// 	    // Add TriggerDelay if neccessary
+// 	    fieldIterator field = (*pmgIter)->findField("general_TriggerDelay");
+// 	    if (field==(*pmgIter)->fieldEnd()) {
+// 	      int dbval=0;
+// 	      PixLib::DBField *new_field = confDBInterface->makeField("general_TriggerDelay");
+// 	      confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
+// 	      (*pmgIter)->pushField(new_field);
+// 	      confDBInterface->DBProcess((*pmgIter), PixLib::COMMITREPLACE);
+// 	    }
+	    
+// 	    for(recordIterator pmIter = (*pmgIter)->recordBegin();pmIter!=(*pmgIter)->recordEnd();pmIter++){
+// 	      if((*pmIter)->getName().find("PixController")!=std::string::npos){
+		
+// 		// get board id
+// 		fieldIterator field = (*pmIter)->findField("general_BoardID");
+// 		int boardid;
+// 		int board_index=0;
+// 		if (field!=(*pmIter)->fieldEnd())
+// 		  {
+// 		    confDBInterface->DBProcess(field, PixLib::READ, boardid);
+		    
+// 		    // board index for this id
+// 		    while (board_index < ScanParameters.boards.count() && ScanParameters.boards[board_index]!=QString::number(boardid))
+// 		      board_index++;
+// 		    //std::cout << "boardid: " << boardid << " with index " << board_index << std::endl;
+// 		  }
+		
+// 		// Set RJ45 to on
+// 		field = (*pmIter)->findField("general_enableRJ45");
+// 		bool dbval=true;
+// 		if (field==(*pmIter)->fieldEnd()) {
+// 		  PixLib::DBField *new_field = confDBInterface->makeField("general_enableRJ45");
+// 		  confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
+// 		  (*pmIter)->pushField(new_field);
+// 		} else {
+// 		  confDBInterface->DBProcess(field, COMMIT, dbval);
+// 		}
+		
+// 		// TODO TB: This feature has been removed, trigger replication mode is always "Disabled"
+// 		// Set trigger replication mode
+// 		field = (*pmIter)->findField("general_TriggerReplication");
+// 		std::string rep_mode = "Disabled";
+		
+// 		if (field==(*pmIter)->fieldEnd()) {
+// 		  PixLib::DBField *new_field = confDBInterface->makeField("general_TriggerReplication");
+// 		  confDBInterface->DBProcess(new_field,PixLib::COMMIT,rep_mode);
+// 		  (*pmIter)->pushField(new_field);
+// 		} else {
+// 		  confDBInterface->DBProcess(field, COMMIT, rep_mode);
+// 		}
+		
+// 		// Add general_enableCmdLvl1 if needed
+// 		field = (*pmIter)->findField("general_enableCmdLvl1");
+// 		if (field==(*pmIter)->fieldEnd()) {
+// 		  // field not existing!
+// 		  bool dbval=true;
+// 		  //		  std::cout << "Add general_enableCmdLvl1" << std::endl;
+// 		  PixLib::DBField *new_field = confDBInterface->makeField("general_enableCmdLvl1");
+// 		  confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
+// 		  (*pmIter)->pushField(new_field);
+// 		} else {
+// 		  bool dbval=true;
+// 		  confDBInterface->DBProcess(field, COMMIT, dbval);
+// 		}
+
+// 		// set channel mode for BIC config
+// 		if(ScanParameters.adapterCardFlavour==1){
+// 		  for(int iFe=0; iFe<4; iFe++){
+// 		    int dbval = 0;
+// 		    if(roChanInput.find(boardid)!=roChanInput.end())
+// 		      dbval = roChanInput[boardid].at(iFe);
+// 		    std::stringstream sv;
+// 		    sv << "general_readoutChannelsInput";
+// 		    sv << iFe;
+// 		    field = (*pmIter)->findField(sv.str());
+// 		    if (field==(*pmIter)->fieldEnd()) {
+// 		      // field not existing!
+// 		      PixLib::DBField *new_field = confDBInterface->makeField(sv.str());
+// 		      confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
+// 		      (*pmIter)->pushField(new_field);
+// 		    } else{
+// 		      confDBInterface->DBProcess((*field),PixLib::COMMIT,dbval);
+// 		    }
+// 		    dbval=0;
+// 		    if(roChanFeid.find(boardid)!=roChanFeid.end())
+// 		      dbval = roChanFeid[boardid].at(iFe);
+// 		    std::stringstream sv2;
+// 		    sv2 << "general_readoutChannelReadsChip";
+// 		    sv2 << iFe;
+// 		    field = (*pmIter)->findField(sv2.str());
+// 		    if (field==(*pmIter)->fieldEnd()) {
+// 		      // field not existing!
+// 		      PixLib::DBField *new_field = confDBInterface->makeField(sv2.str());
+// 		      confDBInterface->DBProcess(new_field,PixLib::COMMIT,dbval);
+// 		      (*pmIter)->pushField(new_field);
+// 		    } else{
+// 		      confDBInterface->DBProcess((*field),PixLib::COMMIT,dbval);
+// 		    }
+// 		  }
+// 		}
+// 		confDBInterface->DBProcess((*pmIter), PixLib::COMMITREPLACE);
+// 	      }
+// 	    }
+// 	  }
+	
+//       }
+//     }
+//   }
+
+//   delete confDBInterface;
+//   loadDB(filename.toLatin1().data());
 }
 void STControlEngine::setShowErrorPopups( bool showErr){
   m_showRodWin = showErr;
