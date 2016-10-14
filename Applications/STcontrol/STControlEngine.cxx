@@ -200,7 +200,7 @@ STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QO
 	eudaq_rc_address="";
 
   if (rc_pos>=0 && eudaq_rc_address!="") {
-	  m_STControlProducer = std::unique_ptr<STControlProducer>(new STControlProducer(*this, "name", eudaq_rc_address.toStdString()) );
+	  m_STControlProducer = std::unique_ptr<STControlProducer>(new STControlProducer(*this, "STControlInterface", eudaq_rc_address.toStdString()) );
   }
 #endif
 }
