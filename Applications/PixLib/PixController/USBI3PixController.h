@@ -228,6 +228,7 @@ public:
 
 private:
   void configInit();         //! Init configuration structure
+  void procSourceScan();
 
   SiUSBDevice* m_BoardHandle;        //JW: Handle des USB Boards
 

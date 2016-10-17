@@ -41,6 +41,7 @@
 #include <processor.h>
 #include <sstream>
 #include <fstream>
+#include <thread>
 
 #define UPC_DEBUG false
 
@@ -1084,6 +1085,33 @@ void USBI3PixController::startScanDelegated(PixScan& scn) {                     
     m_triggerRate = 0;
     m_eventRate = 0;
     m_USBreg->StartMeasurement();
+    std::thread scanThread = std::thread(&USBI3PixController::procSourceScan, this);// start SRAM processing in a thread
+  }
+}
+
+void USBI3PixController::procSourceScan() {
+  bool sramReadoutReady, sramFull, measurementPause, measurementRunning;
+  int sramFillLevel=0;
+  int NumberOfTriggers=0;
+  int NumberOfHitWords=0;
+  int NumberOfEOEWords=0;
+
+  m_USBreg->GetSourceScanStatus(sramReadoutReady, sramFull, measurementPause, measurementRunning, sramFillLevel, NumberOfTriggers, NumberOfHitWords, NumberOfEOEWords);
+  if(measurementRunning && sramFull && sramReadoutReady) { // JJ: readout during scan when SRAM is full
+    if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: MeasurementRunning && SRAMFullSignal && SRAMReadoutReadySignal => reading SRAM..."<<endl;
+    m_USBreg->ReadSRAM();
+    makeSourceScanHistos();
+    m_USBreg->WriteTurboDAQFromRawData(m_SourceFilename.c_str(), m_NewRawDataFile, false); // JJ: do not close file
+    m_NewRawDataFile = false; // JJ: from now on append data to existing file, do not overwrite
+    m_USBreg->ClearSRAM();
+    m_SourceScanDone=false;
+  } else if(!measurementRunning && sramReadoutReady) { // JJ: readout at the end of scan when desired number of hits is reached
+    if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: !MeasurementRunning && SRAMReadoutReadySignal => reading SRAM..."<<endl;
+    m_USBreg->ReadSRAM();
+    makeSourceScanHistos();
+    m_USBreg->WriteTurboDAQFromRawData(m_SourceFilename.c_str(), m_NewRawDataFile, true); // JJ: close file
+    m_USBreg->ClearSRAM();
+    m_SourceScanDone=true;
   }
 }
 
@@ -1466,6 +1494,8 @@ int  USBI3PixController::nTrigger() {                                           
     return nMasks;
   } else { // JW: Source scan, external trigger
     m_USBreg->GetSourceScanStatus(m_sramReadoutReady, m_sramFull, m_measurementPause, m_measurementRunning, m_sramFillLevel, NumberOfTriggers, NumberOfHitWords, NumberOfEOEWords);
+    if(UPC_DEBUG) cout<<"DEBUG: SRAMReadoutReadySignal: "<<(m_sramReadoutReady?"true":"false")<<" MeasurementRunning: "<<(m_measurementRunning?"true":"false")<<" NumberOfTriggers: "<<  NumberOfTriggers
+		      <<", NumberOfHitWords: " << NumberOfHitWords << ", NumberOfEOEWords: " << NumberOfEOEWords <<endl;
     // not available on FW, so set here manually
     m_tluVeto = (m_sramFillLevel>m_sramReadoutAt) && m_testBeamFlag; 
     m_triggerRate= 0; // not available
@@ -1483,28 +1513,6 @@ int  USBI3PixController::nTrigger() {                                           
       break;
     }
     
-    if(UPC_DEBUG) cout<<"DEBUG: SRAMReadoutReadySignal: "<<(m_sramReadoutReady?"true":"false")<<" MeasurementRunning: "<<(m_measurementRunning?"true":"false")<<" NumberOfTriggers: "<<  NumberOfTriggers
-		      <<", NumberOfHitWords: " << NumberOfHitWords << ", NumberOfEOEWords: " << NumberOfEOEWords <<endl;
-    
-    if(m_measurementRunning && m_sramFull && m_sramReadoutReady) { // JJ: readout during scan when SRAM is full
-      if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: MeasurementRunning && SRAMFullSignal && SRAMReadoutReadySignal => reading SRAM..."<<endl;
-      m_USBreg->ReadSRAM();
-      makeSourceScanHistos();
-      m_USBreg->WriteTurboDAQFromRawData(m_SourceFilename.c_str(), m_NewRawDataFile, false); // JJ: do not close file
-      m_NewRawDataFile = false; // JJ: from now on append data to existing file, do not overwrite
-      m_USBreg->ClearSRAM();
-      m_SourceScanDone=false;
-    } else if(!m_measurementRunning && m_sramReadoutReady) { // JJ: readout at the end of scan when desired number of hits is reached
-      if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: !MeasurementRunning && SRAMReadoutReadySignal => reading SRAM..."<<endl;
-      m_USBreg->ReadSRAM();
-      makeSourceScanHistos();
-      m_USBreg->WriteTurboDAQFromRawData(m_SourceFilename.c_str(), m_NewRawDataFile, true); // JJ: close file
-      m_USBreg->ClearSRAM();
-      m_SourceScanDone=true;
-    }
-    //m_USBreg->GetSourceScanStatus(SRAMReadoutReadySignal, SRAMFullSignal, MeasurementPauseSignal, MeasurementRunning, SRAMFillingLevel, NumberOfTriggers, NumberOfHitWords, NumberOfEOEWords);
-    m_USBreg->GetSourceScanStatus(m_sramReadoutReady, m_sramFull, m_measurementPause, m_measurementRunning, m_sramFillLevel, NumberOfTriggers, NumberOfHitWords, NumberOfEOEWords);
-
     if(UPC_DEBUG) cout<<"DEBUG: sending No. triggers to application: " << retNTrigger << endl;
     return retNTrigger;
   }
