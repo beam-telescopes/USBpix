@@ -649,17 +649,36 @@ void STRodCrate::loadDcs( DBInquire *dcsInq ){
   try{
     // Create PixDcs object
     fieldIterator f = dcsInq->findField("ActualClassName");
-    dcsInq->getDB()->DBProcess(f,READ, dcsName);
+    if(f!=dcsInq->fieldEnd())
+      dcsInq->getDB()->DBProcess(f,READ, dcsName);
+    else{
+      // decorate name should also contain class name
+      dcsName = dcsInq->getDecName();
+      getDecNameCore(dcsName); // strip off path
+      // strip off index if needed
+      int pos = dcsName.find("_");
+      if(pos!=(int)std::string::npos)
+        dcsName.erase(pos,dcsName.length()-pos);
+    }
     void *interface = 0;
     // check if name  of a group with a USB controller was specified
     // if so, get the pointer and give it to PixDcs constructor
-    f = dcsInq->findField("USBPixController");
     std::string ctrlName="???";
+    f = dcsInq->findField("general_USBPixController");
     if(f!=dcsInq->fieldEnd()){
       dcsInq->getDB()->DBProcess(f,READ, ctrlName);
       for( std::vector<STPixModuleGroup *>::iterator group = m_pixModuleGroups.begin(); 
 	   group != m_pixModuleGroups.end(); group++ ) {
 	if((*group)->getName()==ctrlName) interface = (void*)(*group)->getPixController();
+      }
+    } else { // for backward compatibility
+      f = dcsInq->findField("USBPixController");
+      if(f!=dcsInq->fieldEnd()){
+	dcsInq->getDB()->DBProcess(f,READ, ctrlName);
+	for( std::vector<STPixModuleGroup *>::iterator group = m_pixModuleGroups.begin(); 
+	     group != m_pixModuleGroups.end(); group++ ) {
+	  if((*group)->getName()==ctrlName) interface = (void*)(*group)->getPixController();
+	}
       }
     }
     if(interface!=0 || ctrlName=="???") 
