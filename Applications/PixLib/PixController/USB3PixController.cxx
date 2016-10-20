@@ -23,7 +23,7 @@
 #include <exception>
 #include <fstream>
 
-#define U3PC_DEBUG false
+#define U3PC_DEBUG false 
 
 using namespace std;
 
@@ -34,6 +34,7 @@ USB3PixController::USB3PixController(PixModuleGroup &modGrp, DBInquire *dbInquir
         fe_to_ch = {{-2,-2,-2,-2,-2,-2,-2,-2}};
 	configInit();
 	m_conf->read(dbInquire);
+	m_circularBuffer.emplace_back(std::make_shared<UintCircBuff1MByte>());	
 }
 
 USB3PixController::USB3PixController(PixModuleGroup &modGrp, int cardFlavour) : PixController(modGrp) {

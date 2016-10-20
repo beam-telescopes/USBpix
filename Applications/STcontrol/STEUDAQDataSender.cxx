@@ -6,6 +6,7 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <bitset>
 
 STEUDAQDataSender::STEUDAQDataSender(std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr): 
 eudaq::Producer("MyDataSender", rcAddr), 
@@ -17,33 +18,54 @@ m_killThread(false){
 void STEUDAQDataSender::monitorBuffer(){
 	std::cout << "Started monitoring buffer!" << std::endl;
 	bool waitedGracePeriod = false;
+
+	eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE("EXAMPLE", m_runNo));
+	SendEvent(bore);	
+	std::cout << "Sent BORE" << std::endl;
+
+	std::map<int,std::vector<uint32_t>> dataMap;
+	std::map<int,int> triggerMap;
+
+	triggerMap[0] = -1;
+
 	while(true){
 		std::cout << "Monitoring ... buffer has size: " << m_circBuffVec.size() << std::endl;
-		//std::map<int, std:vector<uint32_t>> dataPackages;
-		
+
 		for(auto& buffer: m_circBuffVec) {
 			uint32_t element;
-			int currentTriggerNo = -1;
-			std::vector<uint32_t> data;
+			auto& data = dataMap[0];
+			auto currentTriggerNo =  triggerMap.at(0);
+
 			while(buffer->pop(element)) {
-				//std::cout << "Popped element: " << element << ", ";
+				std::cout << "Popped element: " << std::bitset<32>(element) << std::endl;
 	      		if( TRIGGER_WORD_MACRO(element) ){
 					//in case we get a new trigger, we need to send the old data to eudaq, but only if it's not the first trigger
 					if(currentTriggerNo!=-1){
 						eudaq::RawDataEvent event("EXAMPLE", m_runNo, currentTriggerNo-1);
 						event.AddBlock(0, data);
 						SendEvent(event);
+						data.clear();
+						std::cout << "Sent trigger: " << currentTriggerNo-1 << std::endl;
 					}
 					uint32_t nextElement;
-					buffer->pop(nextElement);
-		  			currentTriggerNo = TRIGGER_NUMBER_MACRO2(element, nextElement)%TLU_TRIGGER_AMOUNT;
-					std::cout << "Found trigger number: " << currentTriggerNo << std::endl;
+					auto nextWorked = buffer->pop(nextElement);
+					if(nextWorked) {
+		  				currentTriggerNo = TRIGGER_NUMBER_MACRO2(element, nextElement)%TLU_TRIGGER_AMOUNT;
+						std::cout << "Found trigger number: " << currentTriggerNo-1 << std::endl;
+					} else {
+						std::cout << "PANIC PANIC PANIC!!!!" << std::endl;
+						std::cout << "PANIC PANIC PANIC!!!!" << std::endl;
+						std::cout << "PANIC PANIC PANIC!!!!" << std::endl;
+						std::cout << "PANIC PANIC PANIC!!!!" << std::endl;
+						std::cout << "PANIC PANIC PANIC!!!!" << std::endl;
+					}
 				} else {
-					std::cout << "Found other data" << std::endl;
+					//std::cout << "Found other data" << std::endl;
 					data.emplace_back(element);
 				}
 			}
-			std::cout << std::endl;
+			std::cout << "Next trigger to be sent should be: " << currentTriggerNo-1 << std::endl;
+			triggerMap[0] = currentTriggerNo;
 		}
 		//	std::this_thread::yield();
 		std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -59,6 +81,7 @@ void STEUDAQDataSender::monitorBuffer(){
 }
 
 void STEUDAQDataSender::OnStartRun (unsigned param){
+
 	m_killThread = false;
 	m_runNo = param;
 	SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running!");

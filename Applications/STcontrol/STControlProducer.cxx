@@ -52,7 +52,7 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 		return;
 	}
 
-	scan_options.SRAM_READOUT_AT = config.Get("SRAM_READOUT_AT", 2);
+	scan_options.SRAM_READOUT_AT = config.Get("SRAM_READOUT_AT", 13);
 	scan_options.UseSingleBoardConfig = (QString::fromStdString(config.Get("UseSingleBoardConfigs", "no")).toLower()=="yes");
 	scan_options.config_file = QString::fromStdString( config.Get("config_file", ""));
 	scan_options.fpga_file = QString::fromStdString( config.Get("fpga_file", ""));
@@ -138,9 +138,12 @@ void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 	std::cout << "Configuring" << std::endl;
 	auto pixControllers = getPixControllers();
 	for(auto& controller: pixControllers) {
-		m_dataSenders.emplace_back(std::unique_ptr<STEUDAQDataSender>(new STEUDAQDataSender(controller->getCircularBufferVec(), m_rcAddress)));
-		std::cout << "Added data sender for board: " << controller->getBoardID() << std::endl;
-		std::cout << "Added data sender for board: " << &controller->getCircularBufferVec() << std::endl;
+		auto boardID = controller->getBoardID();
+		if(m_dataSenders.find(boardID) == m_dataSenders.end()){ 
+			m_dataSenders[boardID] = std::unique_ptr<STEUDAQM3DataSender>(new STEUDAQM3DataSender(controller->getCircularBufferVec(), m_rcAddress));
+			std::cout << "Added data sender for board: " << controller->getBoardID() << std::endl;
+			std::cout << "Added data sender for board: " << &controller->getCircularBufferVec() << std::endl;
+		}
 	}	
  	// configure modules
 	m_STControlEngine.configModules();
@@ -153,8 +156,7 @@ void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 	std::map<int, std::string> smff = m_STControlEngine.GetFeFlavours();
 	std::vector<int> feFlavours;
 	
-	for(size_t i=0; i<myBoards.size();i++)
-	{
+	for(size_t i=0; i<myBoards.size();i++) {
 		int feint=-1;
 		if	(smff[myBoards[i]]=="FE_I1")  feint = 1;
 		else if	(smff[myBoards[i]]=="FE_I2")  feint = 1;
@@ -199,12 +201,6 @@ bool STControlProducer::InitControllers(extScanOptions& ScanOptions) {
 	m_STControlEngine.initRods();
 	m_STControlEngine.initDcs();
 
-	auto nRods = m_STControlEngine.CtrlStatusSummary(); 
- 
-	if(nRods<=0) {
-		return false;
-    }
-
 	emit m_STControlEngine.powerOn();
 	return true;
 }
@@ -230,23 +226,13 @@ QString STControlProducer::CreateMultiBoardConfig(extScanOptions& ScanOptions) {
 }
 
 void STControlProducer::OnStartRun (unsigned param){
-//	for(auto& dataSender: m_dataSenders){
-//		std::cout << "Strating data sender!" << std::endl;
-//		auto workThread = dataSender->startThread();
-//		workThread.detach();
-//	}
 	SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running?!");
 	emit m_STControlEngine.startCurrentScan(QString("RunXX"), QString(""));
 }
 
-
 void STControlProducer::OnStopRun (){
+	emit m_STControlEngine.stopPixScan();
 	SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Confg?!");
-	auto pixControllers = getPixControllers();
-	for(auto& controller: pixControllers) {
-		controller->stopScan();
-	}	
-//	m_STControlEngine.stopPixScan();
 }
 
 void STControlProducer::OnTerminate (){}

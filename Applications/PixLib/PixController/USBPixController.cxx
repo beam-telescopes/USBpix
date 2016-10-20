@@ -47,8 +47,8 @@
 
 #include <cassert>
 
-#define UPC_DEBUG_GEN true
-#define UPC_DEBUG_FLAGS false
+#define UPC_DEBUG_GEN 1
+#define UPC_DEBUG_FLAGS 0 
 
 using namespace PixLib;
 using namespace std;
@@ -2569,10 +2569,16 @@ void USBPixController::sourceScan() { // Start a source scan
 	  m_USBpix->ResumeMeasurement();
 	  m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
 	  //m_USBpix->StartReadout();
-	} else if(measurementRunning  && m_testBeamFlag && (m_sramFull || m_tluVeto)) {
+	} else if(measurementRunning  && m_testBeamFlag && (m_sramFull || m_tluVeto) || (!measurementRunning  && m_testBeamFlag)) {
 		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: Testbeam(" << (*it) << ") => reading SRAM..."<<endl;
 			m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
 	  		m_USBpix->PauseMeasurement();
+			if(!measurementRunning) {
+				m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
+				m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
+				m_SourceScanEventQuantity = 0;
+			}
+
 			const int data_size = SRAM_WORDSIZE/MAX_CHIP_COUNT;
 			auto ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
 
@@ -2592,11 +2598,11 @@ void USBPixController::sourceScan() { // Start a source scan
 				unsigned int* di = new unsigned int[data_size];
 				m_USBpix->GetSRAMWordsRB(di, data_size, it - m_chipIds.begin());
         		for(size_t index = 0; index < data_size; ++index){
-					std::cout << di[index] << ", ";
+					//std::cout << di[index] << ", ";
 					if(di[index] == 0) break;
 					m_circularBuffer[it - m_chipIds.begin()]->push(di[index]);
 				}
-				std::cout << std::endl;	
+				//std::cout << std::endl;	
 				delete[] di;
 
         		if(m_fillSrcHistos){
@@ -2630,7 +2636,7 @@ void USBPixController::sourceScan() { // Start a source scan
 	stopScan();
       }
       if(UPC_DEBUG_GEN) cout<<"DEBUG: SRAMReadoutReady: "<<(m_sramReadoutReady?"true":"false")<<" SRAMFull: "<<(m_sramFull?"true":"false")<<" measurementPause: "<<(m_measurementPause?"true":"false")<<" measurementRunning: "<<(m_measurementRunning?"true":"false")<<" collectedTriggers: "<<m_collectedTriggers<<" collectedHits: "<<m_collectedHits<<" triggerRate: "<<m_triggerRate<<" eventRate: "<<m_eventRate<<" tluVeto: "<<m_tluVeto<<endl;
-      if(!m_measurementRunning && !m_testBeamFlag)
+      if(!m_measurementRunning)
 	// m_sourceScanDone has to be asserted here, not in startScan()
 	// USBpix::StartMeasurement() is called once, but not active during source scan
 	// if in testbeam mode, taken care of by getSourceScanData
