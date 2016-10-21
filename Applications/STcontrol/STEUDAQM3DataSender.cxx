@@ -23,7 +23,7 @@ void STEUDAQM3DataSender::monitorBuffer(){
 	std::cout << "Started monitoring buffer!" << std::endl;
 	bool waitedGracePeriod = false;
 
-	eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE("EXAMPLE", m_runNo));
+	eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE("USBPIX_M3", m_runNo));
 	SendEvent(bore);	
 	std::cout << "Sent BORE" << std::endl;
 
@@ -43,7 +43,7 @@ void STEUDAQM3DataSender::monitorBuffer(){
 				//In case the highest bit is set it is a trigger
 				if( element >> 31 ) {
 					if(currentTriggerNo != -1) {
-						eudaq::RawDataEvent event("EXAMPLE", m_runNo, currentTriggerNo-1+TLU_TRIGGER_AMOUNT*triggerRollover+triggerRollover);
+						eudaq::RawDataEvent event("USBPIX_M3", m_runNo, currentTriggerNo-1+TLU_TRIGGER_AMOUNT*triggerRollover+triggerRollover);
 						event.AddBlock(0, data);
 						SendEvent(event);
 						//std::cout << "Sent trigger: " << currentTriggerNo-1 << " payload: " << data.size() << std::endl;	
