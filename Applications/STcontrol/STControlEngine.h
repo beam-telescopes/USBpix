@@ -336,7 +336,9 @@ private: // Private attributes
   std::map<std::string, ChipTest*> m_chipTests;
   PixLib::Config *m_ctCfg;
 
+#ifdef WITHEUDAQ
   std::unique_ptr<STControlProducer> m_STControlProducer;
+#endif
 
   float readCurrent(float cutval); // dummy routine
   void processExecute();
