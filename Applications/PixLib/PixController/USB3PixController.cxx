@@ -333,7 +333,8 @@ void USB3PixController::sendModuleConfig(unsigned int moduleMask){              
 	detectReadoutChannels();
 }
 void USB3PixController::sendPixel(unsigned int moduleMask){                                            //! send specif. pixel register cfg.
-	if(U3PC_DEBUG) cout << "sendPixel" << endl;
+	if(U3PC_DEBUG) cout << "sendPixel 1" << endl;
+	sendModuleConfig(moduleMask); // dumb way out of not having this functionality - FIX ME! (JGK)
 }
 void USB3PixController::sendGlobal(unsigned int moduleMask){                                           //! send specif. gloabal register cfg.
 	if(U3PC_DEBUG) cout << "sendGlobal" << endl;
@@ -351,10 +352,12 @@ void USB3PixController::sendGlobal(unsigned int moduleMask){                    
 }
 
 void USB3PixController::sendPixel(unsigned int moduleMask, std::string regName, bool allDcsIdentical){  //! send pixel register cfg.
-	if(U3PC_DEBUG) cout << "sendPixel" << endl;
+	if(U3PC_DEBUG) cout << "sendPixel 2" << endl;
+	sendPixel(moduleMask);// dumb way out of not having this functionality - FIX ME! (JGK)
 }
 void USB3PixController::sendPixel(unsigned int moduleMask, std::string regName, int DC){  //! send pixel register cfg. for specific DC
-	if(U3PC_DEBUG) cout << "sendPixel" << endl;
+	if(U3PC_DEBUG) cout << "sendPixel 3" << endl;
+	sendPixel(moduleMask);// dumb way out of not having this functionality - FIX ME! (JGK)
 }
 void USB3PixController::sendGlobal(unsigned int moduleMask, std::string regName){                      //! send gloabal register cfg.
 	if(U3PC_DEBUG) cout << "sendGlobal" << endl;
