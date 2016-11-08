@@ -51,7 +51,7 @@
 
 #include <TMath.h>
 
-#define STEP_DEBUG 1 
+#define STEP_DEBUG 0
 
 using namespace PixLib;
 using namespace SctPixelRod;

@@ -959,7 +959,24 @@ void USBI3PixController::writeScanConfig(PixScan &scn) {                        
 }
 
 void USBI3PixController::finalizeScan(){
-  // needed at all?
+  if(UPC_DEBUG) cout << "USBPixController::finalizeScan" << endl;
+  
+  if (m_scanExcept)
+    std::rethrow_exception(m_scanExcept);
+  
+  if(m_scanThread.joinable()) 
+    m_scanThread.join();
+
+//   if (m_createdRawDataFile)
+//   {
+//     for (std::vector<int>::iterator it = m_chipIds.begin();
+//         it != m_chipIds.end(); it++)
+//     {
+//       writeRawDataFile(true, *it);
+//     }
+//     m_createdRawDataFile = false;
+//     m_USBpix->FinishFileFromRawData(m_rawDataFilename);
+//   }
 }
 void USBI3PixController::startScanDelegated(PixScan& scn) {                                                 //! Start a scan
   int maskstages;
@@ -1085,7 +1102,7 @@ void USBI3PixController::startScanDelegated(PixScan& scn) {                     
     m_triggerRate = 0;
     m_eventRate = 0;
     m_USBreg->StartMeasurement();
-    std::thread scanThread = std::thread(&USBI3PixController::procSourceScan, this);// start SRAM processing in a thread
+    m_scanThread = std::thread(&USBI3PixController::procSourceScan, this);// start SRAM processing in a thread
   }
 }
 
@@ -1096,22 +1113,29 @@ void USBI3PixController::procSourceScan() {
   int NumberOfHitWords=0;
   int NumberOfEOEWords=0;
 
-  m_USBreg->GetSourceScanStatus(sramReadoutReady, sramFull, measurementPause, measurementRunning, sramFillLevel, NumberOfTriggers, NumberOfHitWords, NumberOfEOEWords);
-  if(measurementRunning && sramFull && sramReadoutReady) { // JJ: readout during scan when SRAM is full
-    if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: MeasurementRunning && SRAMFullSignal && SRAMReadoutReadySignal => reading SRAM..."<<endl;
-    m_USBreg->ReadSRAM();
-    makeSourceScanHistos();
-    m_USBreg->WriteTurboDAQFromRawData(m_SourceFilename.c_str(), m_NewRawDataFile, false); // JJ: do not close file
-    m_NewRawDataFile = false; // JJ: from now on append data to existing file, do not overwrite
-    m_USBreg->ClearSRAM();
-    m_SourceScanDone=false;
-  } else if(!measurementRunning && sramReadoutReady) { // JJ: readout at the end of scan when desired number of hits is reached
-    if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: !MeasurementRunning && SRAMReadoutReadySignal => reading SRAM..."<<endl;
-    m_USBreg->ReadSRAM();
-    makeSourceScanHistos();
-    m_USBreg->WriteTurboDAQFromRawData(m_SourceFilename.c_str(), m_NewRawDataFile, true); // JJ: close file
-    m_USBreg->ClearSRAM();
-    m_SourceScanDone=true;
+  try{
+    while(!m_SourceScanDone){
+      m_USBreg->GetSourceScanStatus(sramReadoutReady, sramFull, measurementPause, measurementRunning, sramFillLevel, NumberOfTriggers, NumberOfHitWords, NumberOfEOEWords);
+      if(measurementRunning && sramFull && sramReadoutReady) { // JJ: readout during scan when SRAM is full
+	if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: MeasurementRunning && SRAMFullSignal && SRAMReadoutReadySignal => reading SRAM..."<<endl;
+	m_USBreg->ReadSRAM();
+	makeSourceScanHistos();
+	m_USBreg->WriteTurboDAQFromRawData(m_SourceFilename.c_str(), m_NewRawDataFile, false); // JJ: do not close file
+	m_NewRawDataFile = false; // JJ: from now on append data to existing file, do not overwrite
+	m_USBreg->ClearSRAM();
+	m_SourceScanDone=false;
+      } else if(!measurementRunning && sramReadoutReady) { // JJ: readout at the end of scan when desired number of hits is reached
+	if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: !MeasurementRunning && SRAMReadoutReadySignal => reading SRAM..."<<endl;
+	m_USBreg->ReadSRAM();
+	makeSourceScanHistos();
+	m_USBreg->WriteTurboDAQFromRawData(m_SourceFilename.c_str(), m_NewRawDataFile, true); // JJ: close file
+	m_USBreg->ClearSRAM();
+	m_SourceScanDone=true;
+      }
+      sleep(500);
+    }
+  }catch(...){
+    m_scanExcept = std::current_exception();
   }
 }
 

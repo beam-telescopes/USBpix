@@ -17,6 +17,7 @@
 #include "SiUSBLib.h"
 
 #include <queue>
+#include <thread>
 
 #include "PixScan.h"
 
@@ -273,6 +274,10 @@ private:
   bool m_tluVeto;
   int  m_triggerRate;
   int  m_eventRate;
+
+  // scan threads
+  std::thread m_scanThread;
+  std::exception_ptr m_scanExcept;
 
   //USB board classes
   //  ConfigFPGA*     m_FPGAconfig;
