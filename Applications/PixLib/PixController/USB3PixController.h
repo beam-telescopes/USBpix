@@ -136,7 +136,7 @@ class USB3PixController : public PixController {
 		SiUSBDevice* m_dev = nullptr;
 		std::unique_ptr<Board> board;
 		std::unique_ptr<Scan> current_scan;
-		std::unique_ptr<CommandBuffer> module_config;
+		//std::unique_ptr<CommandBuffer> module_config;
 
 		std::map<int, Frontend> frontends;
 		std::vector<int> fe_ids;
