@@ -258,9 +258,9 @@ void USB3PixController::writeModuleConfig(PixModule& mod){                      
 	frontends.clear();
 	fe_ids.clear();
 
-	module_config = std::unique_ptr<CommandBuffer>(new CommandBuffer);
+	//module_config = std::unique_ptr<CommandBuffer>(new CommandBuffer);
 
-	CommandBuffer &c = *module_config;
+	//CommandBuffer &c = *module_config;
 
 	for(auto fe = mod.feBegin(); fe != mod.feEnd(); fe++) {
 		int address = static_cast<ConfInt&>((*fe)->config()["Misc"]["Address"]).getValue();
@@ -279,18 +279,18 @@ void USB3PixController::writeModuleConfig(PixModule& mod){                      
 		fe_ids.push_back(address);
 
 		Frontend &f = frontends.at(address);
-		c += f.confMode();
+		//c += f.confMode();
 
 		f["Vthin_AltFine"] = 255;
 		f["Vthin_AltCoarse"] = 255;
 
-		c += f.flushWrites();
+		//c += f.flushWrites();
 
 		for(auto &reg : f) {
 			f[reg] = (*fe)->readGlobRegister(reg);
 		}
 
-		c += f.flushWrites();
+		//c += f.flushWrites();
 
 		for(auto &reg : {"FDAC", "TDAC"}) {
 			for(int column = 0; column < Frontend::COLUMNS; column++) {
@@ -298,7 +298,7 @@ void USB3PixController::writeModuleConfig(PixModule& mod){                      
 					f.setPixelRegister(reg, column, row, (*fe)->readTrim(reg)[column][row]);
 				}
 			}
-			c += f.writePixelRegister(reg);
+			//c += f.writePixelRegister(reg);
 		}
 
 		for(auto &reg : {"CAP1", "CAP0", "ILEAK", "ENABLE"}) {
@@ -307,11 +307,56 @@ void USB3PixController::writeModuleConfig(PixModule& mod){                      
 					f.setPixelRegister(reg, column, row, (*fe)->readPixRegister(reg)[column][row]);
 				}
 			}
+			//c += f.writePixelRegister(reg);
+		}
+
+// 		c += f.runMode();
+
+
+// 		c += f.confMode(); //FIXME
+// 		f["ReadErrorReq"] = 1;
+// 		c += f.flushWrites();
+// 		c += f.globalPulse(0);
+// 		f["ReadErrorReq"] = 0;
+// 		c += f.flushWrites();
+// 		c += f.runMode();
+	}
+}
+void USB3PixController::readModuleConfig(PixModule& mod){                                              //! Read module configuration 
+	if(U3PC_DEBUG) cout << "readModuleConfig" << endl;
+}
+void USB3PixController::sendModuleConfig(unsigned int moduleMask){                                     //! Send module configuration 
+	if(U3PC_DEBUG) cout << "sendModuleConfig" << endl;
+	sendPixel(moduleMask);
+	sendGlobal(moduleMask);
+	board->getData();
+	detectReadoutChannels();
+}
+void USB3PixController::sendPixel(unsigned int moduleMask){                                            //! send specif. pixel register cfg.
+	if(U3PC_DEBUG) cout << "sendPixel" << endl;
+
+	CommandBuffer c;
+
+	for(auto &i : frontends) {
+		Frontend &f = i.second;
+		c += f.confMode();
+
+		int org_vc = f["Vthin_AltCoarse"];
+		int org_vf = f["Vthin_AltFine"];
+		f["Vthin_AltFine"] = 255;
+		f["Vthin_AltCoarse"] = 255;
+		c += f.flushWrites();
+
+		for(auto &reg : {"FDAC", "TDAC","CAP1", "CAP0", "ILEAK", "ENABLE"}) {
+		  if(U3PC_DEBUG) cout << "sendPixel calls writePixelRegister for " << reg << endl;
 			c += f.writePixelRegister(reg);
 		}
 
-		c += f.runMode();
+		f["Vthin_AltFine"] = org_vf;
+		f["Vthin_AltCoarse"] = org_vc;
+		c += f.flushWrites();
 
+		c += f.runMode();
 
 		c += f.confMode(); //FIXME
 		f["ReadErrorReq"] = 1;
@@ -321,20 +366,93 @@ void USB3PixController::writeModuleConfig(PixModule& mod){                      
 		c += f.flushWrites();
 		c += f.runMode();
 	}
+	board->sendCommands(c);
 }
-void USB3PixController::readModuleConfig(PixModule& mod){                                              //! Read module configuration 
-	if(U3PC_DEBUG) cout << "readModuleConfig" << endl;
-}
-void USB3PixController::sendModuleConfig(unsigned int moduleMask){                                     //! Send module configuration 
-	if(U3PC_DEBUG) cout << "sendModuleConfig" << endl;
+void USB3PixController::sendPixel(unsigned int moduleMask, std::string regName, bool /*allDcsIdentical*/){  //! send pixel register cfg.
+  if(U3PC_DEBUG) cout << "sendPixel for reg " << regName << endl;
+	CommandBuffer c;
 
-	board->sendCommands(*module_config);
-	board->getData();
-	detectReadoutChannels();
+	// USBpix3I4 code deals with FDAC and TDAC in one chunk -> act only on item 0, ignore rest
+	std::string reg = regName;
+	if(regName.substr(0,4)=="TDAC"){
+	  if(regName!="TDAC0") return;
+	  else reg = "TDAC";
+	}
+	else if(regName.substr(0,4)=="FDAC"){
+	  if(regName!="FDAC0") return;
+	  else reg = "FDAC";
+	}
+
+	for(auto &i : frontends) {
+		Frontend &f = i.second;
+		c += f.confMode();
+
+		int org_vc = f["Vthin_AltCoarse"];
+		int org_vf = f["Vthin_AltFine"];
+		f["Vthin_AltFine"] = 255;
+		f["Vthin_AltCoarse"] = 255;
+		c += f.flushWrites();
+
+		c += f.writePixelRegister(reg);
+
+		f["Vthin_AltFine"] = org_vf;
+		f["Vthin_AltCoarse"] = org_vc;
+		c += f.flushWrites();
+
+		c += f.runMode();
+
+		c += f.confMode(); //FIXME
+		f["ReadErrorReq"] = 1;
+		c += f.flushWrites();
+		c += f.globalPulse(0);
+		f["ReadErrorReq"] = 0;
+		c += f.flushWrites();
+		c += f.runMode();
+	}
+	board->sendCommands(c);
 }
-void USB3PixController::sendPixel(unsigned int moduleMask){                                            //! send specif. pixel register cfg.
-	if(U3PC_DEBUG) cout << "sendPixel 1" << endl;
-	sendModuleConfig(moduleMask); // dumb way out of not having this functionality - FIX ME! (JGK)
+void USB3PixController::sendPixel(unsigned int moduleMask, std::string regName, int DC){  //! send pixel register cfg. for specific DC
+  if(U3PC_DEBUG) cout << "sendPixel for reg " << regName << " and DC " << DC << endl;
+	CommandBuffer c;
+
+	// USBpix3I4 code deals with FDAC and TDAC in one chunk -> act only on item 0, ignore rest
+	std::string reg = regName;
+	if(regName.substr(0,4)=="TDAC"){
+	  if(regName!="TDAC0") return;
+	  else reg = "TDAC";
+	}
+	else if(regName.substr(0,4)=="FDAC"){
+	  if(regName!="FDAC0") return;
+	  else reg = "FDAC";
+	}
+
+	for(auto &i : frontends) {
+		Frontend &f = i.second;
+		c += f.confMode();
+
+		int org_vc = f["Vthin_AltCoarse"];
+		int org_vf = f["Vthin_AltFine"];
+		f["Vthin_AltFine"] = 255;
+		f["Vthin_AltCoarse"] = 255;
+		c += f.flushWrites();
+
+		c += f.writePixelRegister(reg, {DC});
+
+		f["Vthin_AltFine"] = org_vf;
+		f["Vthin_AltCoarse"] = org_vc;
+		c += f.flushWrites();
+
+		c += f.runMode();
+
+		c += f.confMode(); //FIXME
+		f["ReadErrorReq"] = 1;
+		c += f.flushWrites();
+		c += f.globalPulse(0);
+		f["ReadErrorReq"] = 0;
+		c += f.flushWrites();
+		c += f.runMode();
+	}
+	board->sendCommands(c);
 }
 void USB3PixController::sendGlobal(unsigned int moduleMask){                                           //! send specif. gloabal register cfg.
 	if(U3PC_DEBUG) cout << "sendGlobal" << endl;
@@ -351,14 +469,6 @@ void USB3PixController::sendGlobal(unsigned int moduleMask){                    
 	board->sendCommands(c);
 }
 
-void USB3PixController::sendPixel(unsigned int moduleMask, std::string regName, bool allDcsIdentical){  //! send pixel register cfg.
-	if(U3PC_DEBUG) cout << "sendPixel 2" << endl;
-	sendPixel(moduleMask);// dumb way out of not having this functionality - FIX ME! (JGK)
-}
-void USB3PixController::sendPixel(unsigned int moduleMask, std::string regName, int DC){  //! send pixel register cfg. for specific DC
-	if(U3PC_DEBUG) cout << "sendPixel 3" << endl;
-	sendPixel(moduleMask);// dumb way out of not having this functionality - FIX ME! (JGK)
-}
 void USB3PixController::sendGlobal(unsigned int moduleMask, std::string regName){                      //! send gloabal register cfg.
 	if(U3PC_DEBUG) cout << "sendGlobal" << endl;
 	if(U3PC_DEBUG) cout << "regName " << regName << endl; 
