@@ -292,7 +292,9 @@ void MainForm::updateDeviceId()
 {
 	myUSBdev->WriteIDToEEPROM(ui->IdLineEdit->text().toInt());
 	myUSBdev->WriteNameToEEPROM(ui->nameLineEdit->text().toLatin1().data());
-	myUSBdev->WriteDeviceClassToEEPROM(ui->classLineEdit->text().toInt());
+	int myclass = ui->classLineEdit->text().toInt();
+	if(myclass>255) myclass=255;
+	myUSBdev->WriteDeviceClassToEEPROM(myclass);
 
 	UpdateDevList();
 }

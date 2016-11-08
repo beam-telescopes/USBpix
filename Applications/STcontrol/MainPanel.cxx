@@ -1,4 +1,6 @@
 #include <Config/Config.h>
+#include "Config/ConfGroup.h"
+#include "Config/ConfObj.h"
 #include <verauth.h>
 #include <OptionsPanel.h>
 #include <DataViewer.h>
@@ -31,6 +33,7 @@
 #include <PixConfDBInterface/PixConfDBInterface.h>
 #include <PixConfDBInterface/GeneralDBfunctions.h>
 #include <PixModuleGroup/PixModuleGroup.h>
+#include <PixDcs/PixDcs.h>
 
 #include <TROOT.h>
 
@@ -79,8 +82,8 @@ MainPanel::MainPanel( STControlEngine &engine_in, STCLogContainer &log_in, QWidg
   QObject::connect(currModuleCfgEdit, SIGNAL(triggered()), this, SLOT(editCurrentModule()));
   QObject::connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(loadConfig()));
   QObject::connect(optionsReload_defaultAction, SIGNAL(triggered()), this, SLOT(loadOptions()));
-  QObject::connect(actionNew_cfg, SIGNAL(triggered()), this, SLOT(newConfig()));
-  QObject::connect(actionNew_cfg_generic, SIGNAL(triggered()), this, SLOT(newConfigGeneric()));
+  //  QObject::connect(actionNew_cfg, SIGNAL(triggered()), this, SLOT(newConfig()));
+  QObject::connect(actionNew_cfg, SIGNAL(triggered()), this, SLOT(newConfigGeneric()));
   QObject::connect(fileReopenAction, SIGNAL(triggered()), this, SLOT(reopenConfig()));
   QObject::connect(fileSaveAsAction, SIGNAL(triggered()), this, SLOT(saveAs()));
   QObject::connect(fileSaveAction, SIGNAL(triggered()), this, SLOT(saveConfig()));
@@ -829,13 +832,10 @@ void MainPanel::newConfigGeneric(){
     ConfigCreator cc(this);
     if(cc.exec() == QDialog::Accepted){
       std::vector<PixModuleGroup*> grps = cc.getCfg();
-	  std::vector<int> makeRegs = cc.getMakeRegs();
-      int usbInd=0;
-      int usbDcsInd=0;
       PixConfDBInterface *myDB = PixLib::createDefaultDB(my_fname.toLatin1().data(), 0);
       DBInquire *appInq = findAppInq(myDB, 0);
       for(unsigned int iGrp=0; iGrp<grps.size(); iGrp++){
-	std::string name, decName, myDecName;
+	std::string name, decName;
 	// new module group
 	name="PixModuleGroup";
 	decName = appInq->getDecName() + std::string(grps[iGrp]->getName());
@@ -844,12 +844,20 @@ void MainPanel::newConfigGeneric(){
 	myDB->DBProcess(appInq,COMMITREPLACE);
 	myDB->DBProcess(grpInq,COMMIT);
 	grps[iGrp]->config().write(grpInq);
-	// add regulators if requested
-	int adapterType = makeRegs[iGrp];
-	// tmp: translation to old convention - FIX!
-	if(adapterType==2) adapterType=4;
-	if(adapterType==3) adapterType=1;
-	if(makeRegs[iGrp]>=0) m_engine.addUsbDcs(grps[iGrp]->getName(), ((grps.size()>1)?usbDcsInd:-1), adapterType, usbDcsInd, usbInd, appInq, myDB);
+      }
+      // add regulators if requested
+      std::vector<PixDcs*> dcs = cc.getDcs();
+      for(unsigned int dcsId=0; dcsId<dcs.size(); dcsId++){
+	std::string name, decName;
+	std::stringstream a;
+	a<<dcsId;
+	name="PixDcs";
+	decName = appInq->getDecName() + dcs[dcsId]->config().name() + "_"+a.str();
+	DBInquire *dcsInq = myDB->makeInquire(name, decName);
+	appInq->pushRecord(dcsInq);
+	myDB->DBProcess(appInq,COMMITREPLACE);
+	myDB->DBProcess(dcsInq,COMMIT);
+	dcs[dcsId]->config().write(dcsInq);
       }
       delete myDB;
       m_engine.loadDB(my_fname.toLatin1().data());
@@ -1320,8 +1328,8 @@ void MainPanel::setShowMenues(){
 }
 void MainPanel::setScanBusy(){
   // file menu
-  menuNew_config->setEnabled(false);
-  //actionNew_cfg->setEnabled(false);
+  //  menuNew_config->setEnabled(false);
+  actionNew_cfg->setEnabled(false);
   fileOpenAction->setEnabled(false);
   fileCloseAction->setEnabled(false);
   fileReopenAction->setEnabled(false);
@@ -1349,8 +1357,8 @@ void MainPanel::setScanDone(){
   m_scanActive = false;
   setCurrentModule(0); // takes care of top part of edit menu
   // file menu
-  menuNew_config->setEnabled(true);
-  //  actionNew_cfg->setEnabled(true);
+  //menuNew_config->setEnabled(true);
+  actionNew_cfg->setEnabled(true);
   fileOpenAction->setEnabled(true);
   fileCloseAction->setEnabled(true);
   fileReopenAction->setEnabled(true);

@@ -14,7 +14,7 @@ namespace PixLib {
     friend class USBGpacPixDcs;
 
     public:
-      USBGpacSupplyPixDcsChan(PixDcs *parent, DBInquire *dbInquire);
+    USBGpacSupplyPixDcsChan(PixDcs *parent, DBInquire *dbInquire);
       USBGpacSupplyPixDcsChan(USBGpacSupplyPixDcsChan &chan_in);
       virtual ~USBGpacSupplyPixDcsChan();
       virtual double ReadParam(std::string);
@@ -113,10 +113,8 @@ namespace PixLib {
 
   class USBGpacPixDcs : public PixDcs 
   {
-    private:
-      USBPixController *m_upc;
     public:
-      USBGpacPixDcs(DBInquire *dbInquire, void *interface);
+    USBGpacPixDcs(DBInquire *dbInquire, void *interface, std::string extDevType="SUPPLY");
       
       virtual ~USBGpacPixDcs();
       
@@ -132,6 +130,8 @@ namespace PixLib {
     protected:
       bool m_problemInit;
       float m_currentLimit;
+      USBPixController *m_upc;
+      std::string m_ctrlName;
 
     private:
       virtual void configInit();   //! Init configuration structure

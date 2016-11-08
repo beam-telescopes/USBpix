@@ -46,18 +46,19 @@ PixDcs* PixDcs::make(DBInquire *dbInquire, void *interface, std::string type)
   PixDcs *dcs = 0;
   
   if (type == "USBPixDcs") {
-    //cout << "PixDcs* PixDcs::make with type std." << endl;
     dcs = new USBPixDcs(dbInquire, interface);
   }
   else if (type == "USBBIPixDcs") {
-    //cout << "PixDcs* PixDcs::make with type BURN-IN" << endl;
     dcs = new USBBIPixDcs(dbInquire, interface);
   }
   else if (type == "USBGpacPixDcs") {
     dcs = new USBGpacPixDcs(dbInquire, interface);
   }
+  else if (type.substr(0,14) == "USBGpacPixDcs:") {
+    std::string subtype = type.substr(14, type.length()-13);
+    dcs = new USBGpacPixDcs(dbInquire, interface, subtype);
+  }
   else if (type == "USBI3PixDcs") {
-    //cout << "PixDcs* PixDcs::make with type std. I3" << endl;
     dcs = new USBI3PixDcs(dbInquire, interface);
   }
 #ifdef HAVE_GPIB

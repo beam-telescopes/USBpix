@@ -6,21 +6,9 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>461</width>
-    <height>403</height>
+    <width>486</width>
+    <height>450</height>
    </rect>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>461</width>
-    <height>403</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>461</width>
-    <height>403</height>
-   </size>
   </property>
   <property name="windowTitle">
    <string>USB Device Manager</string>
@@ -30,367 +18,424 @@
     <normaloff>:/Icons/resources/silab.ico</normaloff>:/Icons/resources/silab.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="gridLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>461</width>
-      <height>361</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QTabWidget" name="tabWidget">
-       <property name="minimumSize">
-        <size>
-         <width>459</width>
-         <height>359</height>
-        </size>
-       </property>
-       <property name="baseSize">
-        <size>
-         <width>391</width>
-         <height>361</height>
-        </size>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::DefaultContextMenu</enum>
-       </property>
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="devlistTab">
-        <attribute name="title">
-         <string>Device List</string>
-        </attribute>
-        <widget class="QTreeWidget" name="devListTree">
-         <property name="geometry">
-          <rect>
-           <x>11</x>
-           <y>10</y>
-           <width>431</width>
-           <height>150</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>431</width>
-           <height>150</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>431</width>
-           <height>150</height>
-          </size>
-         </property>
-         <property name="contextMenuPolicy">
-          <enum>Qt::DefaultContextMenu</enum>
-         </property>
-         <column>
-          <property name="text">
-           <string>1</string>
-          </property>
-         </column>
-        </widget>
-        <widget class="QTabWidget" name="deviceTab">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="geometry">
-          <rect>
-           <x>11</x>
-           <y>167</y>
-           <width>431</width>
-           <height>161</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>431</width>
-           <height>161</height>
-          </size>
-         </property>
-         <property name="currentIndex">
-          <number>0</number>
-         </property>
-         <widget class="QWidget" name="infoTab">
-          <attribute name="title">
-           <string>Info</string>
-          </attribute>
-          <widget class="QTextBrowser" name="infoWindow">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>10</y>
-             <width>401</width>
-             <height>111</height>
-            </rect>
-           </property>
-          </widget>
-         </widget>
-         <widget class="QWidget" name="miscTab">
-          <attribute name="title">
-           <string>Identification</string>
-          </attribute>
-          <widget class="QPushButton" name="updateIdBtn">
-           <property name="geometry">
-            <rect>
-             <x>320</x>
-             <y>50</y>
-             <width>75</width>
-             <height>23</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Update</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_3">
-           <property name="geometry">
-            <rect>
-             <x>81</x>
-             <y>76</y>
-             <width>27</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Class</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="IdLineEdit">
-           <property name="geometry">
-            <rect>
-             <x>114</x>
-             <y>22</y>
-             <width>31</width>
-             <height>20</height>
-            </rect>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_2">
-           <property name="geometry">
-            <rect>
-             <x>81</x>
-             <y>49</y>
-             <width>27</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Name</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="nameLineEdit">
-           <property name="geometry">
-            <rect>
-             <x>114</x>
-             <y>49</y>
-             <width>106</width>
-             <height>20</height>
-            </rect>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="classLineEdit">
-           <property name="geometry">
-            <rect>
-             <x>114</x>
-             <y>76</y>
-             <width>31</width>
-             <height>20</height>
-            </rect>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label">
-           <property name="geometry">
-            <rect>
-             <x>81</x>
-             <y>22</y>
-             <width>27</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>ID</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="iconLabel">
-           <property name="geometry">
-            <rect>
-             <x>30</x>
-             <y>40</y>
-             <width>31</width>
-             <height>31</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="pixmap">
-            <pixmap resource="SiUSBman.qrc">:/Icons/resources/silab_usb.ico</pixmap>
-           </property>
-          </widget>
-         </widget>
-         <widget class="QWidget" name="firmwareTab">
-          <attribute name="title">
-           <string>USB firmware</string>
-          </attribute>
-          <widget class="QPushButton" name="loadControllerBtn">
-           <property name="geometry">
-            <rect>
-             <x>334</x>
-             <y>20</y>
-             <width>81</width>
-             <height>24</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Load Controller</string>
-           </property>
-          </widget>
-          <widget class="QToolButton" name="controlleFileDialogBtn">
-           <property name="geometry">
-            <rect>
-             <x>300</x>
-             <y>20</y>
-             <width>25</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="controllerFileLineEdit">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>20</y>
-             <width>291</width>
-             <height>20</height>
-            </rect>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="flashEEPROMBtn">
-           <property name="geometry">
-            <rect>
-             <x>334</x>
-             <y>60</y>
-             <width>81</width>
-             <height>24</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Flash EEPROM</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="eepromFileLineEdit">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>60</y>
-             <width>291</width>
-             <height>20</height>
-            </rect>
-           </property>
-          </widget>
-          <widget class="QToolButton" name="eepromFileDialogBtn">
-           <property name="geometry">
-            <rect>
-             <x>300</x>
-             <y>60</y>
-             <width>25</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-          </widget>
-          <widget class="QProgressBar" name="flashProgressBar">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>100</y>
-             <width>291</width>
-             <height>15</height>
-            </rect>
-           </property>
-           <property name="maximum">
-            <number>0</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-           <property name="textVisible">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </widget>
-         <widget class="QWidget" name="fpgaTab">
-          <attribute name="title">
-           <string>FPGA firmware</string>
-          </attribute>
-          <widget class="QToolButton" name="fpgaFileDialogBtn">
-           <property name="geometry">
-            <rect>
-             <x>300</x>
-             <y>20</y>
-             <width>25</width>
-             <height>20</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="fpgaFileLineEdit">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>20</y>
-             <width>291</width>
-             <height>20</height>
-            </rect>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="loadFPGAButton">
-           <property name="geometry">
-            <rect>
-             <x>334</x>
-             <y>20</y>
-             <width>81</width>
-             <height>24</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Load FPGA</string>
-           </property>
-          </widget>
-         </widget>
-        </widget>
-       </widget>
-       <widget class="QWidget" name="testTb">
-        <attribute name="title">
-         <string>IO Tests</string>
-        </attribute>
-        <widget class="QWidget" name="gridLayoutWidget_3">
-         <property name="geometry">
-          <rect>
-           <x>60</x>
-           <y>40</y>
-           <width>341</width>
-           <height>192</height>
-          </rect>
-         </property>
+   <layout class="QVBoxLayout" name="verticalLayout_14">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="minimumSize">
+       <size>
+        <width>459</width>
+        <height>359</height>
+       </size>
+      </property>
+      <property name="baseSize">
+       <size>
+        <width>391</width>
+        <height>361</height>
+       </size>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::DefaultContextMenu</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="devlistTab">
+       <attribute name="title">
+        <string>Device List</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_11">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <item>
+           <widget class="QTreeWidget" name="devListTree">
+            <property name="minimumSize">
+             <size>
+              <width>431</width>
+              <height>150</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>431</width>
+              <height>150</height>
+             </size>
+            </property>
+            <property name="contextMenuPolicy">
+             <enum>Qt::DefaultContextMenu</enum>
+            </property>
+            <column>
+             <property name="text">
+              <string>1</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTabWidget" name="deviceTab">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>431</width>
+              <height>161</height>
+             </size>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="infoTab">
+             <attribute name="title">
+              <string>Info</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <item>
+               <widget class="QTextBrowser" name="infoWindow">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="miscTab">
+             <attribute name="title">
+              <string>Identification</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <item>
+                   <widget class="QLabel" name="iconLabel">
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="pixmap">
+                     <pixmap resource="SiUSBman.qrc">:/Icons/resources/silab_usb.ico</pixmap>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout_3">
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_2">
+                    <item>
+                     <widget class="QLabel" name="label">
+                      <property name="text">
+                       <string>ID</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="IdLineEdit"/>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_9">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_3">
+                    <item>
+                     <widget class="QLabel" name="label_2">
+                      <property name="text">
+                       <string>Name</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="nameLineEdit"/>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_4">
+                    <item>
+                     <widget class="QLabel" name="label_3">
+                      <property name="text">
+                       <string>Class</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="classLineEdit"/>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="verticalLayout">
+                  <item>
+                   <spacer name="verticalSpacer_2">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="updateIdBtn">
+                    <property name="text">
+                     <string>Update</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="firmwareTab">
+             <attribute name="title">
+              <string>USB firmware</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_8">
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_4">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_8">
+                  <item>
+                   <widget class="QLineEdit" name="controllerFileLineEdit"/>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="controlleFileDialogBtn">
+                    <property name="text">
+                     <string>...</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Fixed</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>10</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="loadControllerBtn">
+                    <property name="text">
+                     <string>Load Controller</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_7">
+                  <item>
+                   <widget class="QLineEdit" name="eepromFileLineEdit"/>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="eepromFileDialogBtn">
+                    <property name="text">
+                     <string>...</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_4">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Fixed</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>10</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="flashEEPROMBtn">
+                    <property name="text">
+                     <string>Flash EEPROM</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_6">
+                  <item>
+                   <widget class="QProgressBar" name="flashProgressBar">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="maximum">
+                     <number>0</number>
+                    </property>
+                    <property name="value">
+                     <number>0</number>
+                    </property>
+                    <property name="textVisible">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_5">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_5">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="fpgaTab">
+             <attribute name="title">
+              <string>FPGA firmware</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <item>
+               <layout class="QVBoxLayout" name="verticalLayout_5">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_9">
+                  <item>
+                   <widget class="QLineEdit" name="fpgaFileLineEdit"/>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="fpgaFileDialogBtn">
+                    <property name="text">
+                     <string>...</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_6">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Fixed</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>10</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="loadFPGAButton">
+                    <property name="text">
+                     <string>Load FPGA</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="testTb">
+       <attribute name="title">
+        <string>IO Tests</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_12">
+        <item>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="3" column="0">
            <widget class="QLineEdit" name="readDataLine">
@@ -561,64 +606,82 @@
            </layout>
           </item>
          </layout>
-        </widget>
-       </widget>
-       <widget class="QWidget" name="benchmarkTab">
-        <attribute name="title">
-         <string>Benchmark</string>
-        </attribute>
-        <widget class="QPushButton" name="runBtn">
-         <property name="geometry">
-          <rect>
-           <x>350</x>
-           <y>300</y>
-           <width>75</width>
-           <height>23</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Run</string>
-         </property>
-        </widget>
-        <widget class="QWidget" name="horizontalLayoutWidget">
-         <property name="geometry">
-          <rect>
-           <x>50</x>
-           <y>300</y>
-           <width>221</width>
-           <height>21</height>
-          </rect>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="benchmarkTab">
+       <attribute name="title">
+        <string>Benchmark</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_13">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
           <item>
-           <widget class="QLabel" name="label_7">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Single byte access:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="rateLabel">
+              <property name="text">
+               <string> kHz</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="runBtn">
             <property name="text">
-             <string>Single byte access:</string>
+             <string>Run</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="rateLabel">
-            <property name="text">
-             <string> kHz</string>
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-           </widget>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
-        </widget>
-       </widget>
+        </item>
+       </layout>
       </widget>
-     </item>
-    </layout>
-   </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>461</width>
-     <height>21</height>
+     <width>486</width>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Options">
@@ -663,22 +726,6 @@
  </resources>
  <connections>
   <connection>
-   <sender>updateIdBtn</sender>
-   <signal>clicked()</signal>
-   <receiver>MainForm</receiver>
-   <slot>updateDeviceId()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>367</x>
-     <y>293</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>373</x>
-     <y>424</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>controlleFileDialogBtn</sender>
    <signal>clicked()</signal>
    <receiver>MainForm</receiver>
@@ -695,50 +742,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>eepromFileDialogBtn</sender>
+   <sender>updateIdBtn</sender>
    <signal>clicked()</signal>
    <receiver>MainForm</receiver>
-   <slot>openEEPROMDialog()</slot>
+   <slot>updateDeviceId()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>364</x>
-     <y>383</y>
+     <x>367</x>
+     <y>293</y>
     </hint>
     <hint type="destinationlabel">
-     <x>322</x>
-     <y>435</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>loadControllerBtn</sender>
-   <signal>clicked()</signal>
-   <receiver>MainForm</receiver>
-   <slot>loadController()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>398</x>
-     <y>343</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>385</x>
-     <y>441</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>flashEEPROMBtn</sender>
-   <signal>clicked()</signal>
-   <receiver>MainForm</receiver>
-   <slot>flashEEPROM()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>398</x>
-     <y>383</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>407</x>
-     <y>494</y>
+     <x>373</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -759,6 +774,22 @@
    </hints>
   </connection>
   <connection>
+   <sender>loadControllerBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>MainForm</receiver>
+   <slot>loadController()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>398</x>
+     <y>343</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>385</x>
+     <y>441</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>loadFPGAButton</sender>
    <signal>clicked()</signal>
    <receiver>MainForm</receiver>
@@ -775,18 +806,50 @@
    </hints>
   </connection>
   <connection>
-   <sender>devListTree</sender>
-   <signal>itemClicked(QTreeWidgetItem*,int)</signal>
+   <sender>flashEEPROMBtn</sender>
+   <signal>clicked()</signal>
    <receiver>MainForm</receiver>
-   <slot>listItemClicked(QTreeWidgetItem*,int)</slot>
+   <slot>flashEEPROM()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>206</x>
-     <y>140</y>
+     <x>398</x>
+     <y>383</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>407</x>
+     <y>494</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>eepromFileDialogBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>MainForm</receiver>
+   <slot>openEEPROMDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>364</x>
+     <y>383</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>322</x>
+     <y>435</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>MainForm</receiver>
+   <slot>runBenchmark()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>489</x>
+     <y>549</y>
     </hint>
     <hint type="destinationlabel">
      <x>524</x>
-     <y>153</y>
+     <y>347</y>
     </hint>
    </hints>
   </connection>
@@ -807,18 +870,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>readBtn</sender>
-   <signal>clicked()</signal>
+   <sender>devListTree</sender>
+   <signal>itemClicked(QTreeWidgetItem*,int)</signal>
    <receiver>MainForm</receiver>
-   <slot>readClicked()</slot>
+   <slot>listItemClicked(QTreeWidgetItem*,int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>276</x>
-     <y>289</y>
+     <x>206</x>
+     <y>140</y>
     </hint>
     <hint type="destinationlabel">
-     <x>484</x>
-     <y>256</y>
+     <x>524</x>
+     <y>153</y>
     </hint>
    </hints>
   </connection>
@@ -839,18 +902,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>runBtn</sender>
+   <sender>readBtn</sender>
    <signal>clicked()</signal>
    <receiver>MainForm</receiver>
-   <slot>runBenchmark()</slot>
+   <slot>readClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>489</x>
-     <y>549</y>
+     <x>276</x>
+     <y>289</y>
     </hint>
     <hint type="destinationlabel">
-     <x>524</x>
-     <y>347</y>
+     <x>484</x>
+     <y>256</y>
     </hint>
    </hints>
   </connection>
