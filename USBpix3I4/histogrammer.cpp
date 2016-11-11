@@ -149,7 +149,7 @@ void RawFileWriter::rawData(uint32_t data) {
 
 void RawFileWriter::flush(void) {
 	for(int c : channels) {
-		std::cout << "CHANNEL " << c << std::endl; 
+	  //std::cout << "CHANNEL " << c << std::endl; 
 		o << "CHANNEL " << c << std::endl;
 		o << buffers[c-1].str();
 		buffers[c-1].str("");
