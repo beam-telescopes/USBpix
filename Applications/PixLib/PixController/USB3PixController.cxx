@@ -1405,8 +1405,9 @@ bool USB3PixController::checkRxState(rxTypes /*type*/){
 	return false;
 }
 
-void USB3PixController::getServiceRecords(std::string& /*txt*/, std::vector<int>& /*srvCounts*/){
+void USB3PixController::getServiceRecords(std::string& txt, std::vector<int>& /*srvCounts*/){
 	if(U3PC_DEBUG) cout << "getServiceRecords" << endl;
+	txt = "USB3PixController::getServiceRecords not yet implemented";
 }
 
 void USB3PixController::setAuxClkDiv(int /*div*/){

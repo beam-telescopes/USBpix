@@ -299,7 +299,7 @@ ReadScopePositionResponse ProbeStation::ReadScopePosition(char Unit, char PosRef
   return r;
 }
 
-void ProbeStation::MoveScopeZ(float z, char PosRef, char Unit,float velocity, char comp){
+void ProbeStation::MoveScopeZ(float /*z*/, char /*PosRef*/, char /*Unit*/,float /*velocity*/, char /*comp*/){
   throw Exception("Suess::ProbeStation::MoveScopeZ: Currently disabled until cause for malfunctioning is identified.");
 //  std::stringstream data;
 //   std::string cmd = "MoveScopeZ";
