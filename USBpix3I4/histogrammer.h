@@ -18,14 +18,14 @@ class DllExport Histogrammer {
 		Histogrammer(int _channel = -1) : channel(_channel) {}
 		virtual ~Histogrammer(void) {}
 
-		virtual void dataHeader(int bcid, int lv1id, int flag) {}
-		virtual void addressRecord(int type, int address) {}
-		virtual void valueRecord(int value) {}
-		virtual void serviceRecord(int code, int count) {}
-		virtual void dataRecord(unsigned column, unsigned row, unsigned tot1, unsigned tot2) {}
+		virtual void dataHeader(int /*bcid*/, int /*lv1id*/, int /*flag*/) {}
+		virtual void addressRecord(int /*type*/, int /*address*/) {}
+		virtual void valueRecord(int /*value*/) {}
+		virtual void serviceRecord(int /*code*/, int /*count*/) {}
+		virtual void dataRecord(unsigned /*column*/, unsigned /*row*/, unsigned /*tot1*/, unsigned /*tot2*/) {}
 
-		virtual void trigger(uint32_t trigger_number) {}
-		virtual void rawData(uint32_t data) {}
+		virtual void trigger(uint32_t /*trigger_number*/) {}
+		virtual void rawData(uint32_t /*data*/) {}
 
 		const int channel;
 	protected:

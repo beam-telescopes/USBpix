@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#define UBDEBUG false
+
 using namespace std;
 
 Board::Board(SiUSBDevice *dev, int type) : u(dev) {
@@ -42,11 +44,11 @@ void Board::init(int output_mode) {
 		i.rxReset();
 	}
 
-	cout << "fifo size: " << fifo["FIFO_SIZE"] << endl;
-	cout << "resetting fifo" << endl;
+	if(UBDEBUG) cout << "fifo size: " << fifo["FIFO_SIZE"] << endl;
+	if(UBDEBUG) cout << "resetting fifo" << endl;
 	fifo.reset();
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	cout << "fifo size: " << fifo["FIFO_SIZE"] << endl;
+	if(UBDEBUG) cout << "fifo size: " << fifo["FIFO_SIZE"] << endl;
 }
 
 Board::~Board(void) {
@@ -129,7 +131,7 @@ std::vector<uint32_t> Board::getData(void) {
 void Board::printRxStatus(void) {
 	int j = 1;
 	for(auto &i : rx) {
-		cout << "RX" << j << " ready: " << i["READY"] << " error count: " << i["DECODER_ERROR_COUNTER"] << " lost data: " << i["LOST_DATA_COUNTER"] << endl;
+		if(UBDEBUG) cout << "RX" << j << " ready: " << i["READY"] << " error count: " << i["DECODER_ERROR_COUNTER"] << " lost data: " << i["LOST_DATA_COUNTER"] << endl;
 		j++;
 	}
 }
