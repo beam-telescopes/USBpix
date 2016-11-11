@@ -220,7 +220,7 @@ void PixModuleGroup::readDbInquire(){
 
 	conf["general"].addString("ModuleGroupName", m_name, "DEF",
 		"Module Group Name", true);
-	conf["general"].addInt("TriggerDelay", m_triggerDelay, 0,
+	conf["general"].addInt("TriggerDelay", m_triggerDelay, 50,
 		"Global Trigger Delay for in-time threshold scan", true);
 
 	// Read from DB

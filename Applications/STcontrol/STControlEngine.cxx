@@ -431,7 +431,7 @@ void STControlEngine::addUsbDcs(std::string ctrlName_in, int USB_id, int adapter
   myDB->DBProcess(new_inq,COMMITREPLACE);
   // DCS channels
   std::string descr[4]={"VDDD1", "VDDA1", "VDDD2", "VDDA2"};
-  std::string descrB[4]={"VDDA1", "VDDD1", "VDDA2", "VDDD2"};
+  //std::string descrB[4]={"VDDA1", "VDDD1", "VDDA2", "VDDD2"};
   float nomvolts[4]={1.2f,1.5f,1.2f,1.5f};
   float currLim = 1.0f;
   if((adapterType == 1) || (adapterType == 2) || (adapterType == 4)){

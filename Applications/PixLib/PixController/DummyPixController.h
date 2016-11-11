@@ -119,7 +119,7 @@ public:
   bool getTluVeto(){return false;};
   int  getTriggerRate(){return 0;};
   int  getEventRate(){return 0;};
-  bool getSourceScanData(std::vector<unsigned int *>* data, bool forceReadSram){return false;};
+  bool getSourceScanData(std::vector<unsigned int *>* /*data*/, bool /*forceReadSram*/){return false;};
 
 protected:
 
