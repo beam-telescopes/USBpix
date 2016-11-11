@@ -15,7 +15,7 @@ void HitHistogrammer::dataRecord(unsigned column, unsigned row, unsigned tot1, u
 }
 
 
-void TotHistogrammer::dataRecord(unsigned column, unsigned row, unsigned tot1, unsigned tot2) {
+void TotHistogrammer::dataRecord(unsigned /*column*/, unsigned /*row*/, unsigned tot1, unsigned tot2) {
 	if(tot1 < 15) {
 		hist[tot1]++;
 	}
@@ -26,16 +26,16 @@ void TotHistogrammer::dataRecord(unsigned column, unsigned row, unsigned tot1, u
 }
 
 void TotHistogrammer2D::dataRecord(unsigned column, unsigned row, unsigned tot1, unsigned tot2) {
-	if(tot1 < tot_max) {
+  if(tot1 < (unsigned int)tot_max) {
 		hist[row][column][tot1]++;
 	}
 
-	if(tot2 < tot_max) {
+	if(tot2 < (unsigned int)tot_max) {
 		hist[row + 1][column][tot2]++;
 	}
 }
 
-void BCIDHistogrammer::dataHeader(int bcid, int lv1id, int flag) {
+void BCIDHistogrammer::dataHeader(int bcid, int /*lv1id*/, int /*flag*/) {
 	hist[(msb << 10) | bcid]++;
 }
 
@@ -45,17 +45,17 @@ void BCIDHistogrammer::serviceRecord(int code, int count) {
 	}
 }
 
-void LV1IDHistogrammer::dataHeader(int bcid, int lv1id, int flag) {
+void LV1IDHistogrammer::dataHeader(int /*bcid*/, int lv1id, int /*flag*/) {
 	hist[lv1id]++;
 }
 
-void LV1IDHistogrammer::serviceRecord(int code, int count) {
+void LV1IDHistogrammer::serviceRecord(int code, int /*count*/) {
 	if(code == 14) { //fixme
 
 	}
 }
 
-void LVL1Histogrammer::dataHeader(int bcid, int lv1id, int flag) {
+void LVL1Histogrammer::dataHeader(int bcid, int lv1id, int /*flag*/) {
 	if (first_data || (lv1id_low != lv1id) || (bcid != next_bcid)) {
 		first_data = false;
 		lv1_int = 0;
@@ -67,15 +67,15 @@ void LVL1Histogrammer::dataHeader(int bcid, int lv1id, int flag) {
 	lv1id_low = lv1id;
 }
 
-void LVL1Histogrammer::dataRecord(unsigned column, unsigned row, unsigned tot1, unsigned tot2) {
+void LVL1Histogrammer::dataRecord(unsigned /*column*/, unsigned /*row*/, unsigned /*tot1*/, unsigned /*tot2*/) {
 	hist[lv1_int]++;
 }
 
-void SrHistogrammer::serviceRecord(int code, int count) {
+void SrHistogrammer::serviceRecord(int code, int /*count*/) {
 	hist[code]++; //fixme
 }
 
-void RegisterDecoder::addressRecord(int type, int address) {
+void RegisterDecoder::addressRecord(int /*type*/, int address) {
 	this->address = address;
 }
 
@@ -88,7 +88,7 @@ const std::vector<std::pair<uint16_t, uint16_t>> &RegisterDecoder::getRegisters(
 	return registers;
 }
 
-void PixelRegisterDecoder::addressRecord(int type, int address) {
+void PixelRegisterDecoder::addressRecord(int /*type*/, int address) {
 	this->address = address;
 }
 
@@ -149,7 +149,7 @@ void RawFileWriter::rawData(uint32_t data) {
 
 void RawFileWriter::flush(void) {
 	for(int c : channels) {
-		std::cout << "CHANNEL " << c << std::endl; 
+	  //std::cout << "CHANNEL " << c << std::endl; 
 		o << "CHANNEL " << c << std::endl;
 		o << buffers[c-1].str();
 		buffers[c-1].str("");
