@@ -29,9 +29,7 @@ defineTest(test_eudaq) {
   !count(EUDAQ_FLAG,0){
     DEFINES += WITHEUDAQ IN_STCONTROL
   }
-  CONFIG += eudaq
   export(DEFINES)
-  export(CONFIG)
 }
 
 defineTest(test_root){
@@ -65,6 +63,18 @@ win32 {
 # Check for libusb
 equals(LIBUSB_FLAG, "USE_LIBUSB") {
   CONFIG += libusb
+}
+
+# check for local build of EUDAQ
+unix {
+  EUDAQ_LOCAL = $$system(echo $EUDAQ_LOCAL)
+}
+win32 {
+# to do JGK
+  EUDAQ_LOCAL = 
+}
+equals(EUDAQ_LOCAL, "yes"){
+  CONFIG += localeudaq
 }
 
 ###
@@ -113,4 +123,7 @@ equals(BUILDTYPE, "debug-symbols") {
 equals(TEMPLATE, "app") {
   QMAKE_RPATHDIR += $$ROOTSYS/lib
   QMAKE_RPATHDIR += $$DAQ_BASE/lib
+  !count(EUDAQ_FLAG,0){
+    QMAKE_RPATHDIR += $$EUDAQ/lib
+  }
 }

@@ -196,6 +196,21 @@ export ROOTSYS=$rstmp
 
 # export CMTPATH=${CMTPATH}:${DAQ_BASE}/Applications/Pixel
 if [ \( -n "$EUDAQ" -a "$eudaq" = "auto" \) -o "$eudaq" = "yes" ] ; then
+  if [ -z "$EUDAQ" -a "$eudaq" = "yes" ] ; then
+      cd eudaq
+      export EUDAQ=`pwd`/eudaq-1.7-dev
+      if [ -d "$EUDAQ" -a -f "$EUDAQ/lib/libEUDAQ.so" ]; then
+	  echo EUDAQ already installed at ${EUDAQ}
+          export EUDAQ_LOCAL=
+      else
+	  rm -rf ${EUDAQ}
+	  wget https://github.com/eudaq/eudaq/archive/v1.7-dev.zip
+	  unzip v1.7-dev.zip
+	  rm -f v1.7-dev.zip
+	  export EUDAQ_LOCAL=yes
+      fi
+      cd ..
+  fi
   export EUDAQ_FLAG=WITHEUDAQ
   echo "using EUDAQ"
 else
@@ -345,6 +360,7 @@ echo "USBPIX3I4    = ${USBPIX3I4}"
   echo "# Created by $0 on `date`. Modify using $0 if possible."
   echo "DAQ_BASE       = \"${DAQ_BASE}\"" 
   echo "ROOTSYS        = \"${ROOTSYS}\"" 
+  echo "EUDAQ          = \"${EUDAQ}\"" 
   echo "EUDAQ_FLAG     = ${EUDAQ_FLAG}"
   echo "GPIB_FLAG      = ${GPIB_FLAG}"
   echo "USE_GPIB_LINUX = ${USE_GPIB_LINUX}"
