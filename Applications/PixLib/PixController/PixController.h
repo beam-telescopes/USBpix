@@ -27,9 +27,9 @@
 
 #include "Utility/CircularFifo.h"
 
-namespace PixLib {
-
 using UintCircBuff1MByte = CircularFifo<uint32_t, 1000000/sizeof(uint32_t)>;
+
+namespace PixLib {
 
 class Bits;
 class Histo;

@@ -2,9 +2,9 @@
 #include <chrono>
 #include <thread>
 
-#include <eudaq/Logger.hh>
-
 #include "PixController/PixController.h"
+
+#include <eudaq/Logger.hh>
 
 #include "STControlProducer.h"
 #include "STControlEngine.h"
