@@ -125,7 +125,7 @@ IF EXIST %EUDAQ% (
   echo EUDAQ already installed at %EUDAQ%
   IF EXIST %EUDAQ%\lib\EUDAQ.lib (
     set EUDAQ_LOCAL=
-    copy  %EUDAQ%\bin\EUDAQ.dll %DAQ_BASE%\bin\EUDAQ.dll
+    copy  /y %EUDAQ%\bin\EUDAQ.dll %DAQ_BASE%\bin\EUDAQ.dll
   ) ELSE (
     set EUDAQ_LOCAL=yes
   )

@@ -7,7 +7,7 @@ unix{
 }
 win32{
   myeudaq.target = $(EUDAQ)/lib/EUDAQ.lib
-  myeudaq.commands = cd $(EUDAQ)\build & cmake .. & msbuild INSTALL.vcxproj /p:Configuration=Release & copy  $(EUDAQ)\bin\EUDAQ.dll $(DAQ_BASE)\bin\EUDAQ.dll
+  myeudaq.commands = cd $(EUDAQ)\build & cmake .. & msbuild INSTALL.vcxproj /p:Configuration=Release & copy  /y $(EUDAQ)\bin\EUDAQ.dll $(DAQ_BASE)\bin\EUDAQ.dll
   myeudaq.CONFIG  += target_predeps no_link
 }
 
