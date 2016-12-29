@@ -114,8 +114,9 @@ contains(DEFINES, WITHEUDAQ) {
   }
 
   win32 {
-    INCLUDEPATH += $(EUDAQ)/extern/pthread-win32/include
-    LIBS        += EUDAQ.lib
+#    INCLUDEPATH  += $(EUDAQ)/extern/pthread-win32/include
+    QMAKE_LFLAGS += -LIBPATH:"$(EUDAQ)"/lib
+    LIBS         += EUDAQ.lib
   }
 }
 
