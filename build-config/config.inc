@@ -70,8 +70,7 @@ unix {
   EUDAQ_LOCAL = $$system(echo $EUDAQ_LOCAL)
 }
 win32 {
-# to do JGK
-  EUDAQ_LOCAL = 
+  EUDAQ_LOCAL = $$system(echo %EUDAQ_LOCAL%)
 }
 equals(EUDAQ_LOCAL, "yes"){
   CONFIG += localeudaq

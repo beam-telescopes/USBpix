@@ -197,8 +197,8 @@ export ROOTSYS=$rstmp
 # export CMTPATH=${CMTPATH}:${DAQ_BASE}/Applications/Pixel
 if [ \( -n "$EUDAQ" -a "$eudaq" = "auto" \) -o "$eudaq" = "yes" ] ; then
   if [ -z "$EUDAQ" -a "$eudaq" = "yes" ] ; then
-      cd eudaq
-      export EUDAQ=`pwd`/eudaq-1.7-dev
+      cd ${DAQ_BASE}/eudaq
+      export EUDAQ=${DAQ_BASE}/eudaq/eudaq-1.7-dev
       if [ -d "$EUDAQ" -a -f "$EUDAQ/lib/libEUDAQ.so" ]; then
 	  echo EUDAQ already installed at ${EUDAQ}
           export EUDAQ_LOCAL=
@@ -209,7 +209,7 @@ if [ \( -n "$EUDAQ" -a "$eudaq" = "auto" \) -o "$eudaq" = "yes" ] ; then
 	  rm -f v1.7-dev.zip
 	  export EUDAQ_LOCAL=yes
       fi
-      cd ..
+      cd ${DAQ_BASE}
   fi
   export EUDAQ_FLAG=WITHEUDAQ
   echo "using EUDAQ"
