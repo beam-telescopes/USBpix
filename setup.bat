@@ -113,8 +113,11 @@ if "%useeudaq%" == "yes" goto eudaq
 goto noeudaq
 :eudaq
 set EUDAQ_FLAG=WITHEUDAQ
-IF DEFINED EUDAQ (ECHO EUDAQ is defined) 
-ELSE (set EUDAQ=%DAQ_BASE%\eudaq\eudaq-1.7-dev)
+IF DEFINED EUDAQ (
+  echo EUDAQ is defined
+) ELSE (
+  set EUDAQ=%DAQ_BASE%\eudaq\eudaq-1.7-dev
+)
 if %stcontrol_console% == no goto :noconsov
 set stcontrol_console=yes
 :noconsov
