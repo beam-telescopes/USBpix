@@ -60,6 +60,7 @@ DEFINES += TSTAMP
 unix {
 	DEFINES += CF__LINUX
 	INCLUDEPATH += $(BOOSTINC)
+	QMAKE_CXXFLAGS = -Wstrict-aliasing=0
 }
 
 win32{
