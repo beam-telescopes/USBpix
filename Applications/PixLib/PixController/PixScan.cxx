@@ -885,7 +885,7 @@ void PixScan::presetI3(ScanType presetName) {
     m_strobeDuration = 500;
     m_feVCal = 0x1fff;              
     m_repetitions = 100;
-    m_innerLoopSwap = true;  
+    m_innerLoopSwap = false;
     m_digitalInjection = false;
 
     m_loopActive[0] = true;
@@ -911,7 +911,6 @@ void PixScan::presetI3(ScanType presetName) {
     m_histogramKept[OCCUPANCY] = true;
     m_histogramFilled[SCURVE_MEAN] = true;
     m_histogramKept[SCURVE_MEAN] = true;
-    m_histogramFilled[SCURVE_SIGMA] = true;
 
     m_restoreModuleConfig = true;
 
@@ -1926,7 +1925,7 @@ void PixScan::presetI4B(ScanType presetName) {
 		m_strobeDuration = 500;
 		m_feVCal = 0x1fff;              
 		m_repetitions = 100;
-		m_innerLoopSwap = true;  
+		m_innerLoopSwap = false;
 		m_digitalInjection = false;
 		
 		m_loopActive[0] = true;
@@ -1952,7 +1951,6 @@ void PixScan::presetI4B(ScanType presetName) {
 		m_histogramKept[OCCUPANCY] = true;
 		m_histogramFilled[SCURVE_MEAN] = true;
 		m_histogramKept[SCURVE_MEAN] = true;
-		m_histogramFilled[SCURVE_SIGMA] = true;
 		
 		m_restoreModuleConfig = true;
 		
