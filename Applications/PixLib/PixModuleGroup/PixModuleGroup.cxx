@@ -1213,8 +1213,6 @@ void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
 	//Create new Histo
 	hVcal = new Histo ("SCURVE_MEAN", "Threshold", m_nColMod, -0.5, (float)m_nColMod-0.5f, m_nRowMod, -0.5, (float)m_nRowMod-0.5f);
 	scn->addHisto(*hVcal, PixScan::SCURVE_MEAN, mod, scn->scanIndex(2), scn->scanIndex(1), -1); // !! Vcal is not a member of PixLib::PixScan 
-	
-	
       }
       else { //get occupancy that was the result of the last scan step
 	hOcc = &scn->getHisto(PixScan::OCCUPANCY, mod, scn->scanIndex(2), scn->scanIndex(1), (scn->scanIndex(0))-1);
@@ -1237,7 +1235,7 @@ void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
 	} else {
 	  double events = (double)(scn->getRepetitions());
 	  vcal = (*hVcal)(colmod, rowmod); //get vcal from histo
-	  std::cout << "PixModuleGroup::prepareThrFastScan step " <<scn->scanIndex(nloop)<< ", mod " <<pmod<< ", FE"<<ife<<", vcal: " << vcal << std::endl;
+	  if(PMG_DEBUG) std::cout << "PixModuleGroup::prepareThrFastScan step " <<scn->scanIndex(nloop)<< ", mod " <<pmod<< ", FE"<<ife<<", vcal: " << vcal << std::endl;
 	  
 	  double occ = 0, nent = 0;
 	  for (unsigned int col=0; col<(*fe)->nCol(); col++) {
@@ -1259,15 +1257,15 @@ void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
 	  if(nent>0) occ /= nent;
 	  else       occ = 0.;
 	  // check if occupancy is lower or higher than 50% of events
-	  std::cout << "PixModuleGroup::prepareThrFastScan step " <<scn->scanIndex(nloop)<< ", mod " <<pmod<< ", FE"<<ife<<", avg. occ: " << 
+	  if(PMG_DEBUG) std::cout << "PixModuleGroup::prepareThrFastScan step " <<scn->scanIndex(nloop)<< ", mod " <<pmod<< ", FE"<<ife<<", avg. occ: " << 
 	    occ << ", events: " << events << std::endl;
 	  if (occ/events < 0.5) {
 	    vcal +=  (int)(scn->getLoopVarValues(nloop))[scn->scanIndex(nloop)];
-	    std::cout << "PixModuleGroup::prepareThrFastScan VCAL occ/events < 0.5: " << vcal << std::endl;
+	    if(PMG_DEBUG) std::cout << "PixModuleGroup::prepareThrFastScan VCAL occ/events < 0.5: " << vcal << std::endl;
 	  }
 	  else {
 	    vcal -= (int)(scn->getLoopVarValues(nloop))[scn->scanIndex(nloop)];
-	    std::cout << "PixModuleGroup::prepareThrFastScan VCAL occ/events >= 0.5: " << vcal << std::endl;
+	    if(PMG_DEBUG) std::cout << "PixModuleGroup::prepareThrFastScan VCAL occ/events >= 0.5: " << vcal << std::endl;
 	  }
 	}
 	if(isFei4)
@@ -2368,7 +2366,7 @@ void PixModuleGroup::endThrFastScan(int /*nloop*/, PixScan *scn){
 	std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
 	int chargeInjCap = scn->getChargeInjCap();
 	float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
-	if(PMG_DEBUG) cout << "PixModuleGroup::endThrFastScan : using inj. capacitance of " << cInj << " (switch was " << chargeInjCap << ")" << endl;
+	if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan : using inj. capacitance of " << cInj << " (switch was " << chargeInjCap << ")" << endl;
 	
 	// loop over all pixels: check avg. occ. of last two scan points and choos VCAL closest to target
 	double occl = 0, occp = 0., nent = 0;
