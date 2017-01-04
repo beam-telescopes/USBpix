@@ -103,6 +103,7 @@ namespace PixLib {
 		void prepareT0Set(int nloop, PixScan *scn);
 		void prepareDiscBiasTuning(int nloop, PixScan *scn);
 		void prepareIncrTdac(int nloop, PixScan *scn);
+		void prepareThrFastScan(int nloop, PixScan *scn);
 
 		void TOTcalib_FEI4(int nloop, PixScan *scn);		        // analysis for FE-I4 TOT calibration
 		void CreateTotChargeLUT(int pNloops, PixScan* pPixScan);	// creates the look up table (LT) ToT<->PlsrDAC value for each pixel
@@ -121,6 +122,7 @@ namespace PixLib {
 		void endIncrTdac(int nloop, PixScan *scn);
 		void endMeanNOccCalc(int nloop, PixScan *scn);
 		void endDiscBiasTuning(int nloop, PixScan *scn);
+		void endThrFastScan(int nloop, PixScan *scn);
 		void mccDelFit(int nloop, PixScan *scn);
 		void fitCalib(int nloop, PixScan *scn);
 		
