@@ -2112,7 +2112,7 @@ int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
       monRawFile = monRawFile.substr(0, monRawFile.length()-4)+"_0_0_0.raw";
     //std::cout << "Opening SourceMonitor with arg. --input:" << monRawFile << std::endl;
 #ifdef WIN32
-    system(("SourceMonitor --input:"+monRawFile).c_str());
+    system(("start SourceMonitor --input:"+monRawFile).c_str());
 #else
     system(("SourceMonitor --input:"+monRawFile+">&/dev/null &").c_str());
 #endif
