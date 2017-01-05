@@ -2057,8 +2057,8 @@ int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
 
   // if in source scan mode and auto-indexing of raw file is requested, 
   // check for existing file
-  std::string orgRawName = scanOpts.scanConfig->getSourceRawFile().c_str();;
-  if(scanOpts.indexRawFile && scanOpts.scanConfig->getSourceScanFlag()){
+  std::string orgRawName = scanOpts.scanConfig->getSourceRawFile();
+  if(orgRawName!="" && scanOpts.indexRawFile && scanOpts.scanConfig->getSourceScanFlag()){
     QString newRname = scanOpts.fileName.c_str();
     // strip off extension
     QString rExt="";
@@ -2104,6 +2104,20 @@ int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
 
   PixLib::sleep(10);
   
+  // temporary solution: should integrate SourceMonitor via library
+  // open external SourceMonitor application if requested, but not if in loop mode
+  std::string monRawFile = scanOpts.scanConfig->getSourceRawFile();
+  if(monRawFile!="" && scanOpts.openSrcMon && !scanOpts.scanConfig->getLoopActive(0)){
+    if(monRawFile.substr(monRawFile.length()-4, 4)==".raw")
+      monRawFile = monRawFile.substr(0, monRawFile.length()-4)+"_0_0_0.raw";
+    //std::cout << "Opening SourceMonitor with arg. --input:" << monRawFile << std::endl;
+#ifdef WIN32
+    system(("SourceMonitor --input:"+monRawFile).c_str());
+#else
+    system(("SourceMonitor --input:"+monRawFile+">&/dev/null &").c_str());
+#endif
+  }
+
   // restore original raw name - important for iterative calls from prim. list
   ((ConfString&)scanOpts.scanConfig->config()["general"]["sourceRawFile"]).m_value = orgRawName;
   
