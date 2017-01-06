@@ -41,7 +41,10 @@ QRootCanvas::QRootCanvas(QWidget *parent) : QWidget(parent, 0), fCanvas(0)
 
    // set options needed to properly update the canvas when resizing the widget
    // and to properly handle context menus and mouse move events
+#if QT_VERSION < 0x050000
+   // Qt::WA_PaintOnScreen apparently no longer needed in QT5, but instead triggers warnings
    setAttribute(Qt::WA_PaintOnScreen, true);
+#endif
    setAttribute(Qt::WA_OpaquePaintEvent, true);
    setMinimumSize(300, 200);
    setUpdatesEnabled(kFALSE);
