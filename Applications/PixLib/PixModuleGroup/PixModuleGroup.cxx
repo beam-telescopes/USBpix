@@ -1242,11 +1242,6 @@ void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
 	    for (unsigned int row=0; row<(*fe)->nRow(); row++) {
 	      rowmod = m_modules[pmod]->iRowMod(ife, row);
 	      colmod = m_modules[pmod]->iColMod(ife, col);
-	      
-// 	      int ntot_mask = translateMaskSteps(scn->getMaskStageTotalSteps());
-// 	      int mask = scn->getMaskStageSteps();
-// 	      int rest_row = row%ntot_mask;
-// 	      if ((col%2==0 && rest_row < mask) || (col%2==1 && rest_row >= ntot_mask - mask)) {
 	      if(hOcc!=0){
 		occ += (*hOcc)(colmod, rowmod);
 		nent += 1.;
@@ -2351,13 +2346,16 @@ void PixModuleGroup::endThrFastScan(int /*nloop*/, PixScan *scn){
     if (m_modules[pmod]->m_readoutActive) {
       unsigned int mod = m_modules[pmod]->m_moduleId;
       
-      Histo *hVcal, *hOccl, *hOccp;
+      Histo *hVcal;
+      std::vector<Histo*> hOccp;
       hVcal =&scn->getHisto(PixScan::SCURVE_MEAN, mod, scn->scanIndex(2), scn->scanIndex(1), 0);
-      hOccp = &scn->getHisto(PixScan::OCCUPANCY, mod, scn->scanIndex(2), scn->scanIndex(1), scn->getLoopVarNSteps(0)-1);
-      hOccl = &scn->getHisto(PixScan::OCCUPANCY, mod, scn->scanIndex(2), scn->scanIndex(1), scn->getLoopVarNSteps(0)-2);
+      const int nscanpts = scn->getLoopVarNSteps(0);
+      for(int i=0;i<nscanpts; i++)
+	hOccp.push_back(&scn->getHisto(PixScan::OCCUPANCY, mod, scn->scanIndex(2), scn->scanIndex(1), i ));
       
       //FE Loop
       for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe!= m_modules[pmod]->feEnd(); fe++) {
+	int ife = (*fe)->number();
 	//get parameters to calculate q from vcal			
 	float vcal_a = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
 	float vcal_b = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient2"])).value();
@@ -2366,50 +2364,95 @@ void PixModuleGroup::endThrFastScan(int /*nloop*/, PixScan *scn){
 	std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
 	int chargeInjCap = scn->getChargeInjCap();
 	float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
-	if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan : using inj. capacitance of " << cInj << " (switch was " << chargeInjCap << ")" << endl;
+	if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan : FE"<<ife<<": using inj. capacitance of " << cInj << 
+			" (switch was " << chargeInjCap << ")" << endl;
 	
-	// loop over all pixels: check avg. occ. of last two scan points and choos VCAL closest to target
-	double occl = 0, occp = 0., nent = 0;
+	bool pixel_recalc=true;
 	unsigned int colmod, rowmod;
-	int ife = (*fe)->number();
-	for (unsigned int col=0; col<(*fe)->nCol(); col++) {
-	  for (unsigned int row=0; row<(*fe)->nRow(); row++) {
-	    rowmod = m_modules[pmod]->iRowMod(ife, row);
-	    colmod = m_modules[pmod]->iColMod(ife, col);
-	    
-// 	    int ntot_mask = translateMaskSteps(scn->getMaskStageTotalSteps());
-// 	    int mask = scn->getMaskStageSteps();
-// 	    int rest_row = row%ntot_mask;
-// 	    if ((col%2==0 && rest_row < mask) || (col%2==1 && rest_row >= ntot_mask - mask)) {
-	      occl += (*hOccl)(colmod, rowmod);
-	      occp += (*hOccp)(colmod, rowmod);
+	if(pixel_recalc){
+	  // reconstruct VCAL values
+	  std::vector<float> loop_val = scn->getLoopVarValues(0);
+	  std::vector<int> vcal_steps;
+	  vcal_steps.push_back(loop_val[0]);
+	  for(int i=0;i<(nscanpts-1); i++){
+	    double occ = 0, nent = 0;
+	    for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	      for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+		rowmod = m_modules[pmod]->iRowMod(ife, row);
+		colmod = m_modules[pmod]->iColMod(ife, col);
+		occ += (*hOccp.at(i))(colmod, rowmod);
+		nent += 1.;
+	      }
+	    }
+	    if(nent>0) occ /= nent;
+	    else       occ = 0.;	    double events = (double)(scn->getRepetitions());
+	    float vcal = vcal_steps[i];
+	    if (occ/events < 0.5) vcal += loop_val[i+1];
+	    else                  vcal -= loop_val[i+1];
+	    vcal_steps.push_back(vcal);
+	  }
+	  if(PMG_DEBUG) {
+	    for(int i=0;i<nscanpts; i++)
+	      std::cout << "PixModuleGroup::endThrFastScan : FE"<<ife<<": VCAL value step " << i << ": " << vcal_steps[i] << std::endl;
+	  }
+	  // now check for each pixel which is the best occupancy and store corresponding VCAL
+	  for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	    for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+	      rowmod = m_modules[pmod]->iRowMod(ife, row);
+	      colmod = m_modules[pmod]->iColMod(ife, col);
+	      double occ_best = -1;
+	      for(int i=0;i<nscanpts; i++){
+		double occ = (*hOccp.at(i))(colmod, rowmod);
+		double events = (double)(scn->getRepetitions());
+		if(events>0) occ /= events;
+		if(fabs(occ-0.5) < fabs(occ_best-0.5)){
+		  occ_best = occ;
+		  hVcal->set(colmod, rowmod, vcal_steps[i]);
+		}
+	      }
+	      //calculate q from vcal
+	      float vcal_best = (*hVcal)(colmod,rowmod);
+	      float q = 6.241495961*cInj*(((vcal_a*vcal_best + vcal_b)*vcal_best + vcal_c)*vcal_best + vcal_d);
+	      hVcal->set(colmod, rowmod, q);
+	    }
+	  }
+	} else{
+	  // loop over all pixels: check avg. occ. of last two scan points and choos VCAL closest to target
+	  double occl = 0, occp = 0., nent = 0;
+	  for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	    for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+	      rowmod = m_modules[pmod]->iRowMod(ife, row);
+	      colmod = m_modules[pmod]->iColMod(ife, col);
+	      
+	      occl += (*hOccp.at(nscanpts-2))(colmod, rowmod);
+	      occp += (*hOccp.at(nscanpts-1))(colmod, rowmod);
 	      nent += 1.;
-// 	    }
+	    }
 	  }
-	}
-	float vcal_corr = 0.;
-	double events = (double)(scn->getRepetitions());
-	if(nent>0){
-	  occl /= nent;
-	  occp /= nent;
-	  if(fabs(occp/events-0.5) < fabs(occl/events-0.5)){ // last step didn't improve, so use previous step's VCAL
-	    if(occl>occp) vcal_corr = -1.; // VCAL was increased in last step
-	    else          vcal_corr =  1.; // VCAL was decreased in last step
+	  float vcal_corr = 0.;
+	  double events = (double)(scn->getRepetitions());
+	  if(nent>0){
+	    occl /= nent;
+	    occp /= nent;
+	    if(fabs(occp/events-0.5) < fabs(occl/events-0.5)){ // last step didn't improve, so use previous step's VCAL
+	      if(occl>occp) vcal_corr = -1.; // VCAL was increased in last step
+	      else          vcal_corr =  1.; // VCAL was decreased in last step
+	    }
 	  }
-	}
-	if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan: mod " <<pmod<< ", FE"<<ife<<" - last occ. = " <<occl << ", prev. occ. = " << occp
-			    << ", VCAL corr. = " << vcal_corr << std::endl;
-	for (unsigned int col=0; col<(*fe)->nCol(); col++) {
-	  for (unsigned int row=0; row<(*fe)->nRow(); row++) {
-	    rowmod = m_modules[pmod]->iRowMod(ife, row);
-	    colmod = m_modules[pmod]->iColMod(ife, col);
-	    // retrieve and correct VCAL
-	    float vcal_best = (*hVcal)(colmod,rowmod);
-	    vcal_best += vcal_corr;
-	    //calculate q from vcal
-	    float q = 6.241495961*cInj*(((vcal_a*vcal_best + vcal_b)*vcal_best + vcal_c)*vcal_best + vcal_d);
-	    hVcal->set(colmod, rowmod, q);
-	    
+	  if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan: mod " <<pmod<< ", FE"<<ife<<" - last occ. = " <<occl << ", prev. occ. = " << occp
+				  << ", VCAL corr. = " << vcal_corr << std::endl;
+	  // calibration VCAL -> charge
+	  for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	    for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+	      rowmod = m_modules[pmod]->iRowMod(ife, row);
+	      colmod = m_modules[pmod]->iColMod(ife, col);
+	      // retrieve and correct VCAL
+	      float vcal_best = (*hVcal)(colmod,rowmod);
+	      vcal_best += vcal_corr;
+	      //calculate q from vcal
+	      float q = 6.241495961*cInj*(((vcal_a*vcal_best + vcal_b)*vcal_best + vcal_c)*vcal_best + vcal_d);
+	      hVcal->set(colmod, rowmod, q);
+	    }
 	  }
 	}
       }
