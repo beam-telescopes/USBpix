@@ -420,7 +420,10 @@ void monitor::open_shop()
 	
 	initialize_graphics_utilities ();
 	
-	open_file_streams ();
+	if(open_file_streams ()){
+	  started = false;
+	  return;
+	}
 	
 	prepare_for_looping ();
 	
@@ -641,20 +644,39 @@ void monitor::initialize_graphics_utilities ()
 	else                                                  histograms1D.at( *histogram_cycler ).Draw();
 }
 
-void monitor::open_file_streams ()
+bool monitor::open_file_streams ()
 {
 	reader.open( p("input") );
-	if ( ! reader.is_open() ) throw std::runtime_error ("ERROR: couldn't open file \"" + p("input") + "\".");
+	if ( ! reader.is_open() ){
+	  QString msg;
+	  msg  = ("ERROR: couldn't open file \"" + p("input") + "\".\n").c_str();
+	  msg += "Fix the problem and press start again.";
+	  QMessageBox::critical(this, "no input file", msg);
+	  return true;
+	}
 	
 	writer = std::unique_ptr <TFile> ( new TFile( p("output").c_str(), "RECREATE" ) );
-	if ( ! writer->IsOpen() ) throw std::runtime_error ("ERROR: couldn't open file \"" + p("output") + "\".");
+	if ( ! writer->IsOpen() ){
+	  QString msg;
+	  msg  = ("ERROR: couldn't open file \"" + p("output") + "\".\n").c_str();
+	  msg += "Fix the problem and press start again.";
+	  QMessageBox::critical(this, "can't open output file", msg);
+	  return true;
+	}
 	
 	bad_pixel_file.open( p("badpixelfile") );
-	if ( ! bad_pixel_file.is_open() ) throw std::runtime_error ("ERROR: couldn't open file \"" + p("badpixelfile") + "\".");
-	
+	if ( ! bad_pixel_file.is_open() ){
+	  QString msg;
+	  msg  = ("ERROR: couldn't open file \"" + p("badpixelfile") + "\".\n").c_str();
+	  msg += "Fix the problem and press start again.";
+	  QMessageBox::critical(this, "can't open bad-pixel file", msg);
+	  return true;
+	}
+
 	bad_pixel_file << "filter intercept: " << p["maxhitsperpixelintercept"] << "\n"
 	               << "filter slope    : " << p["maxhitsperpixelslope"    ] << "\n"
 	               << "\n";
+	return false;
 }
 
 void monitor::prepare_for_looping ()
@@ -855,22 +877,22 @@ void monitor::patiently_bide_time ()
 
 void monitor::close_shop ()
 {
-	//if (not started) return;
-	
 	end_time = std::chrono::system_clock::now();
 	
 	std::cout << "exiting ...\n";
 	
 	if ( p["showtimediagnostics"] ) show_time_diagnostics ();
 	
-	reader.close();
-	writer->Close();
+	//if (not started) return;
+	if ( reader.is_open() ) reader.close();
+	if ( writer!=0 && writer->IsOpen() ) writer->Close();
 	
-	bad_pixel_file << "\nfinal TD: " << raw_event_data.at("BCID").back() << "\n";
-	
-	bad_pixel_file.close();
-	
-	std::cout << "\n";
+	if ( bad_pixel_file.is_open() ){
+	  bad_pixel_file << "\nfinal TD: " << raw_event_data.at("BCID").back() << "\n";
+	  bad_pixel_file.close();
+	}
+
+	//std::cout << "\n";
 }
 
 void monitor::show_time_diagnostics ()
