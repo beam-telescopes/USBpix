@@ -75,6 +75,7 @@ struct pixScanRunOptions{
   bool indexRawFile;
   int readDcs;
   int timeToAbort;
+  bool openSrcMon;
 };
 
 #endif // STCDEFINES_H

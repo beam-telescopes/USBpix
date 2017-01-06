@@ -71,6 +71,8 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   QObject::connect(srcEventCount, SIGNAL(activated(QString)), this, SLOT(setEvtLabel(QString)));
   QObject::connect(addModNameBox, SIGNAL(toggled(bool)), this, SLOT(showAddModLabels(bool)));
   QObject::connect(tbModeBox  , SIGNAL(toggled(bool)), this, SLOT(goToTbMode(bool)));
+  QObject::connect(appIndRawfile, SIGNAL( toggled(bool) ), this, SLOT( setSrcMonBox() ) );
+  QObject::connect(rawFileName, SIGNAL( textChanged(const QString&) ), this, SLOT( setSrcMonBox() ) );
 
   // not needed anymore, but for the moment just hide this button
   clearLabelMem->hide();
@@ -1307,7 +1309,7 @@ void PixScanPanel::showLoop(int ID){
 
 void PixScanPanel::runButton_clicked(bool tbmode){
 // Just start the scan and return
-  if(runButton->text()=="Start Scan"){   
+  if(runButton->text()=="Start Scan"){  
     QString new_label;
     if(STControlEngine::checkScanLabel(m_scanLabels, scanLabel->text(), new_label)){
       if (tbmode){ // test beam mode
@@ -1351,6 +1353,7 @@ void PixScanPanel::runButton_clicked(bool tbmode){
     myscopt.indexRawFile = appIndRawfile->isChecked();
     myscopt.readDcs = dcsReadBox->currentIndex();
     myscopt.timeToAbort = -1; // no abort
+    myscopt.openSrcMon = sourceMonBox->isChecked() && sourceMonBox->isEnabled();
 
     int nRods = m_engine.CtrlStatusSummary();	
     // check if none of the controllers has been initialised, unless
@@ -1718,6 +1721,7 @@ void PixScanPanel::updateStatus(int nSteps0, int nSteps1, int nSteps2, int nMask
     statusText->setText("scanning");
     statusText->repaint();
   }
+
   return;
 }
 
@@ -2152,4 +2156,11 @@ void PixScanPanel::goToTbMode(bool tbMode){
   nEvents->setMinimum(tbMode?0:1);
   if(tbMode)nEvents->setValue(0);
   eventsLabel->setText(tbMode?"Events per scan point (0=run until stopped):":"Events per scan point:");
+}
+void PixScanPanel::setSrcMonBox(){
+  if(rawFileName->text().isEmpty() && !appIndRawfile->isChecked()){
+    sourceMonBox->setChecked(false);
+    sourceMonBox->setEnabled(false);
+  } else
+    sourceMonBox->setEnabled(true);
 }

@@ -276,12 +276,12 @@ int STPixModuleGroup::setPixScan(PixScan *inPixScan){
     doSFit |= ((m_PixScan->getLoopAction(nl)==PixScan::SCURVE_FIT || m_PixScan->getLoopAction(nl)==PixScan::SCURVE_FAST)
 	       && m_PixScan->getLoopActive(nl));
 
-  m_PixScan->setHistogramFilled(PixScan::SCURVE_MEAN, doSFit);
-  m_PixScan->setHistogramKept(  PixScan::SCURVE_MEAN, doSFit);
-  m_PixScan->setHistogramFilled(PixScan::SCURVE_SIGMA,doSFit);
-  m_PixScan->setHistogramKept(  PixScan::SCURVE_SIGMA,doSFit);
-  m_PixScan->setHistogramFilled(PixScan::SCURVE_CHI2, doSFit);
-  m_PixScan->setHistogramKept(  PixScan::SCURVE_CHI2, doSFit);
+  m_PixScan->setHistogramFilled(PixScan::SCURVE_MEAN, doSFit | m_PixScan->getHistogramFilled(PixScan::SCURVE_MEAN));
+  m_PixScan->setHistogramKept(  PixScan::SCURVE_MEAN, doSFit | m_PixScan->getHistogramKept(PixScan::SCURVE_MEAN));
+  m_PixScan->setHistogramFilled(PixScan::SCURVE_SIGMA,doSFit | m_PixScan->getHistogramFilled(PixScan::SCURVE_SIGMA));
+  m_PixScan->setHistogramKept(  PixScan::SCURVE_SIGMA,doSFit | m_PixScan->getHistogramKept(PixScan::SCURVE_SIGMA));
+  m_PixScan->setHistogramFilled(PixScan::SCURVE_CHI2, doSFit | m_PixScan->getHistogramFilled(PixScan::SCURVE_CHI2));
+  m_PixScan->setHistogramKept(  PixScan::SCURVE_CHI2, doSFit | m_PixScan->getHistogramKept(PixScan::SCURVE_CHI2));
 
   return 0;
 }
