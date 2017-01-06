@@ -118,6 +118,8 @@ STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QO
   //  m_plPath = gSystem->Getenv("PIX_LIB");
   m_plPath = QProcessEnvironment::systemEnvironment ().value("PIX_LIB");
 
+  m_proc = new QProcess(this);
+
   // set up options
   m_options = new Config("STControlConfig");
   Config &conf = *m_options;
@@ -214,6 +216,13 @@ STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QO
 #endif
 }
 STControlEngine::~STControlEngine(){
+
+  // close remaining SourceMonitors
+  if(m_proc->processId()!=0){
+    m_proc->kill();
+    m_proc->waitForFinished();
+  }
+
   m_singleCrateMode=false; // make sure crates are deleted this time
   clear();
 
@@ -2042,7 +2051,12 @@ void STControlEngine::updateGUI(){
 
 /** Start a scan using the configuration in the function argument. */
 int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
-  
+
+  if(m_proc->processId()!=0){
+    m_proc->kill(); // There can be only one!
+    m_proc->waitForFinished();
+  }
+
   emit sendPixScanStatus(0,0,0,0,-1,0,0,0,10);
   m_app->processEvents();
 
@@ -2106,16 +2120,19 @@ int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
   
   // temporary solution: should integrate SourceMonitor via library
   // open external SourceMonitor application if requested, but not if in loop mode
-  std::string monRawFile = scanOpts.scanConfig->getSourceRawFile();
+  QString monRawFile = scanOpts.scanConfig->getSourceRawFile().c_str();
   if(monRawFile!="" && scanOpts.openSrcMon && !scanOpts.scanConfig->getLoopActive(0)){
-    if(monRawFile.substr(monRawFile.length()-4, 4)==".raw")
-      monRawFile = monRawFile.substr(0, monRawFile.length()-4)+"_0_0_0.raw";
-    //std::cout << "Opening SourceMonitor with arg. --input:" << monRawFile << std::endl;
-#ifdef WIN32
-    system(("start SourceMonitor --input:"+monRawFile).c_str());
-#else
-    system(("SourceMonitor --input:"+monRawFile+">&/dev/null &").c_str());
-#endif
+    if(monRawFile.right(4)==".raw") monRawFile = monRawFile.left(monRawFile.length()-4)+"_0_0_0.raw";
+    else monRawFile += "_0_0_0.raw";
+    std::cout << "Opening SourceMonitor with arg. --input:" << std::string(monRawFile.toLatin1().data()) << std::endl;
+    QStringList args("--input:"+monRawFile);
+// #ifdef WIN32
+//     system(("start SourceMonitor --input:"+monRawFile).c_str());
+// #else
+//     system("pkill SourceMonitor"); // There can be only one!
+//     system(("SourceMonitor --input:"+monRawFile+">&/dev/null &").c_str());
+// #endif
+    m_proc->start("SourceMonitor", args);
   }
 
   // restore original raw name - important for iterative calls from prim. list
