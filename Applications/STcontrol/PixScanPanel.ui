@@ -3857,6 +3857,16 @@
                  </layout>
                 </item>
                 <item>
+                 <widget class="QCheckBox" name="sourceMonBox">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="text">
+                   <string>open Source Monitor after scan start</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_26">
                   <item>
                    <widget class="QLabel" name="label_14">
@@ -8268,8 +8278,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>610</width>
-                   <height>1569</height>
+                   <width>616</width>
+                   <height>1456</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_39">
