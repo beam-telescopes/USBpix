@@ -446,7 +446,7 @@ private:
   // S-curve fit quality
   float m_chicut;
   int m_nbadchicut;
-
+  bool m_fastThrUsePseudoPix;
 
   // Private methods
   void writeHistoLevel(DBInquire *dbi, PixScanHisto &sc, std::string lName, int lvl);
@@ -1054,6 +1054,9 @@ public:
   }
   int getNbadchiCut(){
     return m_nbadchicut;
+  }
+  bool getFastThrUsePseudoPix(){
+    return m_fastThrUsePseudoPix;
   }
 
   //! DataBase interaction

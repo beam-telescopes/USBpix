@@ -2367,7 +2367,7 @@ void PixModuleGroup::endThrFastScan(int /*nloop*/, PixScan *scn){
 	if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan : FE"<<ife<<": using inj. capacitance of " << cInj << 
 			" (switch was " << chargeInjCap << ")" << endl;
 	
-	bool pixel_recalc=true;
+	bool pixel_recalc=scn->getFastThrUsePseudoPix();
 	unsigned int colmod, rowmod;
 	if(pixel_recalc){
 	  // reconstruct VCAL values

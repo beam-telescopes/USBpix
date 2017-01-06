@@ -2350,6 +2350,8 @@ void PixScan::initConfig() {
 		"Cut on NOcc above which pixels are defined noisy", true);
 	conf["scans"].addInt("nbadChiCut", m_nbadchicut, 100000,
 		"Number of bad chi^2 values in S-curve scans after which a re-fit with MINUIT is started", true);
+	conf["scans"].addBool("fastThrUsePseudoPix", m_fastThrUsePseudoPix, false,
+		"Fast threshold scan: determine VCAL pseudo-pixel-by-pixel", true);
 
 	// Group histograms
 	conf.addGroup("histograms");
