@@ -1202,7 +1202,7 @@ void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
   // ugly fix in the following line - need to think about a better solution
   scn->setFeVCal(0x1fff); //PixController will not set VCal, FE values used instead
   
-  if (nloop != 1) return; // function doesn't make sense on any other level
+  if (nloop != 0) return; // function doesn't make sense on any other level
 
   //Module loop
   
@@ -2347,7 +2347,7 @@ void PixModuleGroup::endThrFastScan(int nloop, PixScan *scn){
 	
   if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan"<<endl;
   
-  if (nloop != 1) return; // function doesn't make sense on any other level
+  if (nloop != 0) return; // function doesn't make sense on any other level
 
   // these wil store reduced range for threshold scan in the end
   m_vcalMin = 200;
