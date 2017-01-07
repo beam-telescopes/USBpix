@@ -39,7 +39,7 @@
 #include "cmath"
 
 
-#define PMG_DEBUG false
+#define PMG_DEBUG true
 using namespace SctPixelRod;
 using namespace PixLib;
 
@@ -2122,6 +2122,7 @@ void PixModuleGroup::endIFTuning(int nloop, PixScan *scn) {
 void PixModuleGroup::endT0Set(int nloop, PixScan *scn) {
 	const int min_nok = 200;
 	// We assume loop0 is on strobe delay and loop1 on trigger delay
+	if(PMG_DEBUG) cout << "PixModuleGroup::endT0Set: called for nloop="<<nloop<<std::endl;
 	if (nloop != 1) return; //throw an exception?
 
 	std::vector<float> mean_del[32][16]; // first index: module, second index: FE
@@ -2138,8 +2139,7 @@ void PixModuleGroup::endT0Set(int nloop, PixScan *scn) {
 			unsigned int mod = m_modules[pmod]->m_moduleId;
 			// Loop over LVL1 slices
 			for (il=0; il<scn->getLoopVarNSteps(nloop); il++) {
-				//M.B.: Check for DisVbn Tune				//hTime  = &scn->getHisto(PixScan::TIMEWALK, mod, scn->scanIndex(2), il, 0);
-				hTime  = &scn->getHisto(PixScan::TIMEWALK, mod, scn->scanIndex(2), scn->scanIndex(1), scn->scanIndex(nloop));
+			        hTime  = &scn->getHisto(PixScan::TIMEWALK, mod, scn->scanIndex(2), il, 0);
 				unsigned int colmod, rowmod;
 				for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe != m_modules[pmod]->feEnd(); fe++){
 					unsigned int iFE = (unsigned int)(*fe)->number();
