@@ -430,6 +430,8 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   m_knownHandles.insert(std::make_pair("scans_chiCut", (QObject*)scurveChi2Cut));
   m_knownHandles.insert(std::make_pair("scans_nbadChiCut", (QObject*)scurveNbadChi2));
   m_knownHandles.insert(std::make_pair("scans_noiseOccCut", (QObject*)noccCut));
+  m_knownHandles.insert(std::make_pair("scans_useGrpThrRange", (QObject*)redThrRangeBox));
+  m_knownHandles.insert(std::make_pair("scans_fastThrUsePseudoPix", (QObject*) pseudoPixFastThrBox));
   m_knownHandles.insert(std::make_pair("reset_sendHardReset", (QObject*)hardReset));
   m_knownHandles.insert(std::make_pair("reset_sendSoftReset", (QObject*)softReset));
   m_knownHandles.insert(std::make_pair("reset_sendBCR", (QObject*)sendBCR));
