@@ -606,7 +606,7 @@ int WaferPlots::PlotGraph(TGraph* pGraph, TF1* pFitFunction, std::string pXtitle
 		pGraph->SetTitle("");
 	}
 
-	TLegend *l1;	//legend
+	TLegend *l1=0;	//legend
 	if (pFitFunction != 0){
 		l1 = new TLegend(0.34,0.85-0.05*(float) pFitFunction->GetNpar(),0.66,0.89);
 		l1->SetFillStyle(0);
@@ -644,9 +644,9 @@ int WaferPlots::PlotGraph(TGraph* pGraph, TF1* pFitFunction, std::string pXtitle
 		l1->Draw();
 	}
 
-	TLine* tLine;
-	TLine* tLine2;
-	TPaveText* p2;
+	TLine* tLine=0;
+	TLine* tLine2=0;
+	TPaveText* p2=0;
 
 	if (pBestValueName.compare("") != 0){
 		tLine = new TLine(0, pBestYValue, pBestXValue, pBestYValue);
