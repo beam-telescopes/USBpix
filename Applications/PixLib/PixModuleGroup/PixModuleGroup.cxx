@@ -1202,6 +1202,8 @@ void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
   // ugly fix in the following line - need to think about a better solution
   scn->setFeVCal(0x1fff); //PixController will not set VCal, FE values used instead
   
+  if (nloop != 1) return; // function doesn't make sense on any other level
+
   //Module loop
   
   for (unsigned int pmod=0; pmod<m_modules.size(); pmod++){
@@ -1216,7 +1218,7 @@ void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
       if (scn->scanIndex(nloop) == 0){
 	//Create new Histo
 	hVcal = new Histo ("SCURVE_MEAN", "Threshold", m_nColMod, -0.5, (float)m_nColMod-0.5f, m_nRowMod, -0.5, (float)m_nRowMod-0.5f);
-	scn->addHisto(*hVcal, PixScan::SCURVE_MEAN, mod, scn->scanIndex(2), scn->scanIndex(1), -1); // !! Vcal is not a member of PixLib::PixScan 
+	scn->addHisto(*hVcal, PixScan::SCURVE_MEAN, mod, scn->scanIndex(2), scn->scanIndex(1), -1);
       }
       else { //get occupancy that was the result of the last scan step
 	hOcc = &scn->getHisto(PixScan::OCCUPANCY, mod, scn->scanIndex(2), scn->scanIndex(1), (scn->scanIndex(0))-1);
@@ -2341,10 +2343,12 @@ void PixModuleGroup::endT0Set(int nloop, PixScan *scn) {
 	}
 }
 
-void PixModuleGroup::endThrFastScan(int /*nloop*/, PixScan *scn){
+void PixModuleGroup::endThrFastScan(int nloop, PixScan *scn){
 	
   if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan"<<endl;
   
+  if (nloop != 1) return; // function doesn't make sense on any other level
+
   // these wil store reduced range for threshold scan in the end
   m_vcalMin = 200;
   m_vcalMax = 0;
