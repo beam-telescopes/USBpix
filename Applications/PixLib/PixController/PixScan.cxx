@@ -912,7 +912,7 @@ void PixScan::presetI3(ScanType presetName) {
     m_histogramFilled[SCURVE_MEAN] = true;
     m_histogramKept[SCURVE_MEAN] = true;
 
-    m_restoreModuleConfig = true;
+    m_restoreModuleConfig = false;//true;
 
   } else {
     throw PixScanExc(PixControllerExc::ERROR, "Undefined scan preset");
@@ -1952,7 +1952,7 @@ void PixScan::presetI4B(ScanType presetName) {
 		m_histogramFilled[SCURVE_MEAN] = true;
 		m_histogramKept[SCURVE_MEAN] = true;
 		
-		m_restoreModuleConfig = true;
+		m_restoreModuleConfig = false;//true;
 		
 	} else {
 		throw PixScanExc(PixControllerExc::ERROR, "Undefined scan preset");
@@ -2352,6 +2352,8 @@ void PixScan::initConfig() {
 		"Number of bad chi^2 values in S-curve scans after which a re-fit with MINUIT is started", true);
 	conf["scans"].addBool("fastThrUsePseudoPix", m_fastThrUsePseudoPix, false,
 		"Fast threshold scan: determine VCAL pseudo-pixel-by-pixel", true);
+	conf["scans"].addBool("useGrpThrRange", m_useGrpThrRange, false,
+		"Use group threshold range for regular threshold scan", true);
 
 	// Group histograms
 	conf.addGroup("histograms");
