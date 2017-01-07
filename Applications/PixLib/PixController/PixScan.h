@@ -447,6 +447,7 @@ private:
   float m_chicut;
   int m_nbadchicut;
   bool m_fastThrUsePseudoPix;
+  bool m_useGrpThrRange;
 
   // Private methods
   void writeHistoLevel(DBInquire *dbi, PixScanHisto &sc, std::string lName, int lvl);
@@ -1057,6 +1058,9 @@ public:
   }
   bool getFastThrUsePseudoPix(){
     return m_fastThrUsePseudoPix;
+  }
+  bool getUseGrpThrRange(){
+    return m_useGrpThrRange;
   }
 
   //! DataBase interaction
