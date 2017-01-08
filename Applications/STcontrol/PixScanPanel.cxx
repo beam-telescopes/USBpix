@@ -1997,7 +1997,7 @@ void PixScanPanel::openTableMenu(QTableWidgetItem *item){
 
 void PixScanPanel::scanRunning(int type)
 {
-  scanLabel->setText(m_engine.getLastPxScanConfig().anaLabel.c_str());
+  //  scanLabel->setText(m_engine.getLastPxScanConfig().anaLabel.c_str());
 
   // initialise variables for rem. time estimation
   m_StatusUpdatesRecieved=0;

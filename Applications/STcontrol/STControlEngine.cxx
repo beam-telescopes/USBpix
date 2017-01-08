@@ -2053,40 +2053,11 @@ void STControlEngine::updateGUI(){
 /** Start a scan using the configuration in the function argument. */
 int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
 
+  if(scanOpts.scanConfig==0) return -1; // can't work without config
+     
   if(m_proc->processId()!=0){
     m_proc->kill(); // There can be only one!
     m_proc->waitForFinished();
-  }
-
-  emit sendPixScanStatus(0,0,0,0,-1,0,0,0,10);
-  m_app->processEvents();
-
-  m_checkScanCount = 0;
-  for(int ic=0;ic<(int)m_sTRodCrates.size();ic++) m_sTRodCrates[ic]->m_readyForDcs=0;
-
-  if(scanOpts.scanConfig==0) return -1; // can't work without config
-     
-  m_app->processEvents();               // make sure GUI really updates
-  // set wait cursor
-  QApplication::setOverrideCursor(Qt::WaitCursor);
-
-  // if in source scan mode and auto-indexing of raw file is requested, 
-  // check for existing file
-  std::string orgRawName = scanOpts.scanConfig->getSourceRawFile();
-  if(orgRawName!="" && scanOpts.indexRawFile && scanOpts.scanConfig->getSourceScanFlag()){
-    QString newRname = scanOpts.fileName.c_str();
-    // strip off extension
-    QString rExt="";
-    int spos = newRname.lastIndexOf(".");
-    if(spos){
-      rExt = newRname.right(newRname.length()-spos);
-      newRname = newRname.left(spos);
-    }
-    // assemble all parts and save in scan config
-    QString appName = scanOpts.anaLabel.c_str();
-    appName.replace(" ","_");
-    newRname += "_"+appName+".raw";
-    ((ConfString&)scanOpts.scanConfig->config()["general"]["sourceRawFile"]).m_value = std::string(newRname.toLatin1().data());
   }
 
   // store scan options: copy simple elements, but caution with PixScan:
@@ -2097,13 +2068,42 @@ int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
   m_lastPixScanOpts.scanConfig = tmpcfg;  // restore pointer
   m_lastPixScanOpts.scanConfig->config() = scanOpts.scanConfig->config(); // copy Config of PixScan
 
+  emit sendPixScanStatus(0,0,0,0,-1,0,0,0,10);
+  m_app->processEvents();
+
+  m_checkScanCount = 0;
+  for(int ic=0;ic<(int)m_sTRodCrates.size();ic++) m_sTRodCrates[ic]->m_readyForDcs=0;
+
+  m_app->processEvents();               // make sure GUI really updates
+  // set wait cursor
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+
+  // if in source scan mode and auto-indexing of raw file is requested, 
+  // check for existing file
+  std::string orgRawName = m_lastPixScanOpts.scanConfig->getSourceRawFile();
+  if(orgRawName!="" && m_lastPixScanOpts.indexRawFile && m_lastPixScanOpts.scanConfig->getSourceScanFlag()){
+    QString newRname = m_lastPixScanOpts.fileName.c_str();
+    // strip off extension
+    QString rExt="";
+    int spos = newRname.lastIndexOf(".");
+    if(spos){
+      rExt = newRname.right(newRname.length()-spos);
+      newRname = newRname.left(spos);
+    }
+    // assemble all parts and save in scan config
+    QString appName = m_lastPixScanOpts.anaLabel.c_str();
+    appName.replace(" ","_");
+    newRname += "_"+appName+".raw";
+    ((ConfString&)m_lastPixScanOpts.scanConfig->config()["general"]["sourceRawFile"]).m_value = std::string(newRname.toLatin1().data());
+  }
+
   // copy config into all module groups
   for( std::vector<STRodCrate *>::iterator crate = m_sTRodCrates.begin(); crate != m_sTRodCrates.end(); crate++ )
-    if((*crate)->setPixScan(*(scanOpts.scanConfig))) return -2;
+    if((*crate)->setPixScan(*(m_lastPixScanOpts.scanConfig))) return -2;
 
   // then tell the ROD about it
   // ROD text buffer dump
-  readRodBuff("Pre-scan-init info (scan "+scanOpts.anaLabel+"):");
+  readRodBuff("Pre-scan-init info (scan "+m_lastPixScanOpts.anaLabel+"):");
   
   // set ToolPanel inactive
   emit beganScanning();
@@ -2116,7 +2116,7 @@ int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
 
   // if scan modifies and does *not* restore module config,
   // set edited flag accordingly
-  if(!(scanOpts.scanConfig->getRestoreModuleConfig())) editedCfg();
+  if(!(m_lastPixScanOpts.scanConfig->getRestoreModuleConfig())) editedCfg();
 
   //m_log.buffers() << "Post-scan-init info:\n";
   for( std::vector<STRodCrate *>::iterator crate = m_sTRodCrates.begin(); crate != m_sTRodCrates.end(); crate++ )
@@ -2126,23 +2126,17 @@ int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
   
   // temporary solution: should integrate SourceMonitor via library
   // open external SourceMonitor application if requested, but not if in loop mode
-  QString monRawFile = scanOpts.scanConfig->getSourceRawFile().c_str();
-  if(monRawFile!="" && scanOpts.openSrcMon && !scanOpts.scanConfig->getLoopActive(0)){
+  QString monRawFile = m_lastPixScanOpts.scanConfig->getSourceRawFile().c_str();
+  if(monRawFile!="" && m_lastPixScanOpts.openSrcMon && !m_lastPixScanOpts.scanConfig->getLoopActive(0)){
     if(monRawFile.right(4)==".raw") monRawFile = monRawFile.left(monRawFile.length()-4)+"_0_0_0.raw";
     else monRawFile += "_0_0_0.raw";
     std::cout << "Opening SourceMonitor with arg. --input:" << std::string(monRawFile.toLatin1().data()) << std::endl;
     QStringList args("--input:"+monRawFile);
-// #ifdef WIN32
-//     system(("start SourceMonitor --input:"+monRawFile).c_str());
-// #else
-//     system("pkill SourceMonitor"); // There can be only one!
-//     system(("SourceMonitor --input:"+monRawFile+">&/dev/null &").c_str());
-// #endif
     m_proc->start("SourceMonitor", args);
   }
 
   // restore original raw name - important for iterative calls from prim. list
-  ((ConfString&)scanOpts.scanConfig->config()["general"]["sourceRawFile"]).m_value = orgRawName;
+  ((ConfString&)m_lastPixScanOpts.scanConfig->config()["general"]["sourceRawFile"]).m_value = orgRawName;
   
   if(start_monitor){
     connect( m_scanTimer2, SIGNAL(timeout()), this, SLOT(FinishScan()) );
