@@ -83,6 +83,7 @@ STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QO
   m_lastPixScanOpts.timestampStart="";
   m_lastPixScanOpts.stdTestID = -1;
   m_lastPixScanOpts.timeToAbort = -1;
+  m_lastPixScanOpts.scanConfig = new PixScan();
 
   // create single-shot and permanent timer for scan monitoring and prim.list processing
   m_scanTimer = new QTimer(this);
@@ -227,7 +228,7 @@ STControlEngine::~STControlEngine(){
   clear();
 
   // remove user PixScan configs
-  m_lastPixScanOpts.scanConfig=0;
+  delete m_lastPixScanOpts.scanConfig;
   for(std::vector<PixScan*>::iterator scfgIter=m_knownPixScanCfgs.begin();
       scfgIter!=m_knownPixScanCfgs.end();scfgIter++)
     delete (*scfgIter);
@@ -2088,8 +2089,13 @@ int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
     ((ConfString&)scanOpts.scanConfig->config()["general"]["sourceRawFile"]).m_value = std::string(newRname.toLatin1().data());
   }
 
-  // store scan options
-  m_lastPixScanOpts = scanOpts;
+  // store scan options: copy simple elements, but caution with PixScan:
+  // must not overwrite pointer (need to keep this object permanently), 
+  // but instead copy Config content into existing PixScan object
+  PixScan* tmpcfg = m_lastPixScanOpts.scanConfig; // store pointer tmp.
+  m_lastPixScanOpts = scanOpts; // copy simple content
+  m_lastPixScanOpts.scanConfig = tmpcfg;  // restore pointer
+  m_lastPixScanOpts.scanConfig->config() = scanOpts.scanConfig->config(); // copy Config of PixScan
 
   // copy config into all module groups
   for( std::vector<STRodCrate *>::iterator crate = m_sTRodCrates.begin(); crate != m_sTRodCrates.end(); crate++ )
@@ -2468,6 +2474,8 @@ void STControlEngine::launchPrimList(std::vector<PrimListItem*> list, const char
     return;
   }
 
+  m_lastPixScanOpts.anaLabel = "---";  
+
   m_prlOutname = outname;
   m_prlModTestType = "";
   // temporary solution, needs fix for cfg. with >1 module
@@ -2831,8 +2839,7 @@ bool STControlEngine::launchPrlScans(const char *label, const char *fname, PixSc
 
   // start scan - in monitoring
   pixScan(myscopt); 
-  if(cfg==0)
-    delete myCfg;
+  if(cfg==0) delete myCfg;
   
   // after scan: go to next prl item
   connect(this, SIGNAL(finishedScanning()), this, SLOT(processPrimList()));

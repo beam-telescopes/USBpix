@@ -1583,6 +1583,9 @@ void PixScanPanel::setScanValue(std::string parameter, int value) {
 
 void PixScanPanel::updateStatus(int nSteps0, int nSteps1, int nSteps2, int nMasks, int ,//in_currFe, 
 				int sramFillLevel, int triggerRate, int event_Rate, int status){
+
+  scanLabel->setText(m_engine.getLastPxScanConfig().anaLabel.c_str());
+
   if(nMasks<2147483647){// 2147483647 is max. pos. 32-bit int number, not used anywhere else, so should be safe identifier
     if (eventDisp->isEnabled()) {
       if(eventLabel->text()=="Processed Events:"){
@@ -1595,13 +1598,21 @@ void PixScanPanel::updateStatus(int nSteps0, int nSteps1, int nSteps2, int nMask
 	if (scanOptions!=NULL) {
 	  int ntotstp[3];
 	  double max = 1.;
+	  bool loopSwap=false;
 	  for(int is=0;is<3;is++) {
-	    ntotstp[is] = scanOptions->getLoopVarNSteps(is);
+	    if(scanOptions->getLoopActive(is))
+	      ntotstp[is] = scanOptions->getLoopVarNSteps(is);
+	    else
+	      ntotstp[is] = 1;
+	    loopSwap = scanOptions->getInnerLoopSwap();
+	    if(is==0 && loopSwap) // inner lop is not scan but mask -> get that counter
+	      ntotstp[is] = scanOptions->getMaskStageSteps();
 	    if(ntotstp[is]==0) ntotstp[is]=1;
 	    max *= (double)ntotstp[is];
+	    //std::cout << "PixScanPanel::updateStatus: Npts(loop" << is << ")=" << ntotstp[is] << ", max=" << max << std::endl;
 	  }
-	  if (max>0) {
-	    percentage=(double)(nSteps2*ntotstp[1]*ntotstp[0]+nSteps1*ntotstp[0]+nSteps0)/max*100.;
+	  if (max>0){
+	    percentage=(double)(nSteps2*ntotstp[1]*ntotstp[0]+nSteps1*ntotstp[0]+(loopSwap?nMasks:nSteps0))/max*100.;
 	    percentage_error=100/max;
 	  } else
 	    percentage=100;
@@ -1612,22 +1623,27 @@ void PixScanPanel::updateStatus(int nSteps0, int nSteps1, int nSteps2, int nMask
 	    percentage=100;
 	    percentage_error=0;
 	  }
+	  //std::cout << "PixScanPanel::updateStatus: percentage="<<percentage<<", error=" << percentage_error << ", max=" << max << std::endl;
+	  
+	  if (percentage!=m_lastPercentage) m_StatusUpdatesRecieved++;
+	  //std::cout << "PixScanPanel::updateStatus: corrected percentage="<<percentage<< std::endl;
+	  
+	  if (m_StatusUpdatesRecieved==2 && percentage!=m_lastPercentage) {
+	    m_MeasurementStartTime=QDateTime::currentDateTime().toTime_t();
+	    m_MeasurementStartPercentage=percentage;
+	    //std::cout << "PixScanPanel::updateStatus: storing m_MeasurementStartTime=" << m_MeasurementStartTime<<", m_MeasurementStartPercentage=" << m_MeasurementStartPercentage<<std::endl;
+	  }
+	  // First estimation after 1 minute
+	  if (percentage>m_lastPercentage && (QDateTime::currentDateTime().toTime_t()-m_MeasurementStartTime)>30 && percentage>0 && m_MeasurementStartTime>0) {
+	    int remaining_minutes=(int)(((100/(percentage-m_MeasurementStartPercentage-percentage_error))-1)*(QDateTime::currentDateTime().toTime_t()-m_MeasurementStartTime)/60)+1;
+	    eventLabel->setText("Time remaining (min.):");
+	    eventDisp->display(remaining_minutes);
+	    //std::cout << "PixScanPanel::updateStatus:  m_StatusUpdatesRecieved="<<m_StatusUpdatesRecieved << " at " << std::string(QDateTime::currentDateTime().toString("hh:mm:ss").toLatin1().data()) 
+	    //      << " = " <<QDateTime::currentDateTime().toTime_t() <<std::endl;
+	  }
+	  
+	  m_lastPercentage=percentage;
 	}
-	if (percentage!=m_lastPercentage)
-	  m_StatusUpdatesRecieved++;
-	
-	if (m_StatusUpdatesRecieved==2) {
-	  m_MeasurementStartTime=QDateTime::currentDateTime().toTime_t();
-	  m_MeasurementStartPercentage=percentage;
-	}
-	// First estimation after 1 minute
-	if (percentage>m_lastPercentage && (QDateTime::currentDateTime().toTime_t()-m_MeasurementStartTime>30) && percentage>0 && m_MeasurementStartTime!=-1) {
-	  int remaining_minutes=(int)(((100/(percentage-m_MeasurementStartPercentage-percentage_error))-1)*(QDateTime::currentDateTime().toTime_t()-m_MeasurementStartTime)/60)+1;
-	  eventLabel->setText("Time remaining (min.):");
-	  eventDisp->display(remaining_minutes);
-	}
-	
-	m_lastPercentage=percentage;
       }
     }
     if(usedMem->isEnabled())     usedMem->display(sramFillLevel);
@@ -1981,6 +1997,8 @@ void PixScanPanel::openTableMenu(QTableWidgetItem *item){
 
 void PixScanPanel::scanRunning(int type)
 {
+  scanLabel->setText(m_engine.getLastPxScanConfig().anaLabel.c_str());
+
   // initialise variables for rem. time estimation
   m_StatusUpdatesRecieved=0;
   m_MeasurementStartTime=-1;
