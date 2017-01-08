@@ -380,7 +380,7 @@ void PixFeI4BConfig::setupData() {
   writeGlobRegister("PlsrDAC", 0);
   writeGlobRegister("PlsrDacBias", 96);
   writeGlobRegister("PlsrDelay", 2);
-  writeGlobRegister("PlsrIdacRamp", 213);
+  writeGlobRegister("PlsrIdacRamp", 120);
   writeGlobRegister("PlsrPwr", 1);
   writeGlobRegister("PlsrRiseUpTau", 7);
   writeGlobRegister("PlsrVgOPamp", 255);
@@ -419,7 +419,7 @@ void PixFeI4BConfig::setupData() {
   writeGlobRegister("SR_clr", 0);
   writeGlobRegister("Stop_Clk", 0);
   writeGlobRegister("StopModeCnfg", 0);
-  writeGlobRegister("TdacVbp", 255);
+  writeGlobRegister("TdacVbp", 180);
   writeGlobRegister("TempSensBias", 0);
   writeGlobRegister("TempSensDiodeSel", 0);// check
   writeGlobRegister("TempSensDisable", 0); // check
