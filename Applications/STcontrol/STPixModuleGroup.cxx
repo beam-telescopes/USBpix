@@ -920,16 +920,15 @@ void STPixModuleGroup::CtrlThread::scan()
 		getSTPixModuleGroup()->m_nSteps[i]=tmpScans[ife]->scanIndex(i);
 	      getSTPixModuleGroup()->m_nMasks=tmpScans[ife]->getMaskStageIndex();
 	      
-	      // call the main scan function in PixModuleGroup - in a separate thread in case PixController does not return immediately
-	      // if(tmpScans[ife]->getSourceScanFlag() || !tmpScans[ife]->getDspMaskStaging() || 
-		 // tmpScans[ife]->getRunType() != PixScan::NORMAL_SCAN || !histoOnCtrl){ 
-		// // run source scan or special scans as usual
-		// if(STEP_DEBUG) qDebug() << "Running scan in main thread!";
-		// getSTPixModuleGroup()->scanExecute(tmpScans[ife]);
-	      // } else { 
+	      // call the main scan function in PixModuleGroup - in a separate thread in case PixController is involved which may not return immediately
+	      if (cfg.getRunType() == PixScan::NORMAL_SCAN && tmpScans[ife]->getDspMaskStaging() && histoOnCtrl){
 		m_scanThr->setPixScan(tmpScans[ife]);
 		m_scanThr->start();
-	    //  }
+	      } else {
+		// run special scans (e.g. DCS) as usual
+		if(STEP_DEBUG) qDebug() << "Running scan in main thread!";
+		getSTPixModuleGroup()->scanExecute(tmpScans[ife]);
+	      }
 	      
 	      // wait till the controller knows it is in scanning mode
 	      int timeoutCnt=0; 
