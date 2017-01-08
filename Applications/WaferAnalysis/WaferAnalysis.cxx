@@ -3167,8 +3167,8 @@ void WaferAnalysis::analyzeSourceScan(unsigned int pChipIndex, std::string pSTsc
 	TH1F* tHist1d_tot = new TH1F(*(TH1F*) tData.getGenericHisto(PixScan::TOT,0,-1));	//create new object via copy constructor
 	TH1F* tHist1d_lvl1 = new TH1F(*(TH1F*) tData.getGenericHisto(PixScan::LVL1,0,-1));	//create new object via copy constructor
 
-	TH1F* tHist1d_bcid;
-	TH1F* tHist1d_lv1id;
+	TH1F* tHist1d_bcid=0;
+	TH1F* tHist1d_lv1id=0;
 	if(tHasCounterHists){
 		tHist1d_bcid = new TH1F(*(TH1F*) tData.getGenericHisto(PixScan::BCID,0,-1));	//create new object via copy constructor
 		tHist1d_lv1id = new TH1F(*(TH1F*) tData.getGenericHisto(PixScan::LV1ID,0,-1));	//create new object via copy constructor

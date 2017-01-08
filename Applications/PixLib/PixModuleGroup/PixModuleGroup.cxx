@@ -221,6 +221,10 @@ void PixModuleGroup::readDbInquire(){
 		"Module Group Name", true);
 	conf["general"].addInt("TriggerDelay", m_triggerDelay, 50,
 		"Global Trigger Delay for in-time threshold scan", true);
+	conf["general"].addFloat("VCALmin", m_vcalMin, 0,
+		"Min. value for reduced-range threshold scan", true);
+	conf["general"].addFloat("VCALmax", m_vcalMax, 200,
+		"Max. value for reduced-range threshold scan", true);
 
 	// Read from DB
 	conf.reset();
@@ -1198,6 +1202,8 @@ void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
   // ugly fix in the following line - need to think about a better solution
   scn->setFeVCal(0x1fff); //PixController will not set VCal, FE values used instead
   
+  if (nloop != 0) return; // function doesn't make sense on any other level
+
   //Module loop
   
   for (unsigned int pmod=0; pmod<m_modules.size(); pmod++){
@@ -1212,7 +1218,7 @@ void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
       if (scn->scanIndex(nloop) == 0){
 	//Create new Histo
 	hVcal = new Histo ("SCURVE_MEAN", "Threshold", m_nColMod, -0.5, (float)m_nColMod-0.5f, m_nRowMod, -0.5, (float)m_nRowMod-0.5f);
-	scn->addHisto(*hVcal, PixScan::SCURVE_MEAN, mod, scn->scanIndex(2), scn->scanIndex(1), -1); // !! Vcal is not a member of PixLib::PixScan 
+	scn->addHisto(*hVcal, PixScan::SCURVE_MEAN, mod, scn->scanIndex(2), scn->scanIndex(1), -1);
       }
       else { //get occupancy that was the result of the last scan step
 	hOcc = &scn->getHisto(PixScan::OCCUPANCY, mod, scn->scanIndex(2), scn->scanIndex(1), (scn->scanIndex(0))-1);
@@ -2219,6 +2225,7 @@ void PixModuleGroup::endIFTuning(int nloop, PixScan *scn) {
 void PixModuleGroup::endT0Set(int nloop, PixScan *scn) {
 	const int min_nok = 200;
 	// We assume loop0 is on strobe delay and loop1 on trigger delay
+	if(PMG_DEBUG) cout << "PixModuleGroup::endT0Set: called for nloop="<<nloop<<std::endl;
 	if (nloop != 1) return; //throw an exception?
 
 	std::vector<float> mean_del[32][16]; // first index: module, second index: FE
@@ -2235,8 +2242,7 @@ void PixModuleGroup::endT0Set(int nloop, PixScan *scn) {
 			unsigned int mod = m_modules[pmod]->m_moduleId;
 			// Loop over LVL1 slices
 			for (il=0; il<scn->getLoopVarNSteps(nloop); il++) {
-				//M.B.: Check for DisVbn Tune				//hTime  = &scn->getHisto(PixScan::TIMEWALK, mod, scn->scanIndex(2), il, 0);
-				hTime  = &scn->getHisto(PixScan::TIMEWALK, mod, scn->scanIndex(2), scn->scanIndex(1), scn->scanIndex(nloop));
+			        hTime  = &scn->getHisto(PixScan::TIMEWALK, mod, scn->scanIndex(2), il, 0);
 				unsigned int colmod, rowmod;
 				for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe != m_modules[pmod]->feEnd(); fe++){
 					unsigned int iFE = (unsigned int)(*fe)->number();
@@ -2337,10 +2343,16 @@ void PixModuleGroup::endT0Set(int nloop, PixScan *scn) {
 	}
 }
 
-void PixModuleGroup::endThrFastScan(int /*nloop*/, PixScan *scn){
+void PixModuleGroup::endThrFastScan(int nloop, PixScan *scn){
 	
   if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan"<<endl;
   
+  if (nloop != 0) return; // function doesn't make sense on any other level
+
+  // these wil store reduced range for threshold scan in the end
+  m_vcalMin = 200;
+  m_vcalMax = 0;
+
   //Module Loop
   for (unsigned int pmod = 0; pmod<m_modules.size(); pmod++) {
     if (m_modules[pmod]->m_readoutActive) {
@@ -2414,6 +2426,13 @@ void PixModuleGroup::endThrFastScan(int /*nloop*/, PixScan *scn){
 	      float vcal_best = (*hVcal)(colmod,rowmod);
 	      float q = 6.241495961*cInj*(((vcal_a*vcal_best + vcal_b)*vcal_best + vcal_c)*vcal_best + vcal_d);
 	      hVcal->set(colmod, rowmod, q);
+	      // threshold range for reduced normal scan
+	      if(occ_best>.4 && occ_best < 0.6){ // exclude pixels too far away from target
+		float vcal_min = (*fe)->getVcalFromCharge(chargeInjCap, (q>1000.)?(q-1000.):0.);
+		if(vcal_min < m_vcalMin) m_vcalMin = vcal_min;
+		float vcal_max = (*fe)->getVcalFromCharge(chargeInjCap, (q+1500.));
+		if(vcal_max > m_vcalMax) m_vcalMax = vcal_max;
+	      }
 	    }
 	  }
 	} else{
@@ -2452,6 +2471,17 @@ void PixModuleGroup::endThrFastScan(int /*nloop*/, PixScan *scn){
 	      //calculate q from vcal
 	      float q = 6.241495961*cInj*(((vcal_a*vcal_best + vcal_b)*vcal_best + vcal_c)*vcal_best + vcal_d);
 	      hVcal->set(colmod, rowmod, q);
+	      float occ = (*hOccp.at(nscanpts-1))(colmod, rowmod);
+	      double events = (double)(scn->getRepetitions());
+	      if(events>0)  occ /= events;
+	      else          occ = 0;
+	      if(occ>.4 && occ < 0.6){ // exclude pixels too far away from target
+		// threshold range for reduced normal scan
+		float vcal_min = (*fe)->getVcalFromCharge(chargeInjCap, (q>1000.)?(q-1000.):0.);
+		if(vcal_min < m_vcalMin) m_vcalMin = vcal_min;
+		float vcal_max = (*fe)->getVcalFromCharge(chargeInjCap, (q+1500.));
+		if(vcal_max > m_vcalMax) m_vcalMax = vcal_max;
+	      }
 	    }
 	  }
 	}

@@ -798,6 +798,15 @@ void STPixModuleGroup::CtrlThread::scan()
     PixController *pc = getSTPixModuleGroup()->getPixController();
     PixScan &cfg = *(getSTPixModuleGroup()->getPixScan());
     cfg.resetScan();
+    // no smart way to add this to PixModuleGroup, so let's do it here
+    if(cfg.getUseGrpThrRange()){ // if VCAL is scanned: reduce VCAL range to module group's limits
+      for(int i=0;i<2;i++){
+	if(cfg.getLoopActive(i) && cfg.getLoopParam(i)==PixScan::VCAL){
+	  int steps = 1+(int)(getSTPixModuleGroup()->getVcalMax()-getSTPixModuleGroup()->getVcalMin());
+	  cfg.setLoopVarValues(i, getSTPixModuleGroup()->getVcalMin(), getSTPixModuleGroup()->getVcalMax(), steps);
+	}
+      }
+    }
     // check if histograms from controller are requested
     bool histoOnCtrl=false;
     std::map<std::string, int> htv = cfg.getHistoTypes();

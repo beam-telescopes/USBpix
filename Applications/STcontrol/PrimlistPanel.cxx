@@ -81,6 +81,7 @@ PrimListViewItem::~PrimListViewItem()
 }
 void PrimListViewItem::edit(bool isNew)
 {
+  //std::cout << "PrimListViewItem::edit" << std::endl;
   if(isNew) m_copyItem = new PrimListItem(*this, getIndex());
   ((ConfString&)m_copyItem->config()["general"]["label"]).m_value = m_label; // otherwise, we get "Copy of ..."
   optionsPanel op(m_copyItem->config(), treeWidget(), 0, (getType()==CHIP_TEST));
@@ -111,12 +112,16 @@ void PrimListViewItem::edit(bool isNew)
     if(tab!=0) op.m_tabwidget->setCurrentWidget(tab);
   }
   // connect save/cancel functions
-  connect(&op, SIGNAL(accepted()), this, SLOT(saveEdit()));
+  disconnect( op.saveB, SIGNAL( clicked() ), &op, SLOT( save() ) );
+  disconnect( op.cancB, SIGNAL( clicked() ), &op, SLOT( reject() ) );
+  connect( op.saveB, SIGNAL( clicked() ), this, SLOT( saveEdit() ) );
+  connect( op.cancB, SIGNAL( clicked() ), this, SLOT( cancelEdit() ) );
+  //connect(&op, SIGNAL(accepted()), this, SLOT(saveEdit()));
   connect(&op, SIGNAL(rejected()), this, SLOT(cleanEdit()));
   op.exec();
 }
 void PrimListViewItem::toolTypeChanged(){
-  disconnect(m_tmpWidget, SIGNAL(accepted()), this, SLOT(saveEdit()));
+  //disconnect(m_tmpWidget, SIGNAL(accepted()), this, SLOT(saveEdit()));
   ((optionsPanel*)m_tmpWidget)->save();
   m_copyItem->setupSubcfg(0);
   //open new panel
@@ -127,6 +132,8 @@ void PrimListViewItem::editPS()
   emit editThisPS(m_copyItem->getPS(), m_tmpWidget);
 }
 void PrimListViewItem::saveEdit(){
+  //std::cout << "PrimListViewItem::saveEdit" << std::endl;
+  ((optionsPanel*)m_tmpWidget)->save();
   if(m_copyItem->getSubType()>=0 && m_copyItem->getSubType()!=getSubType()){ 
     // sub-type for a TOOL or CHIP_TEST changed, make sure list of arguments is updated
     (*m_config) = m_copyItem->config();
@@ -136,7 +143,14 @@ void PrimListViewItem::saveEdit(){
   if(m_ps!=0 && m_copyItem->getPS()!=0) m_ps->config() = m_copyItem->getPS()->config();
   cleanEdit();
 }
+void PrimListViewItem::cancelEdit(){
+  //std::cout << "PrimListViewItem::cancelEdit" << std::endl;
+  disconnect(m_tmpWidget, SIGNAL(rejected()), this, SLOT(cleanEdit()));
+  ((optionsPanel*)m_tmpWidget)->reject();
+  cleanEdit();
+}
 void PrimListViewItem::cleanEdit(){
+  //std::cout << "PrimListViewItem::cleanEdit" << std::endl;
   setText(0, getLabel().c_str());
   delete m_copyItem; m_copyItem=0;
 }
