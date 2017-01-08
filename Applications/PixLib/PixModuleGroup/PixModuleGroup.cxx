@@ -2926,7 +2926,10 @@ void PixModuleGroup::scanExecute(PixScan *scn) {
 						rtypes = "FE GADC";
 						break;
 					}
-					if(m_dcsChans[pmod]!=0 && rtypes != "unknown") dcsval = m_dcsChans[pmod]->ReadParam(rtypes);
+					if(m_dcsChans[pmod]!=0 && rtypes != "unknown"){
+					  m_dcsChans[pmod]->SetState("UPDATE");
+					  dcsval = m_dcsChans[pmod]->ReadParam(rtypes);
+					}
 					if(PMG_DEBUG) cout << "PixModuleGroup::scanExecute : DCS chan: " << ((m_dcsChans[pmod]!=0)?m_dcsChans[pmod]->name():"NULL") <<
 						" reads type " << rtypes << " of value " << dcsval << endl;
 					hdcs->set(scn->scanIndex(0)*scn->getMaskStageSteps()+scn->getMaskStageIndex(), dcsval);
