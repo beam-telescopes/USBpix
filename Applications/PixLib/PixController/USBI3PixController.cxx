@@ -273,7 +273,7 @@ void USBI3PixController::writeModuleConfig(PixModule& mod) {
   
   m_FEconfig->SetChipAdd(((ConfInt&)firstFE->config()["Misc"]["Address"]).getValue());	//CG:EDIT : now works fine for FE-I3.
   
-  firstFE = dynamic_cast<PixFeI2*>(*(mod.feBegin()));
+  //firstFE = dynamic_cast<PixFeI2*>(*(mod.feBegin()));
   
   m_FEconfig->SetGlobalVal(CHIP_LATENCY, 255);// globReg.latency);
   if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: LATENCY \t"<<255<<endl;
