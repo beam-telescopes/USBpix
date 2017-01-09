@@ -124,7 +124,7 @@ class online::monitor : public QWidget
 	
 	void initialize_graphics_utilities ();
 	
-	void open_file_streams ();
+	bool open_file_streams ();
 	
 	void prepare_for_looping ();
 	

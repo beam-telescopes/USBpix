@@ -52,6 +52,7 @@ class QTimer;
 class QApplication;
 class QString;
 class QTime;
+class QProcess;
 class ChipTest;
 #ifdef WITHEUDAQ
 class STEUDAQ;
@@ -341,6 +342,7 @@ private: // Private attributes
   int m_prlIndex, m_prlLabelIndex;
   bool m_prlIndMode;
   QTime *m_pixScanStartTime;
+  QProcess *m_proc; // used for SourceMonitor
 
   // global chip test options
   std::map<std::string, ChipTest*> m_chipTests;

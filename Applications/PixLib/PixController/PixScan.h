@@ -238,8 +238,8 @@ public:
                         FDAC_TUNE, IF_TUNE, TIMEWALK_MEASURE, INCREMENTAL_TDAC_SCAN, BOC_RX_DELAY_SCAN,
                         BOC_THR_RX_DELAY_SCAN, BOC_V0_RX_DELAY_SCAN, INTIME_THRESH_SCAN, T0_SCAN, CROSSTALK_SCAN,
                         IV_SCAN, DAC_SCAN, MONLEAK, HITBUS_SCALER, SOURCE_SCAN, EUDAQ, TOT_VERIF, NOISE_OCC, INJ_CALIB,
-			TDAC_FAST_TUNE, GDAC_FAST_TUNE, GDAC_FAST_TUNE2, HITOR_SCAN, FE_ST_SOURCE_SCAN, TOT_CALIB_ALT, TOT_CALIB_LUT, CHARGE_CALIB_VERIF, ANALOG_TEST_CCPD,
-			DISCBIAS_TUNE,THRESHOLD_SCAN_CCPD,FDAC_TUNE_CCPD};
+			TDAC_FAST_TUNE, GDAC_FAST_TUNE, GDAC_FAST_TUNE2, HITOR_SCAN, FE_ST_SOURCE_SCAN, TOT_CALIB_ALT, TOT_CALIB_LUT, CHARGE_CALIB_VERIF, 
+			DISCBIAS_TUNE, THR_FAST_SCAN, ANALOG_TEST_CCPD, THRESHOLD_SCAN_CCPD, FDAC_TUNE_CCPD};
   enum ModConfigType  { PHYSICS, CALIB,
                         SPARE };
   enum MaskStageMode  { SEL_ENA, SEL,
@@ -301,7 +301,7 @@ public:
   enum EndLoopAction  { NO_ACTION, SCURVE_FIT, TDAC_TUNING, GDAC_TUNING, T0_SET, FDAC_TUNING,
 			IF_TUNING, MIN_THRESHOLD, MCCDEL_FIT, TOTCAL_FIT, FDAC_TUNING_ALT, OFFSET_CALIB,
 			TDAC_FAST_TUNING, OCC_SUM, GDAC_FAST_TUNING, TOTCAL_FEI4, CLEAR_IOMUX_BITS, TOT_CHARGE_LUT, 
-			TOT_TO_CHARGE, CALC_MEAN_NOCC, SCURVE_FAST, DISCBIAS_TUNING, FDAC_TUNING_CCPD};
+			TOT_TO_CHARGE, CALC_MEAN_NOCC, SCURVE_FAST, DISCBIAS_TUNING,  THR_FAST_SCANNING, FDAC_TUNING_CCPD};
   enum RunType        { NORMAL_SCAN, RAW_PATTERN, RAW_EVENT };
   enum CountType      {COUNT_TRIGGER, COUNT_DH, COUNT_DR, COUNT_SECS};
   enum TriggerType    {STROBE_SCAN=0, USBPIX_SELF_TRG=1, EXT_TRG=2, TLU_SIMPLE=3, TLU_DATA_HANDSHAKE=4, USBPIX_REPLICATION_SLAVE=5, 
@@ -449,6 +449,8 @@ private:
   int m_nbadchicut;
   // Charge convertion
   bool m_convertToCharge;
+  bool m_fastThrUsePseudoPix;
+  bool m_useGrpThrRange;
 
   // Private methods
   void writeHistoLevel(DBInquire *dbi, PixScanHisto &sc, std::string lName, int lvl);
@@ -1067,6 +1069,12 @@ public:
   }
   bool getconvertToCharge(){
     return m_convertToCharge;
+  }
+  bool getFastThrUsePseudoPix(){
+    return m_fastThrUsePseudoPix;
+  }
+  bool getUseGrpThrRange(){
+    return m_useGrpThrRange;
   }
 
   //! DataBase interaction

@@ -67,12 +67,18 @@ void Frontend::writeRegister(const FERegister &reg, uint64_t val) {
 }
 
 uint64_t Frontend::readRegisterNr(int reg) const {
+  try{
 	return global_registers.at(reg);
+  }catch(...){
+    return 0;
+  }
 }
 
 void Frontend::writeRegisterNr(int reg, uint64_t val) {
+  try{
 	global_registers.at(reg) = val;
 	written_registers.push_back(reg);
+  }catch(...){}
 }
 
 void Frontend::loadRegisterList(void) {
