@@ -39,7 +39,7 @@
 #include "cmath"
 
 
-#define PMG_DEBUG false
+#define PMG_DEBUG true
 using namespace SctPixelRod;
 using namespace PixLib;
 
@@ -2490,6 +2490,11 @@ void PixModuleGroup::endThrFastScan(int nloop, PixScan *scn){
 	}
       }
     }
+  }
+  // fall-back if algorithm fails
+  if(m_vcalMax < m_vcalMin){
+    m_vcalMax = 200.;
+    m_vcalMin = 0.;
   }
 }
 
