@@ -1213,3 +1213,9 @@ void ConfigFEMemoryI3::StartScan(int ScanVarIndex, int ScanVarStart, int ScanVar
 			ShiftPixMask(KILL, ShiftMaskStepSize);
 	}
 }
+std::string ConfigFEMemoryI3::getGlobalVarName(int Variable)
+{
+	std::string name = "INDEX NOT FOUND";
+	if(Variable<GLOBAL_REG_ITEMS)	name = gloCnfRegItem[Variable].name;
+	return name;	
+}

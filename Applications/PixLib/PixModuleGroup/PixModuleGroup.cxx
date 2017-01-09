@@ -225,6 +225,10 @@ void PixModuleGroup::readDbInquire(){
 		"Module Group Name", true);
 	conf["general"].addInt("TriggerDelay", m_triggerDelay, 50,
 		"Global Trigger Delay for in-time threshold scan", true);
+	conf["general"].addFloat("VCALmin", m_vcalMin, 0,
+		"Min. value for reduced-range threshold scan", true);
+	conf["general"].addFloat("VCALmax", m_vcalMax, 200,
+		"Max. value for reduced-range threshold scan", true);
 
 	// Read from DB
 	conf.reset();
@@ -1191,6 +1195,105 @@ void PixModuleGroup::prepareIncrTdac(int nloop, PixScan *scn)
 	}
 }
 
+void PixModuleGroup::prepareThrFastScan(int nloop, PixScan *scn){
+  // New fast Threshold Scan
+  // gets called before each scan step
+  
+  if(PMG_DEBUG) std::cout << "PixModuleGroup::prepareThrFastScan loop " << std::dec << nloop << "/" << scn->scanIndex(nloop) << std::endl;
+  
+  // we're scanning VCAL which makes general scan call code call PixScan::setFeVCal(current scan val.)
+  // we want to set VCAL from FE information, which requires PixScan::setFeVCal(0x1fff)
+  // ugly fix in the following line - need to think about a better solution
+  scn->setFeVCal(0x1fff); //PixController will not set VCal, FE values used instead
+  
+  if (nloop != 0) return; // function doesn't make sense on any other level
+
+  //Module loop
+  
+  for (unsigned int pmod=0; pmod<m_modules.size(); pmod++){
+    if (m_modules[pmod]->m_readoutActive){
+      bool isFei4 = false;
+      unsigned int mod = m_modules[pmod]->m_moduleId;
+      
+      //Initialize histogram
+      Histo *hOcc=0, *hVcal;
+      
+      //set correct charge injection
+      if (scn->scanIndex(nloop) == 0){
+	//Create new Histo
+	hVcal = new Histo ("SCURVE_MEAN", "Threshold", m_nColMod, -0.5, (float)m_nColMod-0.5f, m_nRowMod, -0.5, (float)m_nRowMod-0.5f);
+	scn->addHisto(*hVcal, PixScan::SCURVE_MEAN, mod, scn->scanIndex(2), scn->scanIndex(1), -1);
+      }
+      else { //get occupancy that was the result of the last scan step
+	hOcc = &scn->getHisto(PixScan::OCCUPANCY, mod, scn->scanIndex(2), scn->scanIndex(1), (scn->scanIndex(0))-1);
+	hVcal = &scn->getHisto(PixScan::SCURVE_MEAN, mod, scn->scanIndex(2), scn->scanIndex(1), 0);
+      }
+      
+      //FE Loop
+      for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe != m_modules[pmod]->feEnd(); fe++){
+	PixFe* fei4 = dynamic_cast<PixFeI4A*>(*fe);
+	if(fei4==0) fei4 = dynamic_cast<PixFeI4B*>(*fe);
+	isFei4 = (fei4!=0);
+	double vcal = 0.;
+	unsigned int colmod, rowmod;
+	int ife = (*fe)->number();
+	rowmod = m_modules[pmod]->iRowMod(ife, 1);//row);
+	colmod = m_modules[pmod]->iColMod(ife, 1);//col);
+	if (scn->scanIndex(nloop) == 0) {
+	  vcal = (int)(scn->getLoopVarValues(nloop))[0];  //set  inital vcal value
+	  hVcal->set(colmod, rowmod, vcal);  //write inital vcal value to histo
+	} else {
+	  double events = (double)(scn->getRepetitions());
+	  vcal = (*hVcal)(colmod, rowmod); //get vcal from histo
+	  if(PMG_DEBUG) std::cout << "PixModuleGroup::prepareThrFastScan step " <<scn->scanIndex(nloop)<< ", mod " <<pmod<< ", FE"<<ife<<", vcal: " << vcal << std::endl;
+	  
+	  double occ = 0, nent = 0;
+	  for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	    for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+	      rowmod = m_modules[pmod]->iRowMod(ife, row);
+	      colmod = m_modules[pmod]->iColMod(ife, col);
+	      if(hOcc!=0){
+		occ += (*hOcc)(colmod, rowmod);
+		nent += 1.;
+ 	      }
+	      
+	    }
+	  }
+	  if(nent>0) occ /= nent;
+	  else       occ = 0.;
+	  // check if occupancy is lower or higher than 50% of events
+	  if(PMG_DEBUG) std::cout << "PixModuleGroup::prepareThrFastScan step " <<scn->scanIndex(nloop)<< ", mod " <<pmod<< ", FE"<<ife<<", avg. occ: " << 
+	    occ << ", events: " << events << std::endl;
+	  if (occ/events < 0.5) {
+	    vcal +=  (int)(scn->getLoopVarValues(nloop))[scn->scanIndex(nloop)];
+	    if(PMG_DEBUG) std::cout << "PixModuleGroup::prepareThrFastScan VCAL occ/events < 0.5: " << vcal << std::endl;
+	  }
+	  else {
+	    vcal -= (int)(scn->getLoopVarValues(nloop))[scn->scanIndex(nloop)];
+	    if(PMG_DEBUG) std::cout << "PixModuleGroup::prepareThrFastScan VCAL occ/events >= 0.5: " << vcal << std::endl;
+	  }
+	}
+	if(isFei4)
+	  (*fe)->writeGlobRegister("PlsrDAC", vcal);
+	else
+	  (*fe)->writeGlobRegister("DAC_VCAL", vcal);
+	
+	for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	  for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+	    rowmod = m_modules[pmod]->iRowMod(ife, row);
+	    colmod = m_modules[pmod]->iColMod(ife, col);
+	    hVcal->set(colmod, rowmod, vcal); // save vcal in Histo hVcal
+	  }
+	}
+	
+      }
+      m_pixCtrl->writeModuleConfig(*(m_modules[pmod])); 
+    }
+    
+  }
+}
+
+
 void PixModuleGroup::endTDACTuning(int nloop, PixScan *scn) {
 	if(PMG_DEBUG) cout << "Starting PixModuleGroup::endTDACTuning" << endl;
 	// Check if the loop is executed on the host
@@ -2126,6 +2229,7 @@ void PixModuleGroup::endIFTuning(int nloop, PixScan *scn) {
 void PixModuleGroup::endT0Set(int nloop, PixScan *scn) {
 	const int min_nok = 200;
 	// We assume loop0 is on strobe delay and loop1 on trigger delay
+	if(PMG_DEBUG) cout << "PixModuleGroup::endT0Set: called for nloop="<<nloop<<std::endl;
 	if (nloop != 1) return; //throw an exception?
 
 	std::vector<float> mean_del[32][16]; // first index: module, second index: FE
@@ -2142,8 +2246,7 @@ void PixModuleGroup::endT0Set(int nloop, PixScan *scn) {
 			unsigned int mod = m_modules[pmod]->m_moduleId;
 			// Loop over LVL1 slices
 			for (il=0; il<scn->getLoopVarNSteps(nloop); il++) {
-				//M.B.: Check for DisVbn Tune				//hTime  = &scn->getHisto(PixScan::TIMEWALK, mod, scn->scanIndex(2), il, 0);
-				hTime  = &scn->getHisto(PixScan::TIMEWALK, mod, scn->scanIndex(2), scn->scanIndex(1), scn->scanIndex(nloop));
+			        hTime  = &scn->getHisto(PixScan::TIMEWALK, mod, scn->scanIndex(2), il, 0);
 				unsigned int colmod, rowmod;
 				for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe != m_modules[pmod]->feEnd(); fe++){
 					unsigned int iFE = (unsigned int)(*fe)->number();
@@ -2244,6 +2347,161 @@ void PixModuleGroup::endT0Set(int nloop, PixScan *scn) {
 	}
 }
 
+void PixModuleGroup::endThrFastScan(int nloop, PixScan *scn){
+	
+  if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan"<<endl;
+  
+  if (nloop != 0) return; // function doesn't make sense on any other level
+
+  // these wil store reduced range for threshold scan in the end
+  m_vcalMin = 200;
+  m_vcalMax = 0;
+
+  //Module Loop
+  for (unsigned int pmod = 0; pmod<m_modules.size(); pmod++) {
+    if (m_modules[pmod]->m_readoutActive) {
+      unsigned int mod = m_modules[pmod]->m_moduleId;
+      
+      Histo *hVcal;
+      std::vector<Histo*> hOccp;
+      hVcal =&scn->getHisto(PixScan::SCURVE_MEAN, mod, scn->scanIndex(2), scn->scanIndex(1), 0);
+      const int nscanpts = scn->getLoopVarNSteps(0);
+      for(int i=0;i<nscanpts; i++)
+	hOccp.push_back(&scn->getHisto(PixScan::OCCUPANCY, mod, scn->scanIndex(2), scn->scanIndex(1), i ));
+      
+      //FE Loop
+      for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe!= m_modules[pmod]->feEnd(); fe++) {
+	bool isfei4 = (m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4A || m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4B);
+	int ife = (*fe)->number();
+	//get parameters to calculate q from vcal			
+	float vcal_a = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
+	float vcal_b = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient2"])).value();
+	float vcal_c = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient1"])).value();
+	float vcal_d = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient0"])).value();
+	std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
+	int chargeInjCap = scn->getChargeInjCap();
+	// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+	if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
+	float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
+	if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan : FE"<<ife<<": using inj. capacitance of " << cInj << 
+			" (switch was " << chargeInjCap << ")" << endl;
+	
+	bool pixel_recalc=scn->getFastThrUsePseudoPix();
+	unsigned int colmod, rowmod;
+	if(pixel_recalc){
+	  // reconstruct VCAL values
+	  std::vector<float> loop_val = scn->getLoopVarValues(0);
+	  std::vector<int> vcal_steps;
+	  vcal_steps.push_back(loop_val[0]);
+	  for(int i=0;i<(nscanpts-1); i++){
+	    double occ = 0, nent = 0;
+	    for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	      for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+		rowmod = m_modules[pmod]->iRowMod(ife, row);
+		colmod = m_modules[pmod]->iColMod(ife, col);
+		occ += (*hOccp.at(i))(colmod, rowmod);
+		nent += 1.;
+	      }
+	    }
+	    if(nent>0) occ /= nent;
+	    else       occ = 0.;	    double events = (double)(scn->getRepetitions());
+	    float vcal = vcal_steps[i];
+	    if (occ/events < 0.5) vcal += loop_val[i+1];
+	    else                  vcal -= loop_val[i+1];
+	    vcal_steps.push_back(vcal);
+	  }
+	  if(PMG_DEBUG) {
+	    for(int i=0;i<nscanpts; i++)
+	      std::cout << "PixModuleGroup::endThrFastScan : FE"<<ife<<": VCAL value step " << i << ": " << vcal_steps[i] << std::endl;
+	  }
+	  // now check for each pixel which is the best occupancy and store corresponding VCAL
+	  for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	    for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+	      rowmod = m_modules[pmod]->iRowMod(ife, row);
+	      colmod = m_modules[pmod]->iColMod(ife, col);
+	      double occ_best = -1;
+	      for(int i=0;i<nscanpts; i++){
+		double occ = (*hOccp.at(i))(colmod, rowmod);
+		double events = (double)(scn->getRepetitions());
+		if(events>0) occ /= events;
+		if(fabs(occ-0.5) < fabs(occ_best-0.5)){
+		  occ_best = occ;
+		  hVcal->set(colmod, rowmod, vcal_steps[i]);
+		}
+	      }
+	      //calculate q from vcal
+	      float vcal_best = (*hVcal)(colmod,rowmod);
+	      float q = 6.241495961*cInj*(((vcal_a*vcal_best + vcal_b)*vcal_best + vcal_c)*vcal_best + vcal_d);
+	      hVcal->set(colmod, rowmod, q);
+	      // threshold range for reduced normal scan
+	      if(occ_best>.4 && occ_best < 0.6){ // exclude pixels too far away from target
+		float vcal_min = (*fe)->getVcalFromCharge(chargeInjCap, (q>1000.)?(q-1000.):0.);
+		if(vcal_min < m_vcalMin) m_vcalMin = vcal_min;
+		float vcal_max = (*fe)->getVcalFromCharge(chargeInjCap, (q+1500.));
+		if(vcal_max > m_vcalMax) m_vcalMax = vcal_max;
+	      }
+	    }
+	  }
+	} else{
+	  // loop over all pixels: check avg. occ. of last two scan points and choos VCAL closest to target
+	  double occl = 0, occp = 0., nent = 0;
+	  for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	    for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+	      rowmod = m_modules[pmod]->iRowMod(ife, row);
+	      colmod = m_modules[pmod]->iColMod(ife, col);
+	      
+	      occl += (*hOccp.at(nscanpts-2))(colmod, rowmod);
+	      occp += (*hOccp.at(nscanpts-1))(colmod, rowmod);
+	      nent += 1.;
+	    }
+	  }
+	  float vcal_corr = 0.;
+	  double events = (double)(scn->getRepetitions());
+	  if(nent>0){
+	    occl /= nent;
+	    occp /= nent;
+	    if(fabs(occp/events-0.5) < fabs(occl/events-0.5)){ // last step didn't improve, so use previous step's VCAL
+	      if(occl>occp) vcal_corr = -1.; // VCAL was increased in last step
+	      else          vcal_corr =  1.; // VCAL was decreased in last step
+	    }
+	  }
+	  if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan: mod " <<pmod<< ", FE"<<ife<<" - last occ. = " <<occl << ", prev. occ. = " << occp
+				  << ", VCAL corr. = " << vcal_corr << std::endl;
+	  // calibration VCAL -> charge
+	  for (unsigned int col=0; col<(*fe)->nCol(); col++) {
+	    for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+	      rowmod = m_modules[pmod]->iRowMod(ife, row);
+	      colmod = m_modules[pmod]->iColMod(ife, col);
+	      // retrieve and correct VCAL
+	      float vcal_best = (*hVcal)(colmod,rowmod);
+	      vcal_best += vcal_corr;
+	      //calculate q from vcal
+	      float q = 6.241495961*cInj*(((vcal_a*vcal_best + vcal_b)*vcal_best + vcal_c)*vcal_best + vcal_d);
+	      hVcal->set(colmod, rowmod, q);
+	      float occ = (*hOccp.at(nscanpts-1))(colmod, rowmod);
+	      double events = (double)(scn->getRepetitions());
+	      if(events>0)  occ /= events;
+	      else          occ = 0;
+	      if(occ>.4 && occ < 0.6){ // exclude pixels too far away from target
+		// threshold range for reduced normal scan
+		float vcal_min = (*fe)->getVcalFromCharge(chargeInjCap, (q>1000.)?(q-1000.):0.);
+		if(vcal_min < m_vcalMin) m_vcalMin = vcal_min;
+		float vcal_max = (*fe)->getVcalFromCharge(chargeInjCap, (q+1500.));
+		if(vcal_max > m_vcalMax) m_vcalMax = vcal_max;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+  // fall-back if algorithm fails
+  if(m_vcalMax < m_vcalMin){
+    m_vcalMax = 200.;
+    m_vcalMin = 0.;
+  }
+}
+
 void PixModuleGroup::mccDelFit(int nloop, PixScan *scn) {
 	// check if this action makes sense at all
 	if(!scn->getHistogramFilled(PixScan::TIMEWALK) || !scn->getHistogramFilled(PixScan::OCCUPANCY)) return;
@@ -2313,6 +2571,7 @@ void PixModuleGroup::fitCalib(int nloop, PixScan *scn){
 			Histo *hm=0;
 			// Loop on FEs
 			for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe != m_modules[pmod]->feEnd(); fe++){
+			        bool isfei4 = (m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4A || m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4B);
 				int ife = (*fe)->number();
 				int nreg=0;
 				float sx=0., sy=0., sx2=0., sxy=0.;
@@ -2342,6 +2601,8 @@ void PixModuleGroup::fitCalib(int nloop, PixScan *scn){
 					if (npixel != 0) mean = mean/npixel;
 					std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
 					int scanVal = (int) scn->getLoopVarValues(nloop)[step];
+					// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+					if(!isfei4 && scanVal!=0) scanVal = 2;
 					if(scanVal>=0 || scanVal<3){
 						float cInj     = ((dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[scanVal]])).value())/0.160218f;
 						// to do: check avg. threshold vs capacity
@@ -2581,6 +2842,9 @@ void PixModuleGroup::prepareStep(int nloop, PixScan *scn) {
 		case PixScan::DISCBIAS_TUNING:
 			prepareDiscBiasTuning(nloop, scn);
 			break;
+		case PixScan::THR_FAST_SCANNING:
+		        prepareThrFastScan(nloop, scn);
+		        break;
 		case PixScan::NO_ACTION:
 		default:
 			break;
@@ -2684,7 +2948,10 @@ void PixModuleGroup::scanExecute(PixScan *scn) {
 						rtypes = "FE GADC";
 						break;
 					}
-					if(m_dcsChans[pmod]!=0 && rtypes != "unknown") dcsval = m_dcsChans[pmod]->ReadParam(rtypes);
+					if(m_dcsChans[pmod]!=0 && rtypes != "unknown"){
+					  m_dcsChans[pmod]->SetState("UPDATE");
+					  dcsval = m_dcsChans[pmod]->ReadParam(rtypes);
+					}
 					if(PMG_DEBUG) cout << "PixModuleGroup::scanExecute : DCS chan: " << ((m_dcsChans[pmod]!=0)?m_dcsChans[pmod]->name():"NULL") <<
 						" reads type " << rtypes << " of value " << dcsval << endl;
 					hdcs->set(scn->scanIndex(0)*scn->getMaskStageSteps()+scn->getMaskStageIndex(), dcsval);
@@ -3057,6 +3324,9 @@ void PixModuleGroup::scanLoopEnd(int nloop, PixScan *scn) {
 		break;
 	case PixScan::DISCBIAS_TUNING:
 		endDiscBiasTuning(nloop, scn);
+		break;
+	case PixScan::THR_FAST_SCANNING:
+	        endThrFastScan(nloop, scn);
 		break;
 	case PixScan::MCCDEL_FIT:
 		for (unsigned int pmod=0; pmod<m_modules.size(); pmod++) {
@@ -3500,6 +3770,7 @@ void PixModuleGroup::TOTcalib_FEI4(int nloop, PixScan *scn){
 			if(funcID<0) throw PixScanExc(PixControllerExc::ERROR, "Can't define fit function");
 
 			for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe != m_modules[pmod]->feEnd(); fe++){
+				bool isfei4 = (m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4A || m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4B);
 				int ife = (*fe)->number();
 
 				// get FE calib. 
@@ -3509,6 +3780,8 @@ void PixModuleGroup::TOTcalib_FEI4(int nloop, PixScan *scn){
 				float vcalG3 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
 				std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
 				int chargeInjCap = scn->getChargeInjCap();
+				// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+				if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
 				float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
 				if(PMG_DEBUG) cout << "PixModuleGroup::calcTotCal : using inj. capacitance of " << cInj << " (switch was " << chargeInjCap << ")" << endl;
 				if(PMG_DEBUG) cout << "JR: VCALGrad0 = " << vcalG0 << " vcalG1 " << vcalG1 << " vcalG2 " << vcalG2 << " vcalG3 " << vcalG3 << endl;
@@ -4073,6 +4346,7 @@ void PixModuleGroup::calcTotCal(PixScan &scn, unsigned int mod, int ix2, int ix1
 		for (std::vector<PixFe*>::iterator fe = pmod->feBegin(); fe != pmod->feEnd(); fe++){
 			for (unsigned int col=0; col<(*fe)->nCol(); col++) {
 				for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+					bool isfei4 = (pmod->getFEFlavour()==PixModule::PM_FE_I4A || pmod->getFEFlavour()==PixModule::PM_FE_I4B);
 					int ife = (*fe)->number();
 					unsigned int rowmod = pmod->iRowMod(ife, row);
 					unsigned int colmod = pmod->iColMod(ife, col);
@@ -4081,7 +4355,10 @@ void PixModuleGroup::calcTotCal(PixScan &scn, unsigned int mod, int ix2, int ix1
 					float vcalG2 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient2"])).value();
 					float vcalG3 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
 					std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
-					float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[scn.getChargeInjCap()]])).value();
+					int chargeInjCap = scn.getChargeInjCap();
+					// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+					if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
+					float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
 					cInj /= 0.160218f;
 					par[3] = vcalG0*cInj;
 					par[4] = vcalG1*cInj;
@@ -4205,6 +4482,7 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 		for (std::vector<PixFe*>::iterator fe = pmod->feBegin(); fe != pmod->feEnd(); fe++){
 			for (unsigned int col=0; col<(*fe)->nCol(); col++) {
 				for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+					bool isfei4 = (pmod->getFEFlavour()==PixModule::PM_FE_I4A || pmod->getFEFlavour()==PixModule::PM_FE_I4B);
 					int ife = (*fe)->number();
 					unsigned int rowmod = pmod->iRowMod(ife, row);
 					unsigned int colmod = pmod->iColMod(ife, col);
@@ -4213,7 +4491,10 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 					float vcalG2 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient2"])).value();
 					float vcalG3 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
 					std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
-					float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[scn.getChargeInjCap()]])).value();;
+					int chargeInjCap = scn.getChargeInjCap();
+					// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+					if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
+					float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
 					cInj /= 0.160218f;
 					double ymax = (double)scn.getRepetitions();
 					par[2] = ymax;
@@ -4331,6 +4612,7 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 			for (std::vector<PixFe*>::iterator fe = pmod->feBegin(); fe != pmod->feEnd(); fe++){
 				for (unsigned int col=0; col<(*fe)->nCol(); col++) {
 					for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+					        bool isfei4 = (pmod->getFEFlavour()==PixModule::PM_FE_I4A || pmod->getFEFlavour()==PixModule::PM_FE_I4B);
 						int ife = (*fe)->number();
 						unsigned int rowmod = pmod->iRowMod(ife, row);
 						unsigned int colmod = pmod->iColMod(ife, col);
@@ -4342,7 +4624,10 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 							float vcalG2 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient2"])).value();
 							float vcalG3 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
 							std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
-							float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[scn.getChargeInjCap()]])).value();;
+							int chargeInjCap = scn.getChargeInjCap();
+							// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+							if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
+							float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
 							if(PMG_DEBUG && colmod==0 && rowmod==0) cout << "PixScan::calcThr : using inj. capacitance of " << cInj << endl;
 							cInj /= 0.160218f;
 							double ymax = (double)scn.getRepetitions();

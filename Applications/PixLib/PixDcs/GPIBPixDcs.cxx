@@ -222,7 +222,9 @@ void GPIBPixDcsChan::SetParam(string varType, double value) {
 std::string GPIBPixDcsChan::ReadState(std::string){
   return "unknown";
 }
-void GPIBPixDcsChan::SetState(std::string){
+void GPIBPixDcsChan::SetState(std::string state){
+  GPIBPixDcs* myDcs = dynamic_cast<GPIBPixDcs*>(m_parent);
+  myDcs->SetState(state);
   return;
 }
 void GPIBPixDcsChan::rampVoltage(double pVoltage)

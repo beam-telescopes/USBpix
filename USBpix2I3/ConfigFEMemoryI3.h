@@ -48,6 +48,7 @@ public:
 	void StartuCScan(int ScanVarIndex, int ScanVarStart, int ScanVarStop, int ScanVarStepSize, int Injections, int ShiftMaskStepSize, int ShiftMaskSteps, int ShiftMaskType);
 	void StopuCScan();
 	void StartScan(int ScanVarIndex, int ScanVarStart, int ScanVarStop, int ScanVarStepSize, int Injections, int ShiftMaskStepSize, int ShiftMaskSteps, int ShiftMaskType);
+	std::string getGlobalVarName(int Variable);
 
 private:
 	void HandleFECommand(int major_command, int minor_command, int chip_add, unsigned char * data_array);

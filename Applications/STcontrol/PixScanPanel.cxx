@@ -71,6 +71,8 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   QObject::connect(srcEventCount, SIGNAL(activated(QString)), this, SLOT(setEvtLabel(QString)));
   QObject::connect(addModNameBox, SIGNAL(toggled(bool)), this, SLOT(showAddModLabels(bool)));
   QObject::connect(tbModeBox  , SIGNAL(toggled(bool)), this, SLOT(goToTbMode(bool)));
+  QObject::connect(appIndRawfile, SIGNAL( toggled(bool) ), this, SLOT( setSrcMonBox() ) );
+  QObject::connect(rawFileName, SIGNAL( textChanged(const QString&) ), this, SLOT( setSrcMonBox() ) );
 
   // not needed anymore, but for the moment just hide this button
   clearLabelMem->hide();
@@ -428,6 +430,8 @@ PixScanPanel::PixScanPanel( STControlEngine &engine_in, QWidget* parent, Qt::Win
   m_knownHandles.insert(std::make_pair("scans_chiCut", (QObject*)scurveChi2Cut));
   m_knownHandles.insert(std::make_pair("scans_nbadChiCut", (QObject*)scurveNbadChi2));
   m_knownHandles.insert(std::make_pair("scans_noiseOccCut", (QObject*)noccCut));
+  m_knownHandles.insert(std::make_pair("scans_useGrpThrRange", (QObject*)redThrRangeBox));
+  m_knownHandles.insert(std::make_pair("scans_fastThrUsePseudoPix", (QObject*) pseudoPixFastThrBox));
   m_knownHandles.insert(std::make_pair("reset_sendHardReset", (QObject*)hardReset));
   m_knownHandles.insert(std::make_pair("reset_sendSoftReset", (QObject*)softReset));
   m_knownHandles.insert(std::make_pair("reset_sendBCR", (QObject*)sendBCR));
@@ -1306,7 +1310,7 @@ void PixScanPanel::showLoop(int ID){
 
 void PixScanPanel::runButton_clicked(bool tbmode){
 // Just start the scan and return
-  if(runButton->text()=="Start Scan"){   
+  if(runButton->text()=="Start Scan"){  
     QString new_label;
     if(STControlEngine::checkScanLabel(m_scanLabels, scanLabel->text(), new_label)){
       if (tbmode){ // test beam mode
@@ -1350,6 +1354,7 @@ void PixScanPanel::runButton_clicked(bool tbmode){
     myscopt.indexRawFile = appIndRawfile->isChecked();
     myscopt.readDcs = dcsReadBox->currentIndex();
     myscopt.timeToAbort = -1; // no abort
+    myscopt.openSrcMon = sourceMonBox->isChecked() && sourceMonBox->isEnabled();
 
     int nRods = m_engine.CtrlStatusSummary();	
     // check if none of the controllers has been initialised, unless
@@ -1578,6 +1583,9 @@ void PixScanPanel::setScanValue(std::string parameter, int value) {
 
 void PixScanPanel::updateStatus(int nSteps0, int nSteps1, int nSteps2, int nMasks, int ,//in_currFe, 
 				int sramFillLevel, int triggerRate, int event_Rate, int status){
+
+  scanLabel->setText(m_engine.getLastPxScanConfig().anaLabel.c_str());
+
   if(nMasks<2147483647){// 2147483647 is max. pos. 32-bit int number, not used anywhere else, so should be safe identifier
     if (eventDisp->isEnabled()) {
       if(eventLabel->text()=="Processed Events:"){
@@ -1590,13 +1598,21 @@ void PixScanPanel::updateStatus(int nSteps0, int nSteps1, int nSteps2, int nMask
 	if (scanOptions!=NULL) {
 	  int ntotstp[3];
 	  double max = 1.;
+	  bool loopSwap=false;
 	  for(int is=0;is<3;is++) {
-	    ntotstp[is] = scanOptions->getLoopVarNSteps(is);
+	    if(scanOptions->getLoopActive(is))
+	      ntotstp[is] = scanOptions->getLoopVarNSteps(is);
+	    else
+	      ntotstp[is] = 1;
+	    loopSwap = scanOptions->getInnerLoopSwap();
+	    if(is==0 && loopSwap) // inner lop is not scan but mask -> get that counter
+	      ntotstp[is] = scanOptions->getMaskStageSteps();
 	    if(ntotstp[is]==0) ntotstp[is]=1;
 	    max *= (double)ntotstp[is];
+	    //std::cout << "PixScanPanel::updateStatus: Npts(loop" << is << ")=" << ntotstp[is] << ", max=" << max << std::endl;
 	  }
-	  if (max>0) {
-	    percentage=(double)(nSteps2*ntotstp[1]*ntotstp[0]+nSteps1*ntotstp[0]+nSteps0)/max*100.;
+	  if (max>0){
+	    percentage=(double)(nSteps2*ntotstp[1]*ntotstp[0]+nSteps1*ntotstp[0]+(loopSwap?nMasks:nSteps0))/max*100.;
 	    percentage_error=100/max;
 	  } else
 	    percentage=100;
@@ -1607,22 +1623,27 @@ void PixScanPanel::updateStatus(int nSteps0, int nSteps1, int nSteps2, int nMask
 	    percentage=100;
 	    percentage_error=0;
 	  }
+	  //std::cout << "PixScanPanel::updateStatus: percentage="<<percentage<<", error=" << percentage_error << ", max=" << max << std::endl;
+	  
+	  if (percentage!=m_lastPercentage) m_StatusUpdatesRecieved++;
+	  //std::cout << "PixScanPanel::updateStatus: corrected percentage="<<percentage<< std::endl;
+	  
+	  if (m_StatusUpdatesRecieved==2 && percentage!=m_lastPercentage) {
+	    m_MeasurementStartTime=QDateTime::currentDateTime().toTime_t();
+	    m_MeasurementStartPercentage=percentage;
+	    //std::cout << "PixScanPanel::updateStatus: storing m_MeasurementStartTime=" << m_MeasurementStartTime<<", m_MeasurementStartPercentage=" << m_MeasurementStartPercentage<<std::endl;
+	  }
+	  // First estimation after 1 minute
+	  if (percentage>m_lastPercentage && (QDateTime::currentDateTime().toTime_t()-m_MeasurementStartTime)>30 && percentage>0 && m_MeasurementStartTime>0) {
+	    int remaining_minutes=(int)(((100/(percentage-m_MeasurementStartPercentage-percentage_error))-1)*(QDateTime::currentDateTime().toTime_t()-m_MeasurementStartTime)/60)+1;
+	    eventLabel->setText("Time remaining (min.):");
+	    eventDisp->display(remaining_minutes);
+	    //std::cout << "PixScanPanel::updateStatus:  m_StatusUpdatesRecieved="<<m_StatusUpdatesRecieved << " at " << std::string(QDateTime::currentDateTime().toString("hh:mm:ss").toLatin1().data()) 
+	    //      << " = " <<QDateTime::currentDateTime().toTime_t() <<std::endl;
+	  }
+	  
+	  m_lastPercentage=percentage;
 	}
-	if (percentage!=m_lastPercentage)
-	  m_StatusUpdatesRecieved++;
-	
-	if (m_StatusUpdatesRecieved==2) {
-	  m_MeasurementStartTime=QDateTime::currentDateTime().toTime_t();
-	  m_MeasurementStartPercentage=percentage;
-	}
-	// First estimation after 1 minute
-	if (percentage>m_lastPercentage && (QDateTime::currentDateTime().toTime_t()-m_MeasurementStartTime>30) && percentage>0 && m_MeasurementStartTime!=-1) {
-	  int remaining_minutes=(int)(((100/(percentage-m_MeasurementStartPercentage-percentage_error))-1)*(QDateTime::currentDateTime().toTime_t()-m_MeasurementStartTime)/60)+1;
-	  eventLabel->setText("Time remaining (min.):");
-	  eventDisp->display(remaining_minutes);
-	}
-	
-	m_lastPercentage=percentage;
       }
     }
     if(usedMem->isEnabled())     usedMem->display(sramFillLevel);
@@ -1717,6 +1738,7 @@ void PixScanPanel::updateStatus(int nSteps0, int nSteps1, int nSteps2, int nMask
     statusText->setText("scanning");
     statusText->repaint();
   }
+
   return;
 }
 
@@ -1975,6 +1997,8 @@ void PixScanPanel::openTableMenu(QTableWidgetItem *item){
 
 void PixScanPanel::scanRunning(int type)
 {
+  //  scanLabel->setText(m_engine.getLastPxScanConfig().anaLabel.c_str());
+
   // initialise variables for rem. time estimation
   m_StatusUpdatesRecieved=0;
   m_MeasurementStartTime=-1;
@@ -2151,4 +2175,11 @@ void PixScanPanel::goToTbMode(bool tbMode){
   nEvents->setMinimum(tbMode?0:1);
   if(tbMode)nEvents->setValue(0);
   eventsLabel->setText(tbMode?"Events per scan point (0=run until stopped):":"Events per scan point:");
+}
+void PixScanPanel::setSrcMonBox(){
+  if(rawFileName->text().isEmpty() && !appIndRawfile->isChecked()){
+    sourceMonBox->setChecked(false);
+    sourceMonBox->setEnabled(false);
+  } else
+    sourceMonBox->setEnabled(true);
 }

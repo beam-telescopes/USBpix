@@ -34,7 +34,7 @@
 
 //USB board classes
 #include "definesI3.h"
-#include "DataStructDefinesI3.h"
+//#include "DataStructDefinesI3.h"
 
 #include "USBI3PixController.h"
 
@@ -273,7 +273,7 @@ void USBI3PixController::writeModuleConfig(PixModule& mod) {
   
   m_FEconfig->SetChipAdd(((ConfInt&)firstFE->config()["Misc"]["Address"]).getValue());	//CG:EDIT : now works fine for FE-I3.
   
-  firstFE = dynamic_cast<PixFeI2*>(*(mod.feBegin()));
+  //firstFE = dynamic_cast<PixFeI2*>(*(mod.feBegin()));
   
   m_FEconfig->SetGlobalVal(CHIP_LATENCY, 255);// globReg.latency);
   if(UPC_DEBUG) cout<<"DEBUG USBPixCtrl: LATENCY \t"<<255<<endl;
@@ -595,8 +595,8 @@ bool USBI3PixController::testGlobalRegister(int /*module*/, std::vector<int> &da
       m_FEconfig->GetGlobalVarAddVal(i, Address, Size, wValue);
       m_FEconfig->GetGlobalRBVarAddVal(i, Address, Size, rValue);
       stringstream a,b,st;
-      //st << i;	//new stream for the label name
-      st << std::string(gloCnfRegItem[i].name);
+      //st << std::string(gloCnfRegItem[i].name);
+      st << m_FEconfig->getGlobalVarName(i);
       data_in.push_back(wValue);
       data_out.push_back(rValue);
       label.push_back(st.str());	//only plain loop index as string as temporary solution
