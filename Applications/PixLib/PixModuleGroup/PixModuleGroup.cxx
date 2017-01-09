@@ -2367,6 +2367,7 @@ void PixModuleGroup::endThrFastScan(int nloop, PixScan *scn){
       
       //FE Loop
       for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe!= m_modules[pmod]->feEnd(); fe++) {
+	bool isfei4 = (m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4A || m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4B);
 	int ife = (*fe)->number();
 	//get parameters to calculate q from vcal			
 	float vcal_a = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
@@ -2375,6 +2376,8 @@ void PixModuleGroup::endThrFastScan(int nloop, PixScan *scn){
 	float vcal_d = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient0"])).value();
 	std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
 	int chargeInjCap = scn->getChargeInjCap();
+	// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+	if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
 	float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
 	if(PMG_DEBUG) std::cout << "PixModuleGroup::endThrFastScan : FE"<<ife<<": using inj. capacitance of " << cInj << 
 			" (switch was " << chargeInjCap << ")" << endl;
@@ -2559,6 +2562,7 @@ void PixModuleGroup::fitCalib(int nloop, PixScan *scn){
 			Histo *hm=0;
 			// Loop on FEs
 			for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe != m_modules[pmod]->feEnd(); fe++){
+			        bool isfei4 = (m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4A || m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4B);
 				int ife = (*fe)->number();
 				int nreg=0;
 				float sx=0., sy=0., sx2=0., sxy=0.;
@@ -2588,6 +2592,8 @@ void PixModuleGroup::fitCalib(int nloop, PixScan *scn){
 					if (npixel != 0) mean = mean/npixel;
 					std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
 					int scanVal = (int) scn->getLoopVarValues(nloop)[step];
+					// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+					if(!isfei4 && scanVal!=0) scanVal = 2;
 					if(scanVal>=0 || scanVal<3){
 						float cInj     = ((dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[scanVal]])).value())/0.160218f;
 						// to do: check avg. threshold vs capacity
@@ -3750,6 +3756,7 @@ void PixModuleGroup::TOTcalib_FEI4(int nloop, PixScan *scn){
 			if(funcID<0) throw PixScanExc(PixControllerExc::ERROR, "Can't define fit function");
 
 			for (std::vector<PixFe*>::iterator fe = m_modules[pmod]->feBegin(); fe != m_modules[pmod]->feEnd(); fe++){
+				bool isfei4 = (m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4A || m_modules[pmod]->getFEFlavour()==PixModule::PM_FE_I4B);
 				int ife = (*fe)->number();
 
 				// get FE calib. 
@@ -3759,6 +3766,8 @@ void PixModuleGroup::TOTcalib_FEI4(int nloop, PixScan *scn){
 				float vcalG3 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
 				std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
 				int chargeInjCap = scn->getChargeInjCap();
+				// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+				if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
 				float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
 				if(PMG_DEBUG) cout << "PixModuleGroup::calcTotCal : using inj. capacitance of " << cInj << " (switch was " << chargeInjCap << ")" << endl;
 				if(PMG_DEBUG) cout << "JR: VCALGrad0 = " << vcalG0 << " vcalG1 " << vcalG1 << " vcalG2 " << vcalG2 << " vcalG3 " << vcalG3 << endl;
@@ -4323,6 +4332,7 @@ void PixModuleGroup::calcTotCal(PixScan &scn, unsigned int mod, int ix2, int ix1
 		for (std::vector<PixFe*>::iterator fe = pmod->feBegin(); fe != pmod->feEnd(); fe++){
 			for (unsigned int col=0; col<(*fe)->nCol(); col++) {
 				for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+					bool isfei4 = (pmod->getFEFlavour()==PixModule::PM_FE_I4A || pmod->getFEFlavour()==PixModule::PM_FE_I4B);
 					int ife = (*fe)->number();
 					unsigned int rowmod = pmod->iRowMod(ife, row);
 					unsigned int colmod = pmod->iColMod(ife, col);
@@ -4331,7 +4341,10 @@ void PixModuleGroup::calcTotCal(PixScan &scn, unsigned int mod, int ix2, int ix1
 					float vcalG2 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient2"])).value();
 					float vcalG3 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
 					std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
-					float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[scn.getChargeInjCap()]])).value();
+					int chargeInjCap = scn.getChargeInjCap();
+					// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+					if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
+					float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
 					cInj /= 0.160218f;
 					par[3] = vcalG0*cInj;
 					par[4] = vcalG1*cInj;
@@ -4455,6 +4468,7 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 		for (std::vector<PixFe*>::iterator fe = pmod->feBegin(); fe != pmod->feEnd(); fe++){
 			for (unsigned int col=0; col<(*fe)->nCol(); col++) {
 				for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+					bool isfei4 = (pmod->getFEFlavour()==PixModule::PM_FE_I4A || pmod->getFEFlavour()==PixModule::PM_FE_I4B);
 					int ife = (*fe)->number();
 					unsigned int rowmod = pmod->iRowMod(ife, row);
 					unsigned int colmod = pmod->iColMod(ife, col);
@@ -4463,7 +4477,10 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 					float vcalG2 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient2"])).value();
 					float vcalG3 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
 					std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
-					float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[scn.getChargeInjCap()]])).value();;
+					int chargeInjCap = scn.getChargeInjCap();
+					// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+					if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
+					float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
 					cInj /= 0.160218f;
 					double ymax = (double)scn.getRepetitions();
 					par[2] = ymax;
@@ -4581,6 +4598,7 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 			for (std::vector<PixFe*>::iterator fe = pmod->feBegin(); fe != pmod->feEnd(); fe++){
 				for (unsigned int col=0; col<(*fe)->nCol(); col++) {
 					for (unsigned int row=0; row<(*fe)->nRow(); row++) {
+					        bool isfei4 = (pmod->getFEFlavour()==PixModule::PM_FE_I4A || pmod->getFEFlavour()==PixModule::PM_FE_I4B);
 						int ife = (*fe)->number();
 						unsigned int rowmod = pmod->iRowMod(ife, row);
 						unsigned int colmod = pmod->iColMod(ife, col);
@@ -4592,7 +4610,10 @@ void PixModuleGroup::calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, b
 							float vcalG2 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient2"])).value();
 							float vcalG3 = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"]["VcalGradient3"])).value();
 							std::string capLabels[3]={"CInjLo", "CInjMed", "CInjHi"};
-							float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[scn.getChargeInjCap()]])).value();;
+							int chargeInjCap = scn.getChargeInjCap();
+							// FE-I2/3 do not have med. C, so always make it Chi if not Clo
+							if(!isfei4 && chargeInjCap!=0) chargeInjCap = 2;
+							float cInj     = (dynamic_cast<ConfFloat &>((*fe)->config()["Misc"][capLabels[chargeInjCap]])).value();
 							if(PMG_DEBUG && colmod==0 && rowmod==0) cout << "PixScan::calcThr : using inj. capacitance of " << cInj << endl;
 							cInj /= 0.160218f;
 							double ymax = (double)scn.getRepetitions();
