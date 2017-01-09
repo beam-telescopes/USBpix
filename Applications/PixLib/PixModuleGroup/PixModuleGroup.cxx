@@ -39,7 +39,7 @@
 #include "cmath"
 
 
-#define PMG_DEBUG true
+#define PMG_DEBUG false
 using namespace SctPixelRod;
 using namespace PixLib;
 
