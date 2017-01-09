@@ -369,10 +369,11 @@ void PixScan::presetI3(ScanType presetName) {
     m_maskStageSteps = 32;
     m_maskStageMode = SEL_ENA;
     m_strobeDuration = 500;
+    m_innerLoopSwap = true;  
     m_digitalInjection = false;
-    setLoopVarValues(0, 0, 2, 1);
+    setLoopVarValues(0, 0, 2, 2);
     m_loopActive[0] = true;
-    m_dspProcessing[0] = false;
+    m_dspProcessing[0] = true;
     m_dspLoopAction[0] = false;
     m_loopParam[0] = NO_PAR;
     m_loopAction[0] = OCC_SUM;
@@ -914,6 +915,47 @@ void PixScan::presetI3(ScanType presetName) {
 
     m_restoreModuleConfig = false;//true;
 
+  } else if (presetName == INJ_CALIB) {
+    m_maskStageSteps = 32;
+    m_strobeDuration = 500;
+    m_feVCal = 0x1fff;              
+    m_repetitions = 100;
+    m_innerLoopSwap = false;
+    m_digitalInjection = false;
+
+    m_loopActive[0] = true;
+    m_loopParam[0] = VCAL;
+    std::vector<float> vcalSteps;
+    vcalSteps.push_back(512);
+    vcalSteps.push_back(256);
+    vcalSteps.push_back(128);
+    vcalSteps.push_back(64);
+    vcalSteps.push_back(32);
+    vcalSteps.push_back(16);
+    vcalSteps.push_back(8);
+    vcalSteps.push_back(4);
+    vcalSteps.push_back(2);
+    vcalSteps.push_back(1);
+    vcalSteps.push_back(1);
+    setLoopVarValues(0,vcalSteps);
+    m_loopAction[0] = THR_FAST_SCANNING;
+    m_dspProcessing[0] = false;
+    m_dspLoopAction[0] = false;
+
+    m_loopActive[1] = true;
+    m_dspProcessing[1] = false;
+    m_dspLoopAction[1] = false;
+    m_loopParam[1] = CAPSEL;
+    setLoopVarValues(1, 0, 1, 2);
+    m_loopAction[1] = OFFSET_CALIB;
+
+    m_histogramFilled[OCCUPANCY] = true;
+    m_histogramKept[OCCUPANCY] = false;
+    m_histogramFilled[SCURVE_MEAN] = true;
+    m_histogramKept[SCURVE_MEAN] = true;
+
+    m_restoreModuleConfig = false;//true;
+
   } else {
     throw PixScanExc(PixControllerExc::ERROR, "Undefined scan preset");
   }
@@ -1152,33 +1194,42 @@ void PixScan::presetI4B(ScanType presetName) {
 		m_singleDCloop = true;
 		m_avoidSpecialsCols = false;
 		m_digitalInjection = false;
-		m_maskStageSteps = 1;
+		m_maskStageSteps = 3;
 		m_maskStageTotalSteps = STEPS_3;
+		m_feVCal = 0x1fff;              
+		m_repetitions = 100;
+		m_innerLoopSwap = false;
+		m_digitalInjection = false;
+		
 		m_loopActive[0] = true;
 		m_loopParam[0] = VCAL;
-		m_dspProcessing[0] = true;
-		setLoopVarValues(0, 0, 400, 401);
-		m_loopAction[0] = SCURVE_FIT;
+		std::vector<float> vcalSteps;
+		vcalSteps.push_back(512);
+		vcalSteps.push_back(256);
+		vcalSteps.push_back(128);
+		vcalSteps.push_back(64);
+		vcalSteps.push_back(32);
+		vcalSteps.push_back(16);
+		vcalSteps.push_back(8);
+		vcalSteps.push_back(4);
+		vcalSteps.push_back(2);
+		vcalSteps.push_back(1);
+		vcalSteps.push_back(1);
+		setLoopVarValues(0,vcalSteps);
+		m_loopAction[0] = THR_FAST_SCANNING;
+		m_dspProcessing[0] = false;
 		m_dspLoopAction[0] = false;
+
 		m_loopActive[1] = true;
 		m_dspProcessing[1] = false;
 		m_dspLoopAction[1] = false;
-		m_maskStageSteps = 1;
 		m_loopParam[1] = CAPSEL;
 		setLoopVarValues(1, 0, 2, 3);
 		m_loopAction[1] = OFFSET_CALIB;
-		//m_histogramFilled[GDAC_T] = true;
-		//m_histogramKept[GDAC_T] = true;
-		m_chicut = 50.; // Must be strict, otherwise average gets spoiled
 		m_histogramFilled[OCCUPANCY] = true;
 		m_histogramKept[OCCUPANCY] = false;
 		m_histogramFilled[SCURVE_MEAN] = true;
 		m_histogramKept[SCURVE_MEAN] = true;
-		m_histogramFilled[SCURVE_SIGMA] = true;
-		m_histogramKept[SCURVE_SIGMA] = true;
-		m_histogramFilled[SCURVE_CHI2] = true;
-		m_histogramKept[SCURVE_CHI2] = true;
-		m_thresholdTargetValue = 3000;
 		m_restoreModuleConfig = false;
 	} else if (presetName == TOT_CALIB) {
 		m_repetitions = 50;
