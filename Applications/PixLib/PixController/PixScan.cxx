@@ -369,10 +369,11 @@ void PixScan::presetI3(ScanType presetName) {
     m_maskStageSteps = 32;
     m_maskStageMode = SEL_ENA;
     m_strobeDuration = 500;
+    m_innerLoopSwap = true;  
     m_digitalInjection = false;
-    setLoopVarValues(0, 0, 2, 1);
+    setLoopVarValues(0, 0, 2, 2);
     m_loopActive[0] = true;
-    m_dspProcessing[0] = false;
+    m_dspProcessing[0] = true;
     m_dspLoopAction[0] = false;
     m_loopParam[0] = NO_PAR;
     m_loopAction[0] = OCC_SUM;
