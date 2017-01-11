@@ -1,5 +1,5 @@
-#ifndef STEUDAQM3DataSender_h 
-#define STEUDAQM3DataSender_h
+#ifndef STEUDAQGen3DataSender_h 
+#define STEUDAQGen3DataSender_h
 
 #include "eudaq/DataSender.hh"
 #include "eudaq/Producer.hh"
@@ -11,13 +11,12 @@
 
 #include "Utility/CircularFifo.h"
 
-using UintCircBuff1MByte = CircularFifo<uint32_t, 1000000/sizeof(uint32_t)>;
 #define TLU_TRIGGER_AMOUNT	0x8000
 
-class STEUDAQM3DataSender: public eudaq::Producer {
+class STEUDAQGen3DataSender: public eudaq::Producer {
 
 public:
-	STEUDAQM3DataSender(std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr);
+	STEUDAQGen3DataSender(std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr);
 	void OnStartRun(unsigned);
 	void OnStopRun();
 	void OnConfigure(const eudaq::Configuration&);

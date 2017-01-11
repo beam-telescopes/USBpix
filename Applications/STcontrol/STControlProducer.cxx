@@ -146,15 +146,15 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 }
 
 void STControlProducer::OnConfigure(const eudaq::Configuration& config){
-
 	std::cout << "Configuring" << std::endl;
 	auto pixControllers = getPixControllers();
 	for(auto& controller: pixControllers) {
 		auto boardID = controller->getBoardID();
+		std::cout << "Board ID: " << boardID << " has generation: " << controller->getGeneration() << std::endl;
 		if(m_dataSenders.find(boardID) == m_dataSenders.end()){ 
-			m_dataSenders[boardID] = std::unique_ptr<STEUDAQM3DataSender>(new STEUDAQM3DataSender(controller->getCircularBufferVec(), m_rcAddress));
+			m_dataSenders[boardID] = std::unique_ptr<STEUDAQGen3DataSender>(new STEUDAQGen3DataSender(controller->getCircularBufferVec(), m_rcAddress));
 			std::cout << "Added data sender for board: " << controller->getBoardID() << std::endl;
-			std::cout << "Added data sender for board: " << &controller->getCircularBufferVec() << std::endl;
+			std::cout << "It is located at: " << &controller->getCircularBufferVec() << std::endl;
 		}
 	}	
  	// configure modules

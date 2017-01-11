@@ -1,4 +1,4 @@
-#include "STEUDAQDataSender.h"
+#include "STEUDAQGen2DataSender.h"
 #include <defines.h>
 
 #include "eudaq/RawDataEvent.hh"
@@ -8,14 +8,14 @@
 #include <iostream>
 #include <bitset>
 
-STEUDAQDataSender::STEUDAQDataSender(std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr): 
+STEUDAQGen2DataSender::STEUDAQGen2DataSender(std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr): 
 eudaq::Producer("MyDataSender", rcAddr), 
 m_circBuffVec(circBuffVec),
 m_killThread(false){
 	SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (dy default)");
 }
 
-void STEUDAQDataSender::monitorBuffer(){
+void STEUDAQGen2DataSender::monitorBuffer(){
 	std::cout << "Started monitoring buffer!" << std::endl;
 	bool waitedGracePeriod = false;
 
@@ -80,8 +80,7 @@ void STEUDAQDataSender::monitorBuffer(){
 	}
 }
 
-void STEUDAQDataSender::OnStartRun (unsigned param){
-
+void STEUDAQGen2DataSender::OnStartRun (unsigned param){
 	m_killThread = false;
 	m_runNo = param;
 	SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running!");
@@ -89,10 +88,10 @@ void STEUDAQDataSender::OnStartRun (unsigned param){
 	workerThread.detach();
 }
 
-void STEUDAQDataSender::OnStopRun (){
+void STEUDAQGen2DataSender::OnStopRun (){
 	m_killThread = true;
 }
 
-std::thread STEUDAQDataSender::startThread() {
+std::thread STEUDAQGen2DataSender::startThread() {
 	return std::thread([=]{ monitorBuffer(); });
 }

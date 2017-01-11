@@ -1,4 +1,4 @@
-#include "STEUDAQM3DataSender.h"
+#include "STEUDAQGen3DataSender.h"
 #include <defines.h>
 
 #include "eudaq/RawDataEvent.hh"
@@ -10,7 +10,7 @@
 
 #define TLU_TRIGGER_AMOUNT 32767
 
-STEUDAQM3DataSender::STEUDAQM3DataSender(std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr): 
+STEUDAQGen3DataSender::STEUDAQGen3DataSender(std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr): 
 eudaq::Producer("MyDataSender", rcAddr), 
 m_circBuffVec(circBuffVec),
 m_killThread(false){
@@ -19,7 +19,7 @@ m_killThread(false){
 
 static const uint32_t HIGHEST32BIT = 1 << 31;
 
-void STEUDAQM3DataSender::monitorBuffer(){
+void STEUDAQGen3DataSender::monitorBuffer(){
 	std::cout << "Started monitoring buffer!" << std::endl;
 	bool waitedGracePeriod = false;
 
@@ -76,7 +76,7 @@ void STEUDAQM3DataSender::monitorBuffer(){
 	}
 }
 
-void STEUDAQM3DataSender::OnStartRun (unsigned param){
+void STEUDAQGen3DataSender::OnStartRun (unsigned param){
 	m_killThread = false;
 	m_runNo = param;
 	SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running!");
@@ -84,15 +84,15 @@ void STEUDAQM3DataSender::OnStartRun (unsigned param){
 	workerThread.detach();
 }
 
-void STEUDAQM3DataSender::OnStopRun (){
+void STEUDAQGen3DataSender::OnStopRun (){
 	m_killThread = true;
 	SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (dy default)");
 }
 
-void STEUDAQM3DataSender::OnConfigure(const eudaq::Configuration& config){
+void STEUDAQGen3DataSender::OnConfigure(const eudaq::Configuration& config){
 	SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (dy default)");
 }
 
-std::thread STEUDAQM3DataSender::startThread() {
+std::thread STEUDAQGen3DataSender::startThread() {
 	return std::thread([=]{ monitorBuffer(); });
 }

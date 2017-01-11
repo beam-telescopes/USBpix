@@ -7,7 +7,7 @@
 #include "eudaq/CommandReceiver.hh"
 
 #include "STCdefines.h"
-#include "STEUDAQM3DataSender.h"
+#include "STEUDAQGen3DataSender.h"
 
 #include <QString>
 
@@ -43,7 +43,7 @@ private:
 	std::string m_rcAddress;
 	extScanOptions scan_options;
 	
-	std::map<int,std::unique_ptr<STEUDAQM3DataSender>> m_dataSenders;
+	std::map<int,std::unique_ptr<STEUDAQGen3DataSender>> m_dataSenders;
 
 };
 #endif
