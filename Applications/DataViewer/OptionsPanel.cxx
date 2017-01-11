@@ -373,7 +373,10 @@ int optionsPanel::fillTab(QWidget *tab, ConfGroup &cgrp, const char *subcfg_name
 	int expon = 0;
 	if(fabs(value)<1e-3){
 	  expon = (int) log10f(value);
-	  value /= pow(10.,(double)expon);
+	  if(expon>-18) // otherwise below precision, 
+	    value /= pow(10.,(double)expon);
+	  else
+	    expon = 0;
 	}
 	((QDoubleSpinBox*)tmpWgt)->setValue(value);
 	((QSpinBox*)expWgt)->setValue(expon);

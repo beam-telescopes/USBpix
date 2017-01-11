@@ -85,6 +85,8 @@ class PixScanPanel : public QWidget, public Ui::PixScanPanel{
   void toggleClusHis();
   void goToTbMode(bool tbMode);
 
+  void setSrcMonBox();
+
   void setFeReg0(){setFeReg(0);};
   void setFeReg1(){setFeReg(1);};
   void setFeReg2(){setFeReg(2);};

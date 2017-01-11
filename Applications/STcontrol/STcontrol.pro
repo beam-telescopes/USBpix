@@ -36,6 +36,7 @@ HEADERS += ChipTest.h
 HEADERS += MultiboardCfg.h 
 HEADERS += WaferTestPanel.h
 HEADERS += ConfigCreator.h
+HEADERS += ConfigCreatorHelper.h
 HEADERS += STCdefines.h
 
 SOURCES += CfgMap.cxx 
@@ -65,6 +66,7 @@ SOURCES += ChipTest.cxx
 SOURCES += MultiboardCfg.cxx 
 SOURCES += WaferTestPanel.cxx
 SOURCES += ConfigCreator.cxx
+SOURCES += ConfigCreatorHelper.cxx
 
 FORMS += CfgMap.ui 
 FORMS += ColPairSwitch.ui 
@@ -114,8 +116,9 @@ contains(DEFINES, WITHEUDAQ) {
   }
 
   win32 {
-    INCLUDEPATH += $(EUDAQ)/extern/pthread-win32/include
-    LIBS        += EUDAQ.lib
+#    INCLUDEPATH  += $(EUDAQ)/extern/pthread-win32/include
+    QMAKE_LFLAGS += -LIBPATH:"$(EUDAQ)"/lib
+    LIBS         += EUDAQ.lib
   }
 }
 

@@ -51,7 +51,7 @@
 
 #include <TMath.h>
 
-#define STEP_DEBUG 1 
+#define STEP_DEBUG 0
 
 using namespace PixLib;
 using namespace SctPixelRod;
@@ -276,12 +276,12 @@ int STPixModuleGroup::setPixScan(PixScan *inPixScan){
     doSFit |= ((m_PixScan->getLoopAction(nl)==PixScan::SCURVE_FIT || m_PixScan->getLoopAction(nl)==PixScan::SCURVE_FAST)
 	       && m_PixScan->getLoopActive(nl));
 
-  m_PixScan->setHistogramFilled(PixScan::SCURVE_MEAN, doSFit);
-  m_PixScan->setHistogramKept(  PixScan::SCURVE_MEAN, doSFit);
-  m_PixScan->setHistogramFilled(PixScan::SCURVE_SIGMA,doSFit);
-  m_PixScan->setHistogramKept(  PixScan::SCURVE_SIGMA,doSFit);
-  m_PixScan->setHistogramFilled(PixScan::SCURVE_CHI2, doSFit);
-  m_PixScan->setHistogramKept(  PixScan::SCURVE_CHI2, doSFit);
+  m_PixScan->setHistogramFilled(PixScan::SCURVE_MEAN, doSFit | m_PixScan->getHistogramFilled(PixScan::SCURVE_MEAN));
+  m_PixScan->setHistogramKept(  PixScan::SCURVE_MEAN, doSFit | m_PixScan->getHistogramKept(PixScan::SCURVE_MEAN));
+  m_PixScan->setHistogramFilled(PixScan::SCURVE_SIGMA,doSFit | m_PixScan->getHistogramFilled(PixScan::SCURVE_SIGMA));
+  m_PixScan->setHistogramKept(  PixScan::SCURVE_SIGMA,doSFit | m_PixScan->getHistogramKept(PixScan::SCURVE_SIGMA));
+  m_PixScan->setHistogramFilled(PixScan::SCURVE_CHI2, doSFit | m_PixScan->getHistogramFilled(PixScan::SCURVE_CHI2));
+  m_PixScan->setHistogramKept(  PixScan::SCURVE_CHI2, doSFit | m_PixScan->getHistogramKept(PixScan::SCURVE_CHI2));
 
   return 0;
 }
@@ -798,6 +798,15 @@ void STPixModuleGroup::CtrlThread::scan()
     PixController *pc = getSTPixModuleGroup()->getPixController();
     PixScan &cfg = *(getSTPixModuleGroup()->getPixScan());
     cfg.resetScan();
+    // no smart way to add this to PixModuleGroup, so let's do it here
+    if(cfg.getUseGrpThrRange()){ // if VCAL is scanned: reduce VCAL range to module group's limits
+      for(int i=0;i<2;i++){
+	if(cfg.getLoopActive(i) && cfg.getLoopParam(i)==PixScan::VCAL){
+	  int steps = 1+(int)(getSTPixModuleGroup()->getVcalMax()-getSTPixModuleGroup()->getVcalMin());
+	  cfg.setLoopVarValues(i, getSTPixModuleGroup()->getVcalMin(), getSTPixModuleGroup()->getVcalMax(), steps);
+	}
+      }
+    }
     // check if histograms from controller are requested
     bool histoOnCtrl=false;
     std::map<std::string, int> htv = cfg.getHistoTypes();

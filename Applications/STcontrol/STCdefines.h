@@ -21,6 +21,7 @@ struct extScanOptions {
   QStringList config_modules;
   QStringList boards;
   QStringList fpga_files;
+  QStringList adapterCardFlavours;
   bool UseSingleBoardConfig;
   QString rawdata_path;
   QString histogram_filename;
@@ -74,6 +75,7 @@ struct pixScanRunOptions{
   bool indexRawFile;
   int readDcs;
   int timeToAbort;
+  bool openSrcMon;
 };
 
 #endif // STCDEFINES_H

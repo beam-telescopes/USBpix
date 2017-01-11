@@ -1,3 +1,4 @@
+
 #include <stdexcept>
 #include <algorithm>
 #include <fstream>
@@ -7,6 +8,8 @@
 #include <iostream>
 
 #include "frontend.h"
+
+#define UFDEBUG false
 
 using namespace std;
 
@@ -64,12 +67,18 @@ void Frontend::writeRegister(const FERegister &reg, uint64_t val) {
 }
 
 uint64_t Frontend::readRegisterNr(int reg) const {
+  try{
 	return global_registers.at(reg);
+  }catch(...){
+    return 0;
+  }
 }
 
 void Frontend::writeRegisterNr(int reg, uint64_t val) {
+  try{
 	global_registers.at(reg) = val;
 	written_registers.push_back(reg);
+  }catch(...){}
 }
 
 void Frontend::loadRegisterList(void) {
@@ -294,14 +303,14 @@ void Frontend::loadRegisterList(void) {
 		{"CAP1", {3, 1, 1 << 7, PixRegister::LATCH}},
 		{"ILEAK", {4, 1, 1 << 8, PixRegister::LATCH}},
 		{"FDAC", {5, 4, 1 << 9, PixRegister::LATCH}},
-		{"EnableDigInj", {6, 1, 0}}
+		{"EnableDigInj", {6, 1, 0, PixRegister::LATCH}}
 	};
 
 	for(auto &i : registers) {
 		register_list.push_back(i.first);
 	}
 
-	cout << "address " << address << endl;
+	if(UFDEBUG) cout << "address " << address << endl;
 }
 
 std::vector<int> Frontend::uniqueRegisterList(const std::vector<std::string> &regs) {
@@ -377,7 +386,7 @@ CommandBuffer Frontend::writeGlobalRegisters(void) {
 CommandBuffer Frontend::flushWrites(void) {
 	CommandBuffer c;
 
-	//cout << "flushWrites" << endl;
+	if(UFDEBUG) cout << "flushWrites" << endl;
 
 	std::sort(written_registers.begin(), written_registers.end());
 	auto last = std::unique(written_registers.begin(), written_registers.end());
@@ -385,7 +394,7 @@ CommandBuffer Frontend::flushWrites(void) {
 
 	for(auto i : written_registers) {
 		c += cmd.wrRegister(i, global_registers[i]);
-		//cout << dec << i << ' ' << hex << global_registers[i] << endl;
+		if(UFDEBUG) cout << dec << i << ' ' << hex << global_registers[i] << endl;
 	}
 
 	written_registers.clear();
@@ -674,13 +683,13 @@ std::vector<std::string>::const_iterator Frontend::end(void) {
 	return register_list.cend();
 }
 
-CommandBuffer writePixelMask(const std::vector<std::string> &regs) {
+CommandBuffer writePixelMask(const std::vector<std::string> &/*regs*/) {
 	CommandBuffer c;
 
 	return c;
 }
 
-CommandBuffer shiftPixelMask(const std::vector<std::string> &regs) {
+CommandBuffer shiftPixelMask(const std::vector<std::string> &/*regs*/) {
 	CommandBuffer c;
 
 	return c;

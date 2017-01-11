@@ -103,6 +103,7 @@ namespace PixLib {
 		void prepareT0Set(int nloop, PixScan *scn);
 		void prepareDiscBiasTuning(int nloop, PixScan *scn);
 		void prepareIncrTdac(int nloop, PixScan *scn);
+		void prepareThrFastScan(int nloop, PixScan *scn);
 
 		void TOTcalib_FEI4(int nloop, PixScan *scn);		        // analysis for FE-I4 TOT calibration
 		void CreateTotChargeLUT(int pNloops, PixScan* pPixScan);	// creates the look up table (LT) ToT<->PlsrDAC value for each pixel
@@ -121,6 +122,7 @@ namespace PixLib {
 		void endIncrTdac(int nloop, PixScan *scn);
 		void endMeanNOccCalc(int nloop, PixScan *scn);
 		void endDiscBiasTuning(int nloop, PixScan *scn);
+		void endThrFastScan(int nloop, PixScan *scn);
 		void mccDelFit(int nloop, PixScan *scn);
 		void fitCalib(int nloop, PixScan *scn);
 		
@@ -130,6 +132,8 @@ namespace PixLib {
 		int getTriggerDelay(){return m_triggerDelay;};
 		void setModHVmask(int modId, bool on);
 		int getModHVmask(){return m_modHVmask;};
+		float getVcalMin(){return m_vcalMin;};
+		float getVcalMax(){return m_vcalMax;};
 
 	private:   
 		PixConfDBInterface *m_db;
@@ -152,6 +156,8 @@ namespace PixLib {
 		int m_modHVmask; // mask to store module with too high bias curr.
 
 		unsigned int m_nColMod, m_nRowMod;
+
+		float m_vcalMin, m_vcalMax;
 
 		// internal helper functions
 		void calcThr(PixScan &scn, unsigned int mod, int ix2, int ix1, bool delay=false, bool fastOnly=false);

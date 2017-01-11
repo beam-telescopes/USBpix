@@ -2,9 +2,9 @@
 #include <chrono>
 #include <thread>
 
-#include <eudaq/Logger.hh>
-
 #include "PixController/PixController.h"
+
+#include <eudaq/Logger.hh>
 
 #include "STControlProducer.h"
 #include "STControlEngine.h"
@@ -39,8 +39,8 @@ std::vector<PixLib::PixController*> STControlProducer::getPixControllers(){
 void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 
 	//Get Configuration Data
-	QStringList config_files, config_modules, fpga_files;
-	QString config_file, config_module, fpga_file;
+	QStringList config_files, config_modules, fpga_files, adapterCardFlavours;
+	QString config_file, config_module, fpga_file, adapterCardFlavour;
 
 	scan_options.boards = QString::fromStdString(config.Get("boards", "no")).split(",", QString::SkipEmptyParts);
 
@@ -56,6 +56,7 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 	scan_options.UseSingleBoardConfig = (QString::fromStdString(config.Get("UseSingleBoardConfigs", "no")).toLower()=="yes");
 	scan_options.config_file = QString::fromStdString( config.Get("config_file", ""));
 	scan_options.fpga_file = QString::fromStdString( config.Get("fpga_file", ""));
+	scan_options.adapterCardFlavour = config.Get("adapterCardFlavour", 0);
      
 	if (scan_options.UseSingleBoardConfig || scan_options.config_file=="") {
 		scan_options.UseSingleBoardConfig = true;
@@ -71,6 +72,16 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 			}
 			if(config_file=="" || !QFile::exists(config_file)) {
 				EUDAQ_ERROR((QString("No valid config file for board ") + scan_options.boards[i]).toStdString().c_str());
+				send_error=true;
+			}
+
+			// adapter flavour
+			adapterCardFlavour = QString::fromStdString(config.Get((QString("adapterCardFlavour[") + scan_options.boards[i] + QString("]")).toStdString().c_str(), "")).trimmed();
+			if(adapterCardFlavour=="") {
+				adapterCardFlavour=QString::fromStdString(config.Get("adapterCardFlavour[*]", "")).trimmed();
+			}
+			if(adapterCardFlavour=="") {
+				EUDAQ_ERROR((QString("No valid adapter flavour for board ") + scan_options.boards[i]).toStdString().c_str());
 				send_error=true;
 			}
 
@@ -92,12 +103,14 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 			config_files += config_file;
 			fpga_files += fpga_file;
 			config_modules += config_module;
+			adapterCardFlavours += adapterCardFlavour;
 			if(STEP_DEBUG) std::cout << "Configfile for Board " << scan_options.boards[i].toStdString() << ": " << config_file.toStdString() << std::endl;
 		}
 
 		scan_options.config_files = config_files;
 		scan_options.fpga_files = fpga_files;
 		scan_options.config_modules = config_modules;
+		scan_options.adapterCardFlavours = adapterCardFlavours;
 		
 		if(send_error) {
 			SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Error during initialisation");
@@ -106,7 +119,6 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 	}
 
 	scan_options.uc_firmware = QString::fromStdString(config.Get("uc_firmware", ""));
-	scan_options.adapterCardFlavour = config.Get("adapterCardFlavour", 0);
 	scan_options.rawdata_path = QString::fromStdString(config.Get("rawdata_path", ""));
 	scan_options.histogram_filename = QString::fromStdString(config.Get("histogram_filename", ""));
 	scan_options.lvl1_delay  = QString::fromStdString(config.Get("lvl1_delay", "26")).toInt();

@@ -76,11 +76,11 @@ void DummyPixController::configInit(){
 
   conf.reset();
 }
-void DummyPixController::sendCommand(int command, int moduleMask){
+void DummyPixController::sendCommand(int /*command*/, int /*moduleMask*/){
 }
-void DummyPixController::sendCommand(Bits commands, int moduleMask){
+void DummyPixController::sendCommand(Bits /*commands*/, int /*moduleMask*/){
 }
-void DummyPixController::writeModuleConfig(PixModule& mod)
+void DummyPixController::writeModuleConfig(PixModule& /*mod*/)
 {
      cout << "called writeModuleConfig\n";
     //std::cout << "ModuleName: " <<mod.moduleName() << std::endl;
@@ -90,21 +90,21 @@ void DummyPixController::writeModuleConfig(PixModule& mod)
     //if(!mcc) std::cout << "No MCC"  << std::endl;
 
 }
-void DummyPixController::readModuleConfig(PixModule& mod){
+void DummyPixController::readModuleConfig(PixModule& /*mod*/){
 }
-void DummyPixController::sendModuleConfig(unsigned int moduleMask){
+void DummyPixController::sendModuleConfig(unsigned int /*moduleMask*/){
 }
-void DummyPixController::sendPixel(unsigned int moduleMask){
+void DummyPixController::sendPixel(unsigned int /*moduleMask*/){
 }
-void DummyPixController::sendGlobal(unsigned int moduleMask){
+void DummyPixController::sendGlobal(unsigned int /*moduleMask*/){
 }
-void DummyPixController::sendPixel(unsigned int modliculeMask, std::string regName, bool allDcsIdentical){
+void DummyPixController::sendPixel(unsigned int /*modliculeMask*/, std::string /*regName*/, bool /*allDcsIdentical*/){
 }
-void DummyPixController::sendPixel(unsigned int moduleMask, std::string regName, int DC){
+void DummyPixController::sendPixel(unsigned int /*moduleMask*/, std::string /*regName*/, int /*DC*/){
 }
-void DummyPixController::sendGlobal(unsigned int moduleMask, std::string regName){
+void DummyPixController::sendGlobal(unsigned int /*moduleMask*/, std::string /*regName*/){
 }
-void DummyPixController::sendPixelChargeCalib(int pModuleID, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge){
+void DummyPixController::sendPixelChargeCalib(int /*pModuleID*/, unsigned int /*pCol*/, unsigned int /*pRow*/, unsigned int /*pTot*/, float /*pCharge*/){
 }
 void DummyPixController::setCalibrationMode(){
 }
@@ -120,7 +120,7 @@ void DummyPixController::readEPROM(){
 }
 void DummyPixController::burnEPROM(){
 }
-void DummyPixController::readGADC(int type, std::vector<int> &GADCvalues, int FEindex){
+void DummyPixController::readGADC(int /*type*/, std::vector<int>& /*GADCvalues*/, int /*FEindex*/){
 }
 void DummyPixController::
 writeScanConfig(PixScan &scn){
@@ -132,7 +132,7 @@ cout << "called writeScanConfig\n";
   nLoop2Parameters=scn.getLoopVarNSteps(2);
   printf ("%u %u %u %u %u\n",m_nTrigger,nmaskStage,nLoop0Parameters,nLoop1Parameters,nLoop2Parameters);
 }
-void DummyPixController::startScanDelegated(PixScan& scn)
+void DummyPixController::startScanDelegated(PixScan& /*scn*/)
 {
     cout << "called startScanDelegated(PixScan& scn)\n";
 loop0Parameter=nLoop0Parameters;
@@ -141,12 +141,12 @@ loop2Parameter=nLoop2Parameters;
 m_status=1<<5;
 maskStage=-1;
 }
-void DummyPixController::measureEvtTrgRate(PixScan *scn, int mod, double &erval, double &trval){
+void DummyPixController::measureEvtTrgRate(PixScan* /*scn*/, int /*mod*/, double& /*erval*/, double& /*trval*/){
 }
 bool DummyPixController::fitHistos(){
   return false;
 }
-bool DummyPixController::getErrorHistos(unsigned int dsp, Histo* &his){
+bool DummyPixController::getErrorHistos(unsigned int /*dsp*/, Histo* & /*his*/){
   return false;
 }
 void DummyPixController::getHisto(HistoType type, unsigned int xmod, unsigned int slv, std::vector< std::vector<Histo*> >& his){
@@ -183,15 +183,15 @@ cout << "called getHisto\n";
   }
   his[mod2].push_back(h);
 }
-void DummyPixController::getFitResults(HistoType type, unsigned int mod, unsigned int slv, std::vector< Histo * > &thr, std::vector< Histo * > &noise,
-				       std::vector< Histo * > &chi2){
+void DummyPixController::getFitResults(HistoType /*type*/, unsigned int /*mod*/, unsigned int /*slv*/, std::vector< Histo * > & /*thr*/, std::vector< Histo * > & /*noise*/,
+				       std::vector< Histo * > & /*chi2*/){
 }
-bool DummyPixController::moduleActive(int nmod){
+bool DummyPixController::moduleActive(int /*nmod*/){
   return false;
 }
-void DummyPixController::writeRunConfig(PixRunConfig &cfg){
+void DummyPixController::writeRunConfig(PixRunConfig & /*cfg*/){
 }
-void DummyPixController::startRun(int ntrig){
+void DummyPixController::startRun(int /*ntrig*/){
 }
 void DummyPixController::stopRun(){
 }
@@ -211,39 +211,42 @@ int DummyPixController::getBoardID(){
   //eturn m_boardId;
   return 0;
 }
-void DummyPixController::shiftPixMask(int mask, int cap, int steps){
+void DummyPixController::shiftPixMask(int /*mask*/, int /*cap*/, int /*steps*/){
 }
-int DummyPixController:: readHitBusScaler(int mod, int ife, PixScan* scn){
+int DummyPixController:: readHitBusScaler(int /*mod*/, int /*ife*/, PixScan* /*scn*/){
   return 0;
 }
-bool DummyPixController::checkRxState(rxTypes type){
+bool DummyPixController::checkRxState(rxTypes /*type*/){
   return false;
 }
-void DummyPixController::getServiceRecords(std::string &txt, std::vector<int> &srvCounts){
+void DummyPixController::getServiceRecords(std::string & txt, std::vector<int> & /*srvCounts*/){
+  txt = "";
 }
-void DummyPixController::setAuxClkDiv(int div){
+void DummyPixController::setAuxClkDiv(int /*div*/){
 }
-void DummyPixController::setIrefPads(int bits){
+void DummyPixController::setIrefPads(int /*bits*/){
 }
-void DummyPixController::setIOMUXin(int bits){
+void DummyPixController::setIOMUXin(int /*bits*/){
 }
-void DummyPixController::sendGlobalPulse(int length){
+void DummyPixController::sendGlobalPulse(int /*length*/){
 }
-bool DummyPixController::testGlobalRegister(int module, std::vector<int> &data_in,
-					    std::vector<int> &data_out, std::vector<std::string> &label, bool sendCfg, int feIndex){
+bool DummyPixController::testGlobalRegister(int /*module*/, std::vector<int> & /*data_in*/,
+					    std::vector<int> & /*data_out*/, std::vector<std::string> & /*label*/, bool /*sendCfg*/, int /*feIndex*/){
   return false;
 }
-bool DummyPixController::testPixelRegister(int module, std::string regName, std::vector<int> &data_in, std::vector<int> &data_out,
-					   bool ignoreDCsOff, int DC, bool sendCfg, int feIndex, bool bypass){
+bool DummyPixController::testPixelRegister(int /*module*/, std::string /*regName*/, std::vector<int> &/*data_in*/, std::vector<int> &/*data_out*/,
+					   bool /*ignoreDCsOff*/, int /*DC*/, bool /*sendCfg*/, int /*feIndex*/, bool /*bypass*/){
   return false;
 }
-bool DummyPixController::testScanChain(std::string chainName, std::vector<int> data_in, std::string &data_out, std::string data_cmp, bool shift_only,
-				       bool se_while_pulse, bool si_while_pulse, PixDcs *dcs, double &curr_bef, double &curr_after, int feIndex){
+bool DummyPixController::testScanChain(std::string /*chainName*/, std::vector<int> /*data_in*/, std::string& /*data_out*/, std::string /*data_cmp*/, bool /*shift_only*/,
+				       bool /*se_while_pulse*/, bool /*si_while_pulse*/, PixDcs * /*dcs*/, double & /*curr_bef*/, double & /*curr_after*/, int /*feIndex*/){
   return false;
 }
-void DummyPixController::hwInfo(std::string &txt){
+void DummyPixController::hwInfo(std::string & txt){
+  txt = "Dummy controller without hardware";
+  return;
 }
-bool DummyPixController::getGenericBuffer(const char *type, std::string &textBuf){
+bool DummyPixController::getGenericBuffer(const char * /*type*/, std::string &textBuf){
   textBuf="";
   return false;
 }

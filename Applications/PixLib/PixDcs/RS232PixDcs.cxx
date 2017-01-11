@@ -196,7 +196,9 @@ void RS232PixDcsChan::SetParam(string varType, double value) {
 std::string RS232PixDcsChan::ReadState(std::string){
 	return "unknown";
 }
-void RS232PixDcsChan::SetState(std::string){
+void RS232PixDcsChan::SetState(std::string state){
+  RS232PixDcs* myDcs = dynamic_cast<RS232PixDcs*>(m_parent);
+  myDcs->SetState(state);
   return;
 }
 void RS232PixDcsChan::rampVoltage(double pVoltage)

@@ -23,7 +23,7 @@ using namespace PixLib;
 
 USBBIPixDcsChan::USBBIPixDcsChan(PixDcs *parent, DBInquire *dbInquire) : USBPixDcsChan(parent, dbInquire){
   configInit();
-  m_conf->read(dbInquire);
+  if(dbInquire!=0) m_conf->read(dbInquire);
 }
 USBBIPixDcsChan::USBBIPixDcsChan(USBBIPixDcsChan &chan_in) : USBPixDcsChan(chan_in.m_parent, 0){
   configInit();
@@ -80,29 +80,57 @@ std::string USBBIPixDcsChan::ReadState(std::string){
 }
 
 USBBIPixDcs::USBBIPixDcs(DBInquire *dbInquire, void *interface)
-  : USBPixDcs(dbInquire, interface){
+  : USBPixDcs(dbInquire, interface, true){
 
   // needed to add extra cfg. items on top of USBPixDcs's config.
   configInit();
-  m_conf->read(dbInquire);
 
-  for(recordIterator it = dbInquire->recordBegin(); it != dbInquire->recordEnd(); it++){
-    // Look for DCS channel inquire
-    if((*it)->getName() == "PixDcsChan") {
-      USBBIPixDcsChan *uch = new USBBIPixDcsChan(this, *it);
-      if(UDCS_DEB) cout << "created USBBIPixDcsChan " << uch->name()<< endl;
+  if(dbInquire!=0){
+    m_conf->read(dbInquire);
+    
+    for(recordIterator it = dbInquire->recordBegin(); it != dbInquire->recordEnd(); it++){
+      // Look for DCS channel inquire
+      if((*it)->getName() == "PixDcsChan") {
+	USBBIPixDcsChan *uch = new USBBIPixDcsChan(this, *it);
+	if(UDCS_DEB) cout << "created USBBIPixDcsChan " << uch->name()<< endl;
+	m_channels.push_back(uch);
+	m_conf->addConfig(uch->m_conf);
+	// set default name and channel ID if none given yet
+	int chID = (int)m_channels.size()-1;
+	std::stringstream a;
+	a << chID;
+	if(uch->m_name=="unknown"){
+	  uch->m_name = m_name+"_Ch"+a.str();
+	  //uch->m_channelDescr = VDDA1;
+	}
+      }    
+    }
+  } else {
+    for(int chID=0; chID<4; chID++){
+      USBBIPixDcsChan *uch = new USBBIPixDcsChan(this, (DBInquire*) 0);
       m_channels.push_back(uch);
-      m_conf->addConfig(uch->m_conf);
-      // set default name and channel ID if none given yet
-      int chID = (int)m_channels.size()-1;
+      // set default name and channel ID
       std::stringstream a;
       a << chID;
-      if(uch->m_name=="unknown"){
-	uch->m_name = m_name+"_Ch"+a.str();
-	//uch->m_channelDescr = VDDA1;
+      uch->m_name = m_name+"_Ch"+a.str();
+      uch->m_conf->m_confName = "USBBIPixDcsChan_"+a.str()+"/PixDcsChan";
+      m_conf->addConfig(uch->m_conf);
+      std::map<std::string, int> chantypes = ((ConfList&)(*uch->m_conf)["general"]["ChannelDescr"]).symbols();
+      int ctID = 0;
+      for(std::map<std::string, int>::iterator it = chantypes.begin(); it!=chantypes.end(); it++){
+	if(ctID==chID){
+	  uch->m_name = it->first;
+	  ((ConfList&)(*uch->m_conf)["general"]["ChannelDescr"]).setValue(it->second);
+	  ((ConfFloat&)(*uch->m_conf)["settings"]["NomVolts"]).m_value = 2.0;
+	  break;
+	}
+	ctID++;
       }
-    }    
+      if(UDCS_DEB) cout << "created USBPixDcsChan " << uch->name() << " with config. name " << uch->m_conf->name() << endl;
+    }
   }
+  // was set in USBPixDcs constructor, but overwritten when calling configInit()
+  m_ctrlName = m_USBPC->getModGroup().getName();
 }
 USBBIPixDcs::~USBBIPixDcs(){
   USBPixBIDCS *adc = dynamic_cast<USBPixBIDCS*>(m_USBADC);
@@ -111,7 +139,8 @@ USBBIPixDcs::~USBBIPixDcs(){
 }
 void USBBIPixDcs::configInit(){
   if(UDCS_DEB) cout << "USBBIPixDcs::configInit" << endl;
-  // NB: only create what is not taken care of in USBPixDcsChan!
+  // NB: only create what is not taken care of in USBPixDcs!
+  m_conf->m_confName = "USBBIPixDcs";
   if(m_devType==SUPPLY){
     (*m_conf)["general"].addFloat("CurrLim", m_currLim, 1.0, "Current limit (in A) on this device", true);
     (*m_conf)["general"].addFloat("TempLim", m_tempLim, 100.0, "Temperature SW limit (in °C) on this device", true);

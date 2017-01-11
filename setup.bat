@@ -12,7 +12,7 @@ rem Switch default values:
 set useeudaq=no
 set siusbman=auto
 set buildtype=release
-set stcontrol_console=no
+set stcontrol_console=auto
 set libusb=yes
 set buildflags=QT5_FIX_QDIALOG
 
@@ -71,7 +71,7 @@ echo Unknown parameter %~1
 echo Usage: 
 echo setup.bat -restore
 echo or
-echo setup.bat [-useeudaq yes/no] [-buildtype release/debug] [-siusbman yes/no/auto] [-stcontrol_console yes/no] [-libusb yes/no]
+echo setup.bat [-useeudaq yes/no] [-buildtype release/debug] [-siusbman yes/no/auto] [-stcontrol_console yes/no/auto] [-libusb yes/no]
 goto eof
 :cont 
 
@@ -108,14 +108,42 @@ goto :nolibusb
 set LIBUSB_FLAG=USE_LIBUSB
 :nolibusb
 set EUDAQ_FLAG=
-set EUDAQ=
+set EUDAQ_LOCAL=
 if "%useeudaq%" == "yes" goto eudaq
 goto noeudaq
 :eudaq
 set EUDAQ_FLAG=WITHEUDAQ
-set EUDAQ=%DAQ_BASE%\eudaq
+IF DEFINED EUDAQ (
+  echo EUDAQ is defined
+) ELSE (
+  set EUDAQ=%DAQ_BASE%\eudaq\eudaq-1.7-dev
+)
+if %stcontrol_console% == no goto :noconsov
+set stcontrol_console=yes
+:noconsov
+IF EXIST %EUDAQ% (
+  echo EUDAQ already installed at %EUDAQ%
+  IF EXIST %EUDAQ%\lib\EUDAQ.lib (
+    set EUDAQ_LOCAL=
+    copy  /y %EUDAQ%\bin\EUDAQ.dll %DAQ_BASE%\bin\EUDAQ.dll
+  ) ELSE (
+    set EUDAQ_LOCAL=yes
+  )
+) ELSE (
+  cd %DAQ_BASE%\eudaq
+  wget https://github.com/eudaq/eudaq/archive/v1.7-dev.zip --no-check-certificate
+  move v1.7-dev v1.7-dev.zip
+  unzip v1.7-dev.zip
+  del v1.7-dev.zip
+  cd %DAQ_BASE%
+  set EUDAQ_LOCAL=yes
+)
 :noeudaq
-set Path=%SystemRoot%\system32;%SystemRoot%;%ROOTSYS%\bin;%QT5DIR%\lib;%QT5DIR%\bin;%QWTDIR%\lib;%VCDIR%\bin;%DAQ_BASE%\bin
+if %stcontrol_console% == yes goto :noconsov2
+set stcontrol_console=no
+:noconsov2
+
+set Path=%SystemRoot%\system32;%SystemRoot%;%ROOTSYS%\bin;%QT5DIR%\lib;%QT5DIR%\bin;%QWTDIR%\lib;%VCDIR%\bin;%DAQ_BASE%\bin;%PATH%
 echo DAQ_BASE=%DAQ_BASE%
 echo USBCMN=%USBCMN%
 echo ROOTSYS=%ROOTSYS%

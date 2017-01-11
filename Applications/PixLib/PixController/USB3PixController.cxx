@@ -243,7 +243,7 @@ void USB3PixController::sendCommand(int command, int moduleMask){               
 	}
 }
 
-void USB3PixController::sendCommand(Bits commands, int moduleMask){                                    //! Send command from pattern
+void USB3PixController::sendCommand(Bits /*commands*/, int /*moduleMask*/){
 	if(U3PC_DEBUG) cout << "sendCommand" << endl;
 }
 
@@ -252,20 +252,18 @@ std::string &str(const char *c) {
 }
 
 void USB3PixController::writeModuleConfig(PixModule& mod){                                             //! Write module configuration 
-	if(U3PC_DEBUG) cout << "writeModuleConfig" << endl;
-
-	if(U3PC_DEBUG) cout << "moduleID " << mod.moduleId() << endl;
+	if(U3PC_DEBUG) cout << "USB3PixController::writeModuleConfig : moduleID " << mod.moduleId() << endl;
 
 	frontends.clear();
 	fe_ids.clear();
 
-	module_config = std::unique_ptr<CommandBuffer>(new CommandBuffer);
+	//module_config = std::unique_ptr<CommandBuffer>(new CommandBuffer);
 
-	CommandBuffer &c = *module_config;
+	//CommandBuffer &c = *module_config;
 
 	for(auto fe = mod.feBegin(); fe != mod.feEnd(); fe++) {
 		int address = static_cast<ConfInt&>((*fe)->config()["Misc"]["Address"]).getValue();
-		if(U3PC_DEBUG) cout << "address " << address << endl;
+		if(U3PC_DEBUG) cout << "USB3PixController::writeModuleConfig : address " << address << endl;
 
 		if(Frontend::ROWS != (*fe)->nRow() || Frontend::COLUMNS != (*fe)->nCol()) {
 			throw(std::runtime_error("Inconsistent FE geometry."));
@@ -280,18 +278,18 @@ void USB3PixController::writeModuleConfig(PixModule& mod){                      
 		fe_ids.push_back(address);
 
 		Frontend &f = frontends.at(address);
-		c += f.confMode();
+		//c += f.confMode();
 
 		f["Vthin_AltFine"] = 255;
 		f["Vthin_AltCoarse"] = 255;
 
-		c += f.flushWrites();
+		//c += f.flushWrites();
 
 		for(auto &reg : f) {
 			f[reg] = (*fe)->readGlobRegister(reg);
 		}
 
-		c += f.flushWrites();
+		//c += f.flushWrites();
 
 		for(auto &reg : {"FDAC", "TDAC"}) {
 			for(int column = 0; column < Frontend::COLUMNS; column++) {
@@ -299,7 +297,7 @@ void USB3PixController::writeModuleConfig(PixModule& mod){                      
 					f.setPixelRegister(reg, column, row, (*fe)->readTrim(reg)[column][row]);
 				}
 			}
-			c += f.writePixelRegister(reg);
+			//c += f.writePixelRegister(reg);
 		}
 
 		for(auto &reg : {"CAP1", "CAP0", "ILEAK", "ENABLE"}) {
@@ -308,11 +306,56 @@ void USB3PixController::writeModuleConfig(PixModule& mod){                      
 					f.setPixelRegister(reg, column, row, (*fe)->readPixRegister(reg)[column][row]);
 				}
 			}
+			//c += f.writePixelRegister(reg);
+		}
+
+// 		c += f.runMode();
+
+
+// 		c += f.confMode(); //FIXME
+// 		f["ReadErrorReq"] = 1;
+// 		c += f.flushWrites();
+// 		c += f.globalPulse(0);
+// 		f["ReadErrorReq"] = 0;
+// 		c += f.flushWrites();
+// 		c += f.runMode();
+	}
+}
+void USB3PixController::readModuleConfig(PixModule& /*mod*/){                                          //! Read module configuration 
+	if(U3PC_DEBUG) cout << "readModuleConfig" << endl;
+}
+void USB3PixController::sendModuleConfig(unsigned int moduleMask){                                     //! Send module configuration 
+	if(U3PC_DEBUG) cout << "sendModuleConfig" << endl;
+	sendPixel(moduleMask);
+	sendGlobal(moduleMask);
+	board->getData();
+	detectReadoutChannels();
+}
+void USB3PixController::sendPixel(unsigned int /*moduleMask*/){                                        //! send specif. pixel register cfg.
+	if(U3PC_DEBUG) cout << "sendPixel" << endl;
+
+	CommandBuffer c;
+
+	for(auto &i : frontends) {
+		Frontend &f = i.second;
+		c += f.confMode();
+
+		int org_vc = f["Vthin_AltCoarse"];
+		int org_vf = f["Vthin_AltFine"];
+		f["Vthin_AltFine"] = 255;
+		f["Vthin_AltCoarse"] = 255;
+		c += f.flushWrites();
+
+		for(auto &reg : {"FDAC", "TDAC","CAP1", "CAP0", "ILEAK", "ENABLE"}) {
+		  if(U3PC_DEBUG) cout << "sendPixel calls writePixelRegister for " << reg << endl;
 			c += f.writePixelRegister(reg);
 		}
 
-		c += f.runMode();
+		f["Vthin_AltFine"] = org_vf;
+		f["Vthin_AltCoarse"] = org_vc;
+		c += f.flushWrites();
 
+		c += f.runMode();
 
 		c += f.confMode(); //FIXME
 		f["ReadErrorReq"] = 1;
@@ -322,19 +365,93 @@ void USB3PixController::writeModuleConfig(PixModule& mod){                      
 		c += f.flushWrites();
 		c += f.runMode();
 	}
+	board->sendCommands(c);
 }
-void USB3PixController::readModuleConfig(PixModule& mod){                                              //! Read module configuration 
-	if(U3PC_DEBUG) cout << "readModuleConfig" << endl;
-}
-void USB3PixController::sendModuleConfig(unsigned int moduleMask){                                     //! Send module configuration 
-	if(U3PC_DEBUG) cout << "sendModuleConfig" << endl;
+void USB3PixController::sendPixel(unsigned int /*moduleMask*/, std::string regName, bool /*allDcsIdentical*/){  //! send pixel register cfg.
+  if(U3PC_DEBUG) cout << "sendPixel for reg " << regName << endl;
+	CommandBuffer c;
 
-	board->sendCommands(*module_config);
-	board->getData();
-	detectReadoutChannels();
+	// USBpix3I4 code deals with FDAC and TDAC in one chunk -> act only on item 0, ignore rest
+	std::string reg = regName;
+	if(regName.substr(0,4)=="TDAC"){
+	  if(regName!="TDAC0") return;
+	  else reg = "TDAC";
+	}
+	else if(regName.substr(0,4)=="FDAC"){
+	  if(regName!="FDAC0") return;
+	  else reg = "FDAC";
+	}
+
+	for(auto &i : frontends) {
+		Frontend &f = i.second;
+		c += f.confMode();
+
+		int org_vc = f["Vthin_AltCoarse"];
+		int org_vf = f["Vthin_AltFine"];
+		f["Vthin_AltFine"] = 255;
+		f["Vthin_AltCoarse"] = 255;
+		c += f.flushWrites();
+
+		c += f.writePixelRegister(reg);
+
+		f["Vthin_AltFine"] = org_vf;
+		f["Vthin_AltCoarse"] = org_vc;
+		c += f.flushWrites();
+
+		c += f.runMode();
+
+		c += f.confMode(); //FIXME
+		f["ReadErrorReq"] = 1;
+		c += f.flushWrites();
+		c += f.globalPulse(0);
+		f["ReadErrorReq"] = 0;
+		c += f.flushWrites();
+		c += f.runMode();
+	}
+	board->sendCommands(c);
 }
-void USB3PixController::sendPixel(unsigned int moduleMask){                                            //! send specif. pixel register cfg.
-	if(U3PC_DEBUG) cout << "sendPixel" << endl;
+void USB3PixController::sendPixel(unsigned int /*moduleMask*/, std::string regName, int DC){  //! send pixel register cfg. for specific DC
+  if(U3PC_DEBUG) cout << "sendPixel for reg " << regName << " and DC " << DC << endl;
+	CommandBuffer c;
+
+	// USBpix3I4 code deals with FDAC and TDAC in one chunk -> act only on item 0, ignore rest
+	std::string reg = regName;
+	if(regName.substr(0,4)=="TDAC"){
+	  if(regName!="TDAC0") return;
+	  else reg = "TDAC";
+	}
+	else if(regName.substr(0,4)=="FDAC"){
+	  if(regName!="FDAC0") return;
+	  else reg = "FDAC";
+	}
+
+	for(auto &i : frontends) {
+		Frontend &f = i.second;
+		c += f.confMode();
+
+		int org_vc = f["Vthin_AltCoarse"];
+		int org_vf = f["Vthin_AltFine"];
+		f["Vthin_AltFine"] = 255;
+		f["Vthin_AltCoarse"] = 255;
+		c += f.flushWrites();
+
+		c += f.writePixelRegister(reg, {DC});
+
+		f["Vthin_AltFine"] = org_vf;
+		f["Vthin_AltCoarse"] = org_vc;
+		c += f.flushWrites();
+
+		c += f.runMode();
+
+		c += f.confMode(); //FIXME
+		f["ReadErrorReq"] = 1;
+		c += f.flushWrites();
+		c += f.globalPulse(0);
+		f["ReadErrorReq"] = 0;
+		c += f.flushWrites();
+		c += f.runMode();
+	}
+	board->sendCommands(c);
 }
 void USB3PixController::sendGlobal(unsigned int moduleMask){                                           //! send specif. gloabal register cfg.
 	if(U3PC_DEBUG) cout << "sendGlobal" << endl;
@@ -351,13 +468,7 @@ void USB3PixController::sendGlobal(unsigned int moduleMask){                    
 	board->sendCommands(c);
 }
 
-void USB3PixController::sendPixel(unsigned int moduleMask, std::string regName, bool allDcsIdentical){  //! send pixel register cfg.
-	if(U3PC_DEBUG) cout << "sendPixel" << endl;
-}
-void USB3PixController::sendPixel(unsigned int moduleMask, std::string regName, int DC){  //! send pixel register cfg. for specific DC
-	if(U3PC_DEBUG) cout << "sendPixel" << endl;
-}
-void USB3PixController::sendGlobal(unsigned int moduleMask, std::string regName){                      //! send gloabal register cfg.
+void USB3PixController::sendGlobal(unsigned int /*moduleMask*/, std::string regName){                      //! send gloabal register cfg.
 	if(U3PC_DEBUG) cout << "sendGlobal" << endl;
 	if(U3PC_DEBUG) cout << "regName " << regName << endl; 
 
@@ -373,8 +484,8 @@ void USB3PixController::sendGlobal(unsigned int moduleMask, std::string regName)
 }
 
 //DLP: sends the charge calibration for the clusterizer
-void USB3PixController::sendPixelChargeCalib(int pModuleID, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge){
-	//if(U3PC_DEBUG) cout << "sendPixelChargeCalib" << endl;
+void USB3PixController::sendPixelChargeCalib(int /*pModuleID*/, unsigned int /*pCol*/, unsigned int /*pRow*/, unsigned int /*pTot*/, float /*pCharge*/){
+	if(U3PC_DEBUG) cout << "sendPixelChargeCalib" << endl;
 }
 
 void USB3PixController::setCalibrationMode(void) {
@@ -417,7 +528,7 @@ void USB3PixController::burnEPROM(void) { // burns the FE GR values to the EPROM
 	if(U3PC_DEBUG) cout << "burnEPROM" << endl;
 }
 
-void USB3PixController::readGADC(int type, std::vector<int> &GADCvalues, int FEindex) {
+  void USB3PixController::readGADC(int /*type*/, std::vector<int> &/*GADCvalues*/, int /*FEindex*/) {
 	if(U3PC_DEBUG) cout << "readGADC" << endl;
 }
 
@@ -442,7 +553,6 @@ std::string USB3PixController::translateScanParam(PixScan::ScanParam param, std:
 }
 
 void USB3PixController::writeScanConfig(PixScan &scn) {                                           //! Write scan parameters
-	if(U3PC_DEBUG) cout << "writeScanConfig" << endl;
 
 	CommandBuffer c;
 
@@ -459,13 +569,32 @@ void USB3PixController::writeScanConfig(PixScan &scn) {                         
 		}
 
 		fe["TrigCnt"] = trigcnt;
-		fe["DIGHITIN_Sel"] = scn.getDigitalInjection();
+
+		if((scn.getLoopParam(0)!=PixScan::LATENCY || !scn.getLoopActive(0)) &&
+		   (scn.getLoopParam(1)!=PixScan::LATENCY || !scn.getLoopActive(1)) &&
+		   (scn.getLoopParam(2)!=PixScan::LATENCY || !scn.getLoopActive(2))){
+		  fe["DIGHITIN_Sel"] = scn.getDigitalInjection();
+		  if(U3PC_DEBUG) cout << "USB3PixController::writeScanConfig : FE"<< fe.address
+				      <<" latency = " << fe["DIGHITIN_Sel"] << endl;
+		}
 
 		fe["TrigLat"] = scn.getLVL1Latency();
-		fe["PlsrDelay"] = scn.getStrobeMCCDelay();
+		if((scn.getLoopParam(0)!=PixScan::STROBE_DELAY || !scn.getLoopActive(0)) && 
+			(scn.getLoopParam(1)!=PixScan::STROBE_DELAY || !scn.getLoopActive(1)) && 
+			(scn.getLoopParam(2)!=PixScan::STROBE_DELAY || !scn.getLoopActive(2)) ){
+		  if(scn.getStrobeMCCDelayRange()!=31) fe["PlsrDelay"] = scn.getStrobeMCCDelay();
+		  if(U3PC_DEBUG) cout << "USB3PixController::writeScanConfig : FE"<< fe.address
+				      <<" PlsrDelay = " << fe["PlsrDelay"] << endl;
+		}
 
-		if(scn.getFeVCal()!=8191){
-			fe["PlsrDAC"] = scn.getFeVCal();
+		if((scn.getLoopParam(0)!=PixScan::VCAL || !scn.getLoopActive(0)) && 
+			(scn.getLoopParam(1)!=PixScan::VCAL || !scn.getLoopActive(1)) && 
+			(scn.getLoopParam(2)!=PixScan::VCAL || !scn.getLoopActive(2))){
+		  if(scn.getFeVCal()!=8191){
+		    fe["PlsrDAC"] = scn.getFeVCal();
+		    if(U3PC_DEBUG) cout << "USB3PixController::writeScanConfig : FE"<< fe.address
+					<<" PlsrDAC = " << fe["PlsrDAC"] << endl;
+		  }
 		}
 
 		if(scn.getSrcTriggerType() == PixScan::FE_SELFTRIGGER) {
@@ -717,6 +846,8 @@ void USB3PixController::strobeScan(PixScan *scn) {
 
   try{
 	int lvl1_delay = scn->getStrobeLVL1Delay();
+	if(!scn->getStrobeLVL1DelayOverride()) lvl1_delay = m_modGroup.getTriggerDelay();
+	if(U3PC_DEBUG) cout << "USB3PixController::strobeScan : trigger delay = " << lvl1_delay << endl;
 
 	MaskSettings m;
 	getMaskSettings(m, *scn);
@@ -980,7 +1111,7 @@ void USB3PixController::finalizeScan(void) {                                    
 	}
 }
 
-void USB3PixController::measureEvtTrgRate(PixScan *scn, int mod, double &erval, double &trval) {  //! measure event and trigger rate - not a real occ./ToT-scan!
+void USB3PixController::measureEvtTrgRate(PixScan */*scn*/, int /*mod*/, double &/*erval*/, double &/*trval*/) {  //! measure event and trigger rate - not a real occ./ToT-scan!
 	if(U3PC_DEBUG) cout << "measureEvtTrgRate" << endl;
 }
 
@@ -989,12 +1120,12 @@ bool USB3PixController::fitHistos(void) {                                       
 	return false;
 }
 
-bool USB3PixController::getErrorHistos(unsigned int dsp, Histo* &his) {                                               //! get error arrays 
+bool USB3PixController::getErrorHistos(unsigned int /*dsp*/, Histo* &/*his*/) {                                               //! get error arrays 
 	if(U3PC_DEBUG) cout << "getErrorHistos" << endl;
 	return false;
 }
 
-void USB3PixController::getHisto(HistoType type, unsigned int mod, unsigned int slv, std::vector< std::vector<Histo*> >& his) { //! Read an histogram
+void USB3PixController::getHisto(HistoType type, unsigned int mod, unsigned int /*slv*/, std::vector< std::vector<Histo*> >& his) { //! Read an histogram
 	if(U3PC_DEBUG) cout << "getHisto" << endl;
 
 	for(int i=0;i<32;i++) {
@@ -1088,8 +1219,8 @@ void USB3PixController::getHisto(HistoType type, unsigned int mod, unsigned int 
 				int fe = 0;
 				for(auto &hist : loop.hit_hist) {
 
-					for(int x = 0; x < hist.columns; x++) {
-						for(int y = 0; y < hist.rows; y++) {
+				  for(int x = 0; x < (int)hist.columns; x++) {
+						for(int y = 0; y < (int)hist.rows; y++) {
 						        int colm = pm->iColMod(fe, x);
 							int rowm = pm->iRowMod(fe, y);
 							if(hist[y][x]>255 && !current_scan->source_scan) { // cap strobe scan histos to 255 to get same behaviour as usbpix 2
@@ -1106,7 +1237,7 @@ void USB3PixController::getHisto(HistoType type, unsigned int mod, unsigned int 
 
 			case LV1ID: {
 				for(auto & hist : loop.lv1id_hist) {
-					for(int i=0; i<hist.size; i++) {
+					for(int i=0; i<(int)hist.size; i++) {
 						h->set(i, hist[i]);
 					}
 				}
@@ -1115,7 +1246,7 @@ void USB3PixController::getHisto(HistoType type, unsigned int mod, unsigned int 
 
 			case BCID: {
 				for(auto & hist : loop.bcid_hist) {
-					for(int i=0; i<hist.size; i++) {
+					for(int i=0; i<(int)hist.size; i++) {
 						h->set(i, hist[i]);
 					}
 				}
@@ -1126,7 +1257,7 @@ void USB3PixController::getHisto(HistoType type, unsigned int mod, unsigned int 
 				size_t lvl1His[16] = {0};
 
 				for(auto & hist : loop.lvl1_hist) {
-					for(int i=0; i<hist.size; i++) {
+					for(int i=0; i<(int)hist.size; i++) {
 						lvl1His[i] += hist[i];
 					}
 				}
@@ -1134,7 +1265,10 @@ void USB3PixController::getHisto(HistoType type, unsigned int mod, unsigned int 
 				for(int i=0; i<16; i++) {
 					h->set(i, lvl1His[i]);
 				}
+				break;
 			}
+		        default:
+		                break;
 		}
 
 		if((type>=TOT0 && type<=TOT15) || type == TOT_MEAN || type == TOT_SIGMA || type == TOT) {
@@ -1143,8 +1277,8 @@ void USB3PixController::getHisto(HistoType type, unsigned int mod, unsigned int 
 			int fe = 0;
 			for(auto & hist : loop.tot_hist2d) {
 
-				for(int column=0; column<hist.columns; column++) {
-					for(int row=0; row<hist.rows; row++) {
+				for(int column=0; column<(int)hist.columns; column++) {
+					for(int row=0; row<(int)hist.rows; row++) {
 					        int colm = pm->iColMod(fe, column);
 						int rowm = pm->iRowMod(fe, row);
 						int TOTsumsqr = 0;
@@ -1204,18 +1338,18 @@ void USB3PixController::getHisto(HistoType type, unsigned int mod, unsigned int 
 	}
 }
 
-void USB3PixController::getFitResults(HistoType type, unsigned int mod, unsigned int slv, std::vector< Histo * > &thr, std::vector< Histo * > &noise, std::vector< Histo * > &chi2){}                                                  //! Read a Fit from Dsp
+void USB3PixController::getFitResults(HistoType /*type*/, unsigned int /*mod*/, unsigned int /*slv*/, std::vector< Histo * >& /*thr*/, std::vector< Histo * >& /*noise*/, std::vector< Histo * >& /*chi2*/){}                                                  //! Read a Fit from Dsp
 
 bool USB3PixController::moduleActive(int nmod) {                    //! true if a module is active during scan or datataking
 	if(U3PC_DEBUG) cout << "moduleActive " << nmod << endl;
 	return true;
 }
 
-void USB3PixController::writeRunConfig(PixRunConfig &cfg) {         //! Get the run configuration parameters from PixModuleGroup
+void USB3PixController::writeRunConfig(PixRunConfig& /*cfg*/) {         //! Get the run configuration parameters from PixModuleGroup
 	if(U3PC_DEBUG) cout << "writeRunConfig" << endl;
 }
 
-void USB3PixController::startRun(int ntrig) {                   //! Start a run
+void USB3PixController::startRun(int /*ntrig*/) {                   //! Start a run
 	if(U3PC_DEBUG) cout << "startRun" << endl;
 }
 
@@ -1276,41 +1410,42 @@ int USB3PixController::nTrigger(void) {              //! Returns the number of t
 }
 
 // new function for MonLeak and HitBusScaler
-void USB3PixController::shiftPixMask(int mask, int cap, int steps){
+void USB3PixController::shiftPixMask(int /*mask*/, int /*cap*/, int /*steps*/){
 	if(U3PC_DEBUG) cout << "shiftPixMask" << endl;
 }
 
-int  USB3PixController::readHitBusScaler(int mod, int ife, PixScan* scn){
+int  USB3PixController::readHitBusScaler(int /*mod*/, int /*ife*/, PixScan* /*scn*/){
 	if(U3PC_DEBUG) cout << "readHitBusScaler" << endl;
 	return 0;
 }
 
-bool USB3PixController::checkRxState(rxTypes type){
+bool USB3PixController::checkRxState(rxTypes /*type*/){
 	if(U3PC_DEBUG) cout << "checkRxState" << endl;
 	return false;
 }
 
-void USB3PixController::getServiceRecords(std::string &txt, std::vector<int> &srvCounts){
+void USB3PixController::getServiceRecords(std::string& txt, std::vector<int>& /*srvCounts*/){
 	if(U3PC_DEBUG) cout << "getServiceRecords" << endl;
+	txt = "USB3PixController::getServiceRecords not yet implemented";
 }
 
-void USB3PixController::setAuxClkDiv(int div){
+void USB3PixController::setAuxClkDiv(int /*div*/){
 	if(U3PC_DEBUG) cout << "setAuxClkDiv" << endl;
 }
 
-void USB3PixController::setIrefPads(int bits){
+void USB3PixController::setIrefPads(int /*bits*/){
 	if(U3PC_DEBUG) cout << "setIrefPads" << endl;
 }
 
-void USB3PixController::setIOMUXin(int bits){
+void USB3PixController::setIOMUXin(int /*bits*/){
 	if(U3PC_DEBUG) cout << "setIOMUXin" << endl;
 }
 
-void USB3PixController::sendGlobalPulse(int length){
+void USB3PixController::sendGlobalPulse(int /*length*/){
 	if(U3PC_DEBUG) cout << "sendGlobalPulse" << endl;
 }
 
-bool USB3PixController::testGlobalRegister(int module, std::vector<int> &data_in,
+bool USB3PixController::testGlobalRegister(int /*module*/, std::vector<int> &data_in,
   std::vector<int> &data_out, std::vector<std::string> &label, bool sendCfg, int feIndex){
 	if(U3PC_DEBUG) cout << "testGlobalRegister" << endl;
 	if(U3PC_DEBUG) cout << feIndex << endl;
@@ -1362,7 +1497,7 @@ bool USB3PixController::testGlobalRegister(int module, std::vector<int> &data_in
 	return retval;
 }
 
-bool USB3PixController::testPixelRegister(int module, std::string regName, std::vector<int> &data_in, std::vector<int> &data_out, 
+bool USB3PixController::testPixelRegister(int /*module*/, std::string regName, std::vector<int> &data_in, std::vector<int> &data_out, 
 			 bool ignoreDCsOff, int DC, bool sendCfg, int feIndex, bool bypass){
 	if(U3PC_DEBUG) cout << "testPixelRegister " << regName << endl;
 	if(U3PC_DEBUG) cout << bypass << endl;
@@ -1485,8 +1620,8 @@ bool USB3PixController::testPixelRegister(int module, std::string regName, std::
 	return retval;
 }
 
-bool USB3PixController::testScanChain(std::string chainName, std::vector<int> data_in, std::string &data_out, std::string data_cmp, bool shift_only, 
-		     bool se_while_pulse, bool si_while_pulse, PixDcs *dcs, double &curr_bef, double &curr_after, int feIndex){
+bool USB3PixController::testScanChain(std::string /*chainName*/, std::vector<int> /*data_in*/, std::string& /*data_out*/, std::string /*data_cmp*/, bool /*shift_only*/, 
+		     bool /*se_while_pulse*/, bool /*si_while_pulse*/, PixDcs* /*dcs*/, double& /*curr_bef*/, double& /*curr_after*/, int /*feIndex*/){
 	if(U3PC_DEBUG) cout << "testScanChain" << endl;
 
 	return false;
@@ -1507,7 +1642,6 @@ void USB3PixController::hwInfo(std::string &txt) {
 }
 
 bool USB3PixController::getGenericBuffer(const char *type, std::string &textBuf){
-	if(U3PC_DEBUG) cout << "getGenericBuffer: " << type << endl;
 	textBuf = "";
 
 	if(std::string(type) == "err") {
@@ -1567,7 +1701,7 @@ int  USB3PixController::getEventRate(void) {
 	return event_rate;
 }
 
-bool USB3PixController::getSourceScanData(std::vector<unsigned int *>* data, bool forceReadSram){
+bool USB3PixController::getSourceScanData(std::vector<unsigned int *>* /*data*/, bool /*forceReadSram*/){
 	if(U3PC_DEBUG) cout << "getSourceScanData" << endl;
 	return false;
 }

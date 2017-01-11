@@ -56,18 +56,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <widget class="QMenu" name="menuNew_config">
-     <property name="icon">
-      <iconset>
-       <normaloff>:/icons/images/filenew.png</normaloff>:/icons/images/filenew.png</iconset>
-     </property>
-     <property name="title">
-      <string>New config.</string>
-     </property>
-     <addaction name="actionNew_cfg"/>
-     <addaction name="actionNew_cfg_generic"/>
-    </widget>
-    <addaction name="menuNew_config"/>
+    <addaction name="actionNew_cfg"/>
     <addaction name="fileOpenAction"/>
     <addaction name="fileReopenAction"/>
     <addaction name="fileSaveAction"/>
@@ -688,18 +677,14 @@
   </action>
   <action name="actionNew_cfg">
    <property name="text">
-    <string>&amp;New cfg. (USBpix)</string>
+    <string>&amp;New config.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
    </property>
-  </action>
-  <action name="actionNew_cfg_generic">
-   <property name="text">
-    <string>New cfg. (&amp;generic)</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+G</string>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/icons/images/filenew.png</normaloff>:/icons/images/filenew.png</iconset>
    </property>
   </action>
  </widget>

@@ -18,6 +18,12 @@ tdaq {
   message("Skipping RodDaq/RodCrate")
 }
 
+localeudaq {
+  SUBDIRS += eudaq
+} else {
+  message("Skipping eudaq")
+}
+
 # misc. peripheral interfaces
 gpib {
   SUBDIRS += PixGPIB

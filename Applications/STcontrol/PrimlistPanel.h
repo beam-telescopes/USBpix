@@ -53,6 +53,7 @@ class PrimListViewItem : public QWidget, public QTreeWidgetItem, public PrimList
   void editPS();
   void saveEdit();
   void cleanEdit();
+  void cancelEdit();
   void toolTypeChanged();
 
  signals:
