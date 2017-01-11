@@ -30,12 +30,12 @@
 using namespace PixLib;
 
 DummyPixController::DummyPixController(PixModuleGroup &modGrp, DBInquire *dbInquire) :
-  PixController(modGrp, dbInquire){
+  PixController(modGrp, dbInquire, gen::DUMMYGEN){
   configInit();
   if (dbInquire != NULL) m_conf->read(dbInquire);
 }
 DummyPixController::DummyPixController(PixModuleGroup &modGrp) :
-  PixController(modGrp){
+  PixController(modGrp, gen::DUMMYGEN){
   configInit();
 }
 void DummyPixController::configInit(){

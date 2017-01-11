@@ -113,5 +113,8 @@ size_t CircularFifo<Element, Size>::increment(size_t idx) const
 
 
 //} // sequential_consistent
+
+using UintCircBuff1MByte = CircularFifo<uint32_t, 1000000/sizeof(uint32_t)>;
+
 #endif /* CIRCULARFIFO_SEQUENTIAL_H_ */
 

@@ -27,8 +27,6 @@
 
 #include "Utility/CircularFifo.h"
 
-using UintCircBuff1MByte = CircularFifo<uint32_t, 1000000/sizeof(uint32_t)>;
-
 namespace PixLib {
 
 class Bits;
@@ -44,6 +42,10 @@ struct PixControllerInfo{
   std::string className;
   std::string decName;
   int extraOption;
+};
+
+enum gen {
+  DUMMYGEN = 10, MIO2 = 2, MIO3 = 3 
 };
 
 //! Pix Controller Exception class; an object of this type is thrown in case of a controller error
@@ -85,6 +87,18 @@ private:
 
 class PixController {
 
+protected:
+  Config *m_conf;                  //! Configuration object
+  PixModuleGroup &m_modGroup;      //! Pointer to the module group using this controller
+  std::vector<std::shared_ptr<UintCircBuff1MByte>> m_circularBuffer;
+  gen m_generation;
+
+private:
+  virtual void configInit() = 0;   //! Init configuration structure
+  std::string m_name;              //! Name of the controller
+  DBInquire *m_dbInquire;          //! DBInquire
+  bool m_inTBMode = false;
+
 public:
   enum HistoType{OCCUPANCY=0, LVL1, LV1ID, BCID, TOT, TOT_MEAN, TOT_SIGMA,
                  SCURVES, SCURVE_MEAN, SCURVE_SIGMA, SCURVE_CHI2, HITOCC, TOTAVERAGE,
@@ -101,12 +115,12 @@ public:
   static PixController *make(PixModuleGroup &grp, DBInquire *dbInquire, std::string type);    //! Factory
   static PixController *make(PixModuleGroup &grp, std::string type, int extraOption=0);       //! Factory
 
-  PixController(PixModuleGroup &modGrp, DBInquire *dbInquire) : 
-                m_modGroup(modGrp), m_dbInquire(dbInquire) {          //! Constructor
+  PixController(PixModuleGroup &modGrp, DBInquire *dbInquire, gen generation) : 
+                m_modGroup(modGrp), m_generation(generation), m_dbInquire(dbInquire) {          //! Constructor
     m_name = m_modGroup.getRodName();
   }
-  PixController(PixModuleGroup &modGrp) : 
-                m_modGroup(modGrp), m_dbInquire(NULL) {               //! Constructor
+  PixController(PixModuleGroup &modGrp, gen generation) : 
+                m_modGroup(modGrp), m_generation(generation), m_dbInquire(nullptr) {               //! Constructor
     m_name = m_modGroup.getRodName();
   }
   virtual ~PixController() {};                                        //! Destructor
@@ -197,7 +211,6 @@ public:
   virtual int  getEventRate() = 0;
   virtual bool getSourceScanData(std::vector<unsigned int *>* data, bool forceReadSram) = 0;
 
-
   // Accessors
   PixModuleGroup &getModGroup() { return m_modGroup; };       //! Parent module group accessor
   std::string getCtrlName() { return m_name; };               //! Group name accessor
@@ -205,19 +218,14 @@ public:
   static void listTypes(std::vector<PixControllerInfo> &list);             //! available controller types
 
   auto getCircularBufferVec() const -> std::vector<std::shared_ptr<UintCircBuff1MByte>> const & {
-	return m_circularBuffer;
+	  return m_circularBuffer;
+  }
+  
+  auto getGeneration() const -> decltype(m_generation) {
+    return m_generation;
   }
 
-protected:
-  Config *m_conf;                  //! Configuration object
-  PixModuleGroup &m_modGroup;      //! Pointer to the module group using this controller
-  std::vector<std::shared_ptr<UintCircBuff1MByte>> m_circularBuffer;
 
-private:
-  virtual void configInit() = 0;   //! Init configuration structure
-  std::string m_name;              //! Name of the controller
-  DBInquire *m_dbInquire;          //! DBInquire
-  bool m_inTBMode = false;
 };
 
 }

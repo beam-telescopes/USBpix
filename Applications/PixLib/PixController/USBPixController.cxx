@@ -73,7 +73,7 @@ const int RCA_AUTOSAVE = -1;
 
 // ***************** Constructors *********************
 USBPixController::USBPixController(PixModuleGroup &modGrp, DBInquire *dbInquire) :
-PixController(modGrp, dbInquire), m_readoutChannelReadsChip(4), m_ringbuffersInit(false) { 
+PixController(modGrp, dbInquire, gen::MIO2), m_readoutChannelReadsChip(4), m_ringbuffersInit(false) { 
 	initChipIds();
 	configInit();
 	m_conf->read(dbInquire);
@@ -105,7 +105,7 @@ PixController(modGrp, dbInquire), m_readoutChannelReadsChip(4), m_ringbuffersIni
 }
 
 USBPixController::USBPixController(PixModuleGroup &modGrp, int adapterCardFlavor) : 
-PixController(modGrp), m_readoutChannelReadsChip(4) { //! Constructor
+PixController(modGrp, gen::MIO2), m_readoutChannelReadsChip(4) { //! Constructor
 	initChipIds();
 	configInit();
 	m_AdapterCardFlavor = adapterCardFlavor;

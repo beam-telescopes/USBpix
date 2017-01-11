@@ -63,7 +63,7 @@ UINT32 bitflip(UINT32 bits_in){
 
 // ***************** Constructors *********************
 USBI3PixController::USBI3PixController(PixModuleGroup &modGrp, DBInquire *dbInquire) :
-                                   PixController(modGrp, dbInquire) { 
+                                   PixController(modGrp, dbInquire, gen::MIO2) { 
   //initHW();
   configInit();
   m_conf->read(dbInquire);
@@ -75,7 +75,7 @@ USBI3PixController::USBI3PixController(PixModuleGroup &modGrp, DBInquire *dbInqu
 }
 
 USBI3PixController::USBI3PixController(PixModuleGroup &modGrp) : 
-                                   PixController(modGrp) { //! Constructor
+                                   PixController(modGrp, gen::MIO2) { //! Constructor
   configInit();
 
   //  m_FPGAconfig = NULL;
