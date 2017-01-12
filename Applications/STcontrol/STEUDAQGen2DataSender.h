@@ -1,6 +1,8 @@
 #ifndef STEUDAQGen2DataSender_h 
 #define STEUDAQGen2DataSender_h
 
+#include "STEUDAQDataSenderInterface.h"
+
 #include "eudaq/DataSender.hh"
 #include "eudaq/Producer.hh"
 
@@ -13,10 +15,10 @@
 
 #define TLU_TRIGGER_AMOUNT	0x8000
 
-class STEUDAQGen2DataSender: public eudaq::Producer {
+class STEUDAQGen2DataSender: public STEUDAQDataSenderInterface, public eudaq::Producer  {
 
 public:
-	STEUDAQGen2DataSender(std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr);
+	STEUDAQGen2DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr);
 	void OnStartRun(unsigned);
 	void OnStopRun();
 

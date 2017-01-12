@@ -142,7 +142,6 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 	for(auto& controller: pixControllers) {
 		std::cout << "Got controller: " << controller->getBoardID() << std::endl;
 	}
-
 }
 
 void STControlProducer::OnConfigure(const eudaq::Configuration& config){
@@ -150,13 +149,24 @@ void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 	auto pixControllers = getPixControllers();
 	for(auto& controller: pixControllers) {
 		auto boardID = controller->getBoardID();
-		std::cout << "Board ID: " << boardID << " has generation: " << controller->getGeneration() << std::endl;
+		auto boardGen = controller->getGeneration();
+		std::cout << "Board ID: " << boardID << " has generation: " << boardGen << std::endl;
 		if(m_dataSenders.find(boardID) == m_dataSenders.end()){ 
-			m_dataSenders[boardID] = std::unique_ptr<STEUDAQGen3DataSender>(new STEUDAQGen3DataSender(controller->getCircularBufferVec(), m_rcAddress));
+			switch(boardGen) {
+				case PixLib::gen::MIO3:
+					m_dataSenders[boardID] = std::unique_ptr<STEUDAQGen3DataSender>(new STEUDAQGen3DataSender("USBpixGen3_Board"+std::to_string(boardID), controller->getCircularBufferVec(), m_rcAddress));
+					break;
+				case PixLib::gen::MIO2:
+					m_dataSenders[boardID] = std::unique_ptr<STEUDAQGen2DataSender>(new STEUDAQGen2DataSender("USBpixGen2_Board"+std::to_string(boardID), controller->getCircularBufferVec(), m_rcAddress));
+					break;
+				default:
+					//ERROR
+					break;
+			}
 			std::cout << "Added data sender for board: " << controller->getBoardID() << std::endl;
 			std::cout << "It is located at: " << &controller->getCircularBufferVec() << std::endl;
 		}
-	}	
+	}
  	// configure modules
 	m_STControlEngine.configModules();
 
@@ -178,7 +188,11 @@ void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 	}
 	scan_options.FEflavour = (myBoards.size()>0)?feFlavours[0]:3;
 
-	if(STE_DEBUG) std::cout << "EUDAQ: got FE flavours, setting scan options now!" << std::endl;
+	if(STE_DEBUG){
+		std::cout << "EUDAQ: got FE flavours: ";
+		for(auto& flavour: feFlavours) std::cout << flavour << " ";
+		std::cout << std::endl;
+	} 
 
 	emit m_STControlEngine.setScanOptions(scan_options);
 

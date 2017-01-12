@@ -101,6 +101,7 @@ contains(DEFINES, WITHEUDAQ) {
   TARGET = STcontrol_eudaq
   
   HEADERS += STControlProducer.h
+  HEADERS += STEUDAQDataSenderInterface.h
   HEADERS += STEUDAQGen2DataSender.h
   HEADERS += STEUDAQGen3DataSender.h
   

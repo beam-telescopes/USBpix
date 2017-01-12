@@ -10,8 +10,8 @@
 
 #define TLU_TRIGGER_AMOUNT 32767
 
-STEUDAQGen3DataSender::STEUDAQGen3DataSender(std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr): 
-eudaq::Producer("MyDataSender", rcAddr), 
+STEUDAQGen3DataSender::STEUDAQGen3DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr): 
+eudaq::Producer(std::move(prodName), rcAddr), 
 m_circBuffVec(circBuffVec),
 m_killThread(false){
 	SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (dy default)");
@@ -38,16 +38,16 @@ void STEUDAQGen3DataSender::monitorBuffer(){
 			uint32_t element;
 
 			while(buffer->pop(element)) {
-				//std::cout << "Popped element: " << std::bitset<32>(element) << std::endl;
+				std::cout << "Popped element: " << std::bitset<32>(element) << std::endl;
 				
 				//In case the highest bit is set it is a trigger
 				if( element >> 31 ) {
 					if(currentTriggerNo != -1) {
-						//eudaq::RawDataEvent event("USBPIX_M3", m_runNo, currentTriggerNo-1+TLU_TRIGGER_AMOUNT*triggerRollover+triggerRollover);
-						eudaq::RawDataEvent event("USBPIX_M3", m_runNo, currentTriggerNo);
+						//eudaq::RawDataEvent event("USBPIX_GEN3", m_runNo, currentTriggerNo-1+TLU_TRIGGER_AMOUNT*triggerRollover+triggerRollover);
+						eudaq::RawDataEvent event("USBPIX_GEN3", m_runNo, currentTriggerNo);
 						event.AddBlock(0, data);
 						SendEvent(event);
-						//std::cout << "Sent trigger: " << currentTriggerNo-1 << " payload: " << data.size() << std::endl;	
+						std::cout << "Sent trigger: " << currentTriggerNo-1 << " payload: " << data.size() << std::endl;	
 						data.clear();
 					}
 					/*
