@@ -18,7 +18,7 @@
 class STEUDAQGen2DataSender: public STEUDAQDataSenderInterface, public eudaq::Producer  {
 
 public:
-	STEUDAQGen2DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr);
+	STEUDAQGen2DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr, int boardID);
 	void OnStartRun(unsigned);
 	void OnStopRun();
 

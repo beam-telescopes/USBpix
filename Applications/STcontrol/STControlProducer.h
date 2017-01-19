@@ -9,6 +9,7 @@
 #include "STCdefines.h"
 
 #include "STEUDAQGen3DataSender.h"
+#include "STEUDAQGen3RndDataSender.h"
 #include "STEUDAQGen2DataSender.h"
 
 #include <QString>

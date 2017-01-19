@@ -10,10 +10,11 @@
 
 #define TLU_TRIGGER_AMOUNT 32767
 
-STEUDAQGen3DataSender::STEUDAQGen3DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr): 
+STEUDAQGen3DataSender::STEUDAQGen3DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr, int boardID): 
 eudaq::Producer(std::move(prodName), rcAddr), 
 m_circBuffVec(circBuffVec),
-m_killThread(false){
+m_killThread(false),
+boardID(boardID){
 	SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (dy default)");
 }
 
@@ -23,41 +24,37 @@ void STEUDAQGen3DataSender::monitorBuffer(){
 	std::cout << "Started monitoring buffer!" << std::endl;
 	bool waitedGracePeriod = false;
 
-	eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE("USBPIX_M3", m_runNo));
+	eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE("USBPIX_GEN3", m_runNo));
+	bore.SetTag("board", boardID);
 	SendEvent(bore);	
-	std::cout << "Sent BORE" << std::endl;
+	//std::cout << "Sent BORE" << std::endl;
 
 	std::vector<uint32_t> data;
-	int currentTriggerNo = -1;
+	int currentTriggerNo = 0;
 	int triggerRollover = 0;	
 
 	while(true){
 		//std::cout << "Monitoring ... buffer has size: " << m_circBuffVec.size() << std::endl;
-
 		for(auto& buffer: m_circBuffVec) {
 			uint32_t element;
-
 			while(buffer->pop(element)) {
-				std::cout << "Popped element: " << std::bitset<32>(element) << std::endl;
-				
 				//In case the highest bit is set it is a trigger
 				if( element >> 31 ) {
-					if(currentTriggerNo != -1) {
+					if(currentTriggerNo != 0) {
 						//eudaq::RawDataEvent event("USBPIX_GEN3", m_runNo, currentTriggerNo-1+TLU_TRIGGER_AMOUNT*triggerRollover+triggerRollover);
 						eudaq::RawDataEvent event("USBPIX_GEN3", m_runNo, currentTriggerNo);
 						event.AddBlock(0, data);
+						event.SetTag("board", boardID);
 						SendEvent(event);
-						std::cout << "Sent trigger: " << currentTriggerNo-1 << " payload: " << data.size() << std::endl;	
 						data.clear();
 					}
+					data.push_back(element);
 					/*
 					if(currentTriggerNo == TLU_TRIGGER_AMOUNT) {
 						triggerRollover++;
 						std::cout << "ROLLOVER!!" << std::endl;
-					}*/
-					
+					}*/	
 					++currentTriggerNo;//element&(~HIGHEST32BIT);
-
 					//std::cout << "Trigger: " << currentTriggerNo << std::endl;	
 				} else {
 					data.push_back(element);
@@ -70,7 +67,7 @@ void STEUDAQGen3DataSender::monitorBuffer(){
 			waitedGracePeriod = true;
 			std::this_thread::sleep_for(std::chrono::seconds(10));
 		} else if (m_killThread && waitedGracePeriod) {
-			std::cout << "KILLING THREAD - YEAH!!!!!" << std::endl;
+			std::cout << "KILLING THREAD" << std::endl;
 			return;
 		}
 	}

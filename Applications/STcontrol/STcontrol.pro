@@ -104,11 +104,13 @@ contains(DEFINES, WITHEUDAQ) {
   HEADERS += STEUDAQDataSenderInterface.h
   HEADERS += STEUDAQGen2DataSender.h
   HEADERS += STEUDAQGen3DataSender.h
-  
+  HEADERS += STEUDAQGen3RndDataSender.h
+
   SOURCES += STControlProducer.cxx
   SOURCES += STEUDAQGen2DataSender.cxx
   SOURCES += STEUDAQGen3DataSender.cxx
-  
+  SOURCES += STEUDAQGen3RndDataSender.cxx
+
   INCLUDEPATH += $(EUDAQ)/main/include
 
   unix {

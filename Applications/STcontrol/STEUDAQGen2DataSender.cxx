@@ -8,7 +8,7 @@
 #include <iostream>
 #include <bitset>
 
-STEUDAQGen2DataSender::STEUDAQGen2DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr): 
+STEUDAQGen2DataSender::STEUDAQGen2DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr, int boardID): 
 eudaq::Producer(std::move(prodName), rcAddr), 
 m_circBuffVec(circBuffVec),
 m_killThread(false){

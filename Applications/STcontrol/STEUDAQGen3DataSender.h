@@ -18,7 +18,7 @@
 class STEUDAQGen3DataSender: public STEUDAQDataSenderInterface, public eudaq::Producer  {
 
 public:
-	STEUDAQGen3DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr);
+	STEUDAQGen3DataSender(std::string prodName, std::vector<std::shared_ptr<UintCircBuff1MByte>> const & circBuffVec, std::string& rcAddr, int boardID);
 	void OnStartRun(unsigned);
 	void OnStopRun();
 	void OnConfigure(const eudaq::Configuration&);
@@ -30,5 +30,6 @@ private:
 	std::vector<std::shared_ptr<UintCircBuff1MByte>> const & m_circBuffVec;
 	std::atomic<bool> m_killThread;
 	std::atomic<unsigned> m_runNo;
+	int boardID;
 };
 #endif

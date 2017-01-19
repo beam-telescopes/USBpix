@@ -154,10 +154,11 @@ void STControlProducer::OnConfigure(const eudaq::Configuration& config){
 		if(m_dataSenders.find(boardID) == m_dataSenders.end()){ 
 			switch(boardGen) {
 				case PixLib::gen::MIO3:
-					m_dataSenders[boardID] = std::unique_ptr<STEUDAQGen3DataSender>(new STEUDAQGen3DataSender("USBpixGen3_Board"+std::to_string(boardID), controller->getCircularBufferVec(), m_rcAddress));
+					m_dataSenders[boardID] = std::unique_ptr<STEUDAQGen3DataSender>(new STEUDAQGen3DataSender("USBpixGen3_Board"+std::to_string(boardID), controller->getCircularBufferVec(), m_rcAddress, boardID));
+					//m_dataSenders[boardID] = std::unique_ptr<STEUDAQGen3RndDataSender>(new STEUDAQGen3RndDataSender("USBpixGen3_Board"+std::to_string(boardID)+"_rnd", controller->getCircularBufferVec(), m_rcAddress, boardID));
 					break;
 				case PixLib::gen::MIO2:
-					m_dataSenders[boardID] = std::unique_ptr<STEUDAQGen2DataSender>(new STEUDAQGen2DataSender("USBpixGen2_Board"+std::to_string(boardID), controller->getCircularBufferVec(), m_rcAddress));
+					m_dataSenders[boardID] = std::unique_ptr<STEUDAQGen2DataSender>(new STEUDAQGen2DataSender("USBpixGen2_Board"+std::to_string(boardID), controller->getCircularBufferVec(), m_rcAddress, boardID));
 					break;
 				default:
 					//ERROR
