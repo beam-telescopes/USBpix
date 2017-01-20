@@ -28,5 +28,6 @@ private:
 	std::vector<std::shared_ptr<UintCircBuff1MByte>> const & m_circBuffVec;
 	std::atomic<bool> m_killThread;
 	std::atomic<unsigned> m_runNo;
+	int boardID;
 };
 #endif
