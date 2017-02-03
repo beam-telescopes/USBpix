@@ -172,8 +172,8 @@ public:
 	bool CheckDataConsisty(const char * filename, bool attach_data, bool write_summary, int chip_addr);
 	bool WriteToTHisto(const char *filename, int chip_addr);
 	bool WriteConfHisto(const char *filename, int chip_addr);
-	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, int chip_addr);
-	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto, int chip_addr);	// Overloaded to add TLU veto flag
+	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate);
+	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto);	// Overloaded to add TLU veto flag
 	void BuildWords(int chip_addr); // in run mode: makes array of words out of character array
 	bool WriteSRAMWords(char* filename, int chip_addr);
 	bool WriteSRAMBitsFromWords(char *filename, int chip_addr);

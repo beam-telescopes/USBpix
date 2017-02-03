@@ -47,7 +47,7 @@
 
 #include <cassert>
 
-#define UPC_DEBUG_GEN 1
+#define UPC_DEBUG_GEN 0
 #define UPC_DEBUG_FLAGS 0 
 
 using namespace PixLib;
@@ -599,10 +599,7 @@ void USBPixController::initHWSingleBoard()
 	if(m_BoardHandle[0] != 0) {
     m_chipIds.clear();
     const int dummyChipId = 999;
-		if(m_USBpix==NULL) m_USBpix = new USBpix(dummyChipId, 0, 
-				m_BoardHandle[0], true, m_BoardHandle[1], 
-				dummyChipId, m_MultiChipWithSingleBoard);
-    
+		if(m_USBpix==NULL) m_USBpix = new USBpix(dummyChipId, 0, m_BoardHandle[0], true, m_BoardHandle[1], dummyChipId, m_MultiChipWithSingleBoard);
 		else m_USBpix->SetUSBHandles(m_BoardHandle[0], m_BoardHandle[1]);
   
     m_USBpix->SetAdapterCardFlavor(m_AdapterCardFlavor&0x1);
@@ -2488,72 +2485,54 @@ try {
 		// to do : check if the displayed quantities can be revised for >1 FE
 		int collectedTriggersTotal = 0;
 
-		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: We have:" << m_chipIds.size() << " chips!" << endl;
+		//if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: We have:" << m_chipIds.size() << " chips!" << endl;
 
-		for (std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++){
-			// stop loop if no more meaningful chip IDs or after 1st chip if in multichip mode (always have one board then!)
-			if(*it==999 || (m_MultiChipWithSingleBoard && it != m_chipIds.begin())) break;
-			if(UPC_DEBUG_GEN) cout << "DEBUG USBPixCtrl: m_USBpix->GetSourceScanStatus() board with chip ID " << (*it) << endl;
 			bool measurementRunning = true;
 			int sramFillLevel=0, collectedTriggers=0, triggerRate=0, eventRate=0;
 	
-			m_USBpix->GetSourceScanStatus(m_sramFull, measurementRunning, sramFillLevel, collectedTriggers, triggerRate, eventRate, m_tluVeto, *it);		// added m_tluVeto
+			m_USBpix->GetSourceScanStatus(m_sramFull, measurementRunning, sramFillLevel, collectedTriggers, triggerRate, eventRate, m_tluVeto);		// added m_tluVeto
 	
 			m_measurementRunning |= measurementRunning;
-			// 	if(m_sramFillLevel > sramFillLevel) m_sramFillLevel = sramFillLevel;
-			// 	if(m_triggerRate < triggerRate) m_triggerRate = triggerRate;
-			// 	if(m_eventRate < eventRate) m_eventRate = eventRate;
-			// 	collectedTriggersTotal += collectedTriggers;
+
 			if(!measurementRunning && !m_testBeamFlag /* && m_sramReadoutReady*/) { // TODO
-				if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: MeasRunning(" << (*it) << ") = false => reading SRAM..."<<endl;
 	  		m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
 	  		m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
 	  		m_SourceScanEventQuantity = 0;
-	  		m_USBpix->ReadSRAM(*it);
-	  		if(m_MultiChipWithSingleBoard){
-	      	if(m_fillSrcHistos)	m_USBpix->FillHistosFromRawData(*it);
-					for(auto chipID: m_chipIds) {
-		  			writeRawDataFile(false, chipID);
-					}
-				// USBpix somehow doesn't make use of chipID in MutliChip mode
-				if(m_fillClusterHistos) ClusterRawData(*it);
-	    	} else {
-	      	if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData(*it);
-					writeRawDataFile(false, *it);
-					//DLP
-					if(m_fillClusterHistos)	ClusterRawData(*it);
-	    	}
-	  
-				m_USBpix->ClearSRAM(*it);
+				
+				for(auto chipID: m_chipIds) {
+					m_USBpix->ReadSRAM(chipID);
+					if(m_fillSrcHistos)	m_USBpix->FillHistosFromRawData(chipID);
+		  		writeRawDataFile(false, chipID);
+					if(m_fillClusterHistos)	ClusterRawData(chipID);
+				}
+
+				for(auto chipID: m_chipIds) {
+					m_USBpix->ClearSRAM(chipID);
+				}
+
 			} else if(measurementRunning  && !m_testBeamFlag && (m_sramFull || m_tluVeto) ){ // when using TLU, TLU veto seems to be raised before SRAM full flag, so must trigger on the former
-				if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: SRAMFull(" << (*it) << ") => reading SRAM..."<<endl;
 	  		int tbefore = clock()/CLOCKS_PER_SEC;
 	  		int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
 	  		m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
 	  		m_USBpix->PauseMeasurement();
-	  		m_USBpix->ReadSRAM(*it);
-	  		int tafter = clock()/CLOCKS_PER_SEC;
-	 			m_srcSecStart += tafter-tbefore;
-				if(m_MultiChipWithSingleBoard) {
-					if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData(*it);
-					for (auto chipID: m_chipIds) {
-						writeRawDataFile(false, chipID);
-					}
-					// USBpix somehow doesn't make use of chipID in MutliChip mode
-					if(m_fillClusterHistos) ClusterRawData(*it);
-	    	} else {
-					if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData(*it);
-					writeRawDataFile(false, *it);
-					//DLP
-					if(m_fillClusterHistos) ClusterRawData(*it);
-	    	}
-	  
-				m_USBpix->ClearSRAM(*it);
+				int tafter = clock()/CLOCKS_PER_SEC;
+				m_srcSecStart += tafter-tbefore;
+
+				for(auto chipID: m_chipIds) {	
+					m_USBpix->ReadSRAM(chipID);
+					if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData(chipID);
+					writeRawDataFile(false, chipID);
+					if(m_fillClusterHistos) ClusterRawData(chipID);
+				}
+
+				for(auto chipID: m_chipIds) {
+					m_USBpix->ClearSRAM(chipID);
+				}
+
 	  		m_USBpix->ResumeMeasurement();
 	  		m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
 	  		//m_USBpix->StartReadout();
 			} else if(measurementRunning  && m_testBeamFlag && (m_sramFull || m_tluVeto) || (!measurementRunning  && m_testBeamFlag)) {
-				if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: Testbeam(" << (*it) << ") => reading SRAM..."<<endl;
 				m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
 	  		m_USBpix->PauseMeasurement();
 				if(!measurementRunning) {
@@ -2566,54 +2545,47 @@ try {
 				auto ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
 				//for(auto it = m_chipIds.begin(); it != m_chipIds.end(); it++) {
 				// stop loop if no more meaningful chip IDs
-				if(*it==999) {	
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::sourceScan: no meaningfull ID" << std::endl;
-					break;
-				}
 
-				m_USBpix->ReadSRAM(*it);
+				for(auto it =  m_chipIds.begin(); it !=  m_chipIds.end();  ++it) {
 
-				if(!m_ringbuffersInit) {
-					for(size_t idx = 0; idx < m_chipIds.size(); ++idx){
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::sourceScan: Creating ringbuffer for FE: " << it - m_chipIds.begin() << std::endl;
-					m_circularBuffer.emplace_back(std::make_shared<UintCircBuff1MByte>());
+					if(*it==999){	
+						if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
+						break;
 					}
-				}
-				if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::sourceScan: Copying data"<<std::endl;
-				unsigned int* di = new unsigned int[data_size];
-				m_USBpix->GetSRAMWordsRB(di, data_size, it - m_chipIds.begin());
 
-        for(size_t index = 0; index < data_size; ++index){
-					if(di[index] == 0) break;
-					std::cout << "Data from channel: " << it - m_chipIds.begin() << " is: " << di[index] << std::endl;
-					m_circularBuffer[it - m_chipIds.begin()]->push(di[index]);
-				}
-				delete[] di;
+					m_USBpix->ReadSRAM(*it);
 
-        if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData(*it);
+					if(!m_ringbuffersInit) {
+						for(size_t idx = 0; idx < m_chipIds.size(); ++idx){
+							if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::sourceScan: Creating ringbuffer for FE: " << m_chipIds.at(idx) << std::endl;
+							m_circularBuffer.emplace_back(std::make_shared<UintCircBuff1MByte>());
+						}
+						m_ringbuffersInit=true;
+					}
+					
+					unsigned int* di = new unsigned int[data_size];
+					m_USBpix->GetSRAMWordsRB(di, data_size, it - m_chipIds.begin());
+
+					for(size_t index = 0; index < data_size; ++index){
+						if(di[index] == 0) break;
+						m_circularBuffer[it - m_chipIds.begin()]->push(di[index]);
+					}
+					
+					delete[] di;
+					if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData(*it);
+					writeRawDataFile(false, *it);
+					if(m_fillClusterHistos) ClusterRawData(*it);
+				}
+
+				for(auto chipID: m_chipIds) {
+					m_USBpix->ClearSRAM(chipID);
+				}
 				
-				writeRawDataFile(false, *it);
-
-				if(m_fillClusterHistos){
-					ClusterRawData(*it);
-				}
-
-				m_ringbuffersInit=true;
-
-				//clear SRAM loop
-				//for(std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++){
-        
-				// stop loop if no more meaningful chip IDs
-				if(*it==999){	
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
-					break;
-				}
-				m_USBpix->ClearSRAM(*it);
 	  		m_USBpix->ResumeMeasurement();
 	  		m_USBpix->WriteRegister(CS_ENABLE_RJ45, true);
 			}
 			sleep(500);
-    }
+    
 		if ((m_SourceScanEventQuantity != 0) && (collectedTriggersTotal >= m_SourceScanEventQuantity)){
 			if(UPC_DEBUG_GEN) cout<<"DEBUG: reached event limit, stopping scan" << std::endl;
 			stopScan();
@@ -3341,20 +3313,16 @@ int USBPixController::nTrigger() {                 //! Returns the number of tri
 // 			}
 			// to do : check if the displayed quantities can be revised for >1 FE
 			int collectedTriggersTotal=0;
-			for (std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++){
-			        // stop loop if no more meaningful chip IDs or after 1st chip if in multichip mode (always have one board then!)
-			        if(*it==999 || (m_MultiChipWithSingleBoard && it != m_chipIds.begin())) break;
-				if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->GetSourceScanStatus() board with chip ID "<< (*it) << endl;
+
 				bool measurementRunning=true, tluVeto, sramFull;
 				int sramFillLevel=0, collectedTriggers=0, triggerRate=0, eventRate=0;
-				m_USBpix->GetSourceScanStatus(sramFull, measurementRunning, sramFillLevel, collectedTriggers, triggerRate, eventRate, tluVeto, *it);
+				m_USBpix->GetSourceScanStatus(sramFull, measurementRunning, sramFillLevel, collectedTriggers, triggerRate, eventRate, tluVeto);
 
 // 				m_measurementRunning |= measurementRunning;
 				if(m_sramFillLevel > sramFillLevel) m_sramFillLevel = sramFillLevel;
 				if(m_triggerRate < triggerRate) m_triggerRate = triggerRate;
 				if(m_eventRate < eventRate) m_eventRate = eventRate;
 				collectedTriggersTotal += collectedTriggers;
-			}
 
  			if(m_collectedTriggers < collectedTriggersTotal)
  				m_collectedTriggers = collectedTriggersTotal;

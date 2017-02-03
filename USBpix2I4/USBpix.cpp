@@ -1540,16 +1540,14 @@ bool USBpix::WriteConfHisto(const char *filename, int chip_addr)
 	return false;
 }
 
-void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, int chip_addr)
+void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
     confReg1->GetSourceScanStatus(SRAMFull, MeasurementRunning, SRAMFillLevel, CollectedEvents, TriggerRate, EventRate);
 }
 
 // overloaded to add TLU veto flag while keeping compatability
-void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto, int chip_addr)
+void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
     confReg1->GetSourceScanStatus(SRAMFull, MeasurementRunning, SRAMFillLevel, CollectedEvents,
                 TriggerRate, EventRate, TluVeto);
 }
