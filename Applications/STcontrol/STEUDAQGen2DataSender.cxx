@@ -28,26 +28,55 @@ void STEUDAQGen2DataSender::monitorBuffer(){
 	std::map<int,std::vector<uint32_t>> dataMap;
 	std::map<int,int> triggerMap;
 
-	triggerMap[0] = -1;
+	bool sendEvents = false;
+	size_t finishedEvents = 0;
 
 	while(true){
 		std::cout << "Monitoring ... buffer has size: " << m_circBuffVec.size() << std::endl;
 
+		bool initialized = false;
+
+		std::vector<eudaq::RawDataEvent> eudaqEvtVec;
+
 		for(size_t bufferIdx = 0;  bufferIdx < m_circBuffVec.size(); ++bufferIdx) {
+			std::cout << "Entered loop for buffer: " << bufferIdx << std::endl;
+
+			if(!initialized) {
+				for(size_t ix = 0;  ix < m_circBuffVec.size(); ++ix) {
+					triggerMap[ix] = -1;
+				}
+				initialized = true;
+			}
+
 			auto& buffer = m_circBuffVec[bufferIdx];
 			uint32_t element;
-			auto& data = dataMap[0];
-			auto currentTriggerNo =  triggerMap.at(0);
+			auto& data = dataMap[bufferIdx];
+			auto currentTriggerNo =  triggerMap.at(bufferIdx);
+
+			size_t internalTriggerCounter = 0;
+
+			auto getEudaqEvt = [&]() -> eudaq::RawDataEvent&  {
+				if(bufferIdx == 0) {
+					eudaqEvtVec.emplace_back("USBPIX_GEN2", m_runNo, currentTriggerNo-1);
+					eudaq::RawDataEvent& event = eudaqEvtVec.back();
+					std::cout << "Added event for trigger: " << currentTriggerNo-1 << std::endl;
+					event.SetTag("board", boardID);
+					return event;
+				} else {
+					std::cout << "Retrieved event for trigger: " << currentTriggerNo-1 << " at local coordinate: " << internalTriggerCounter << "for buffer: " << bufferIdx << std::endl;
+					if(bufferIdx+1 == m_circBuffVec.size()) ++finishedEvents;
+					return eudaqEvtVec.at(internalTriggerCounter);
+				}
+			};
 
 			while(buffer->pop(element)) {
-				std::cout << "Popped element: " << std::bitset<32>(element) << " from buffer: " << bufferIdx << std::endl;
+				//std::cout << "Popped element: " << std::bitset<32>(element) << " from buffer: " << bufferIdx << std::endl;
 	      		if( TRIGGER_WORD_MACRO(element) ){
-					//in case we get a new trigger, we need to send the old data to eudaq, but only if it's not the first trigger
+					//in case we get a new trigger, we need to attach the old data to the eudaq event, but only if it's not the first trigger
 					if(currentTriggerNo!=-1){
-						eudaq::RawDataEvent event("USBPIX_GEN2", m_runNo, currentTriggerNo-1);
-						event.AddBlock(0, data);
-						event.SetTag("board", boardID);
-						SendEvent(event);
+						eudaq::RawDataEvent& event = getEudaqEvt();
+						++internalTriggerCounter;
+						event.AddBlock(bufferIdx, data);
 						data.clear();
 						//std::cout << "Sent trigger: " << currentTriggerNo-1 << std::endl;
 					}
@@ -69,8 +98,18 @@ void STEUDAQGen2DataSender::monitorBuffer(){
 				}
 			}
 			//std::cout << "Next trigger to be sent should be: " << currentTriggerNo-1 << std::endl;
-			triggerMap[0] = currentTriggerNo;
+			triggerMap[bufferIdx] = currentTriggerNo;
 		}
+
+		for(size_t counter = 0; counter < finishedEvents; counter++){
+				SendEvent(eudaqEvtVec.at(counter));
+				
+		} 
+		if( finishedEvents != 0 ) {
+			eudaqEvtVec.erase(eudaqEvtVec.begin(), eudaqEvtVec.begin()+finishedEvents);
+			finishedEvents = 0;
+		}
+
 		//	std::this_thread::yield();
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		if(m_killThread && !waitedGracePeriod){
