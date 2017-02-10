@@ -75,9 +75,10 @@ void STEUDAQGen2DataSender::monitorBuffer(){
 						std::cout << "PANIC PANIC PANIC!!!!" << std::endl;
 						std::cout << "PANIC PANIC PANIC!!!!" << std::endl;
 						std::cout << "PANIC PANIC PANIC!!!!" << std::endl;
+						nextElement = 0;
 					}
-					//data->emplace_back(element)
-					//data->emplace_back(nextElement)
+					data->emplace_back(element);
+					data->emplace_back(nextElement);
 				} else {
 					//std::cout << "Found other data" << std::endl;
 					data->emplace_back(element);
