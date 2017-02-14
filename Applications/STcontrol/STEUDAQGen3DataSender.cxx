@@ -30,7 +30,7 @@ void STEUDAQGen3DataSender::monitorBuffer(){
 	//std::cout << "Sent BORE" << std::endl;
 
 	std::vector<uint32_t> data;
-	int currentTriggerNo = 0;
+	int currentTriggerNo = -1;
 	int triggerRollover = 0;	
 
 	while(true){
@@ -40,7 +40,7 @@ void STEUDAQGen3DataSender::monitorBuffer(){
 			while(buffer->pop(element)) {
 				//In case the highest bit is set it is a trigger
 				if( element >> 31 ) {
-					if(currentTriggerNo != 0) {
+					if(currentTriggerNo != -1) {
 						//eudaq::RawDataEvent event("USBPIX_GEN3", m_runNo, currentTriggerNo-1+TLU_TRIGGER_AMOUNT*triggerRollover+triggerRollover);
 						eudaq::RawDataEvent event("USBPIX_GEN3", m_runNo, currentTriggerNo);
 						event.AddBlock(0, data);
