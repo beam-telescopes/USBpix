@@ -940,7 +940,7 @@ void USB3PixController::sourceScan(int max_event, int trigger_type, int count_ty
   try{
 	Readout r([&](void) {
 		current_scan->dec.decode(board->getData(),
-		[this](uint32_t a){ m_circularBuffer.front()->push(a); }
+					 [this](uint32_t a){ if(!(m_circularBuffer.front()->push(a))){ std::cout << "USB3PixController: ERROR - BUFFER OVERFLOW!" << std::endl; }}
 	); }, m_readoutInterval);
 
 	CommandBuffer c;
