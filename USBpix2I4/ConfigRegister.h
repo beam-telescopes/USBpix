@@ -44,7 +44,7 @@ struct DllExport StrbOutputGate {
 class DllExport ConfigRegister {
 
 public:
-	ConfigRegister(SiUSBDevice * Handle, bool isFEI4B, bool MultiChipWithSingleBoard);
+        ConfigRegister(SiUSBDevice * Handle, bool isFEI4B);
 	~ConfigRegister();
 
 public:
@@ -219,7 +219,6 @@ private:
 
 	void write_debug_file();
 
-  bool MultiChipWithSingleBoard;
   bool sram_cleared;
   int GetSRAMByteDataOffset(int readout_channel_id);
   int GetSRAMWordDataOffset(int readout_channel_id);

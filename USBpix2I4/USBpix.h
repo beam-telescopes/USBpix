@@ -15,13 +15,13 @@ class DllExport USBpix { //: public ConfigRegister
 
 	// public functions in this class
 public:
-	USBpix(int chip_add_0, int mod_add, SiUSBDevice * Handle0, bool isFEI4B, SiUSBDevice * Handle1 = NULL, int chip_add_1 = 999, bool MultiChipWithSingleBoard = false);
+	USBpix(SiUSBDevice * Handle);
 	~USBpix();
 
 	bool StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int ScanStepSiz, int InjCount, int MaskStepSiz, int MaskStepCount, int ShiftMask, bool all_DCs, bool special_dc_loop, bool singleDCloop);
 	void StartHitORScan();
 
-	void SetUSBHandles(SiUSBDevice * hUSB0, SiUSBDevice * hUSB1); // sets pointers hUSB to correct instances of SiUSBDevice. Needed for Plug'n'Play
+	void SetUSBHandles(SiUSBDevice * hUSB); // sets pointers hUSB to correct instances of SiUSBDevice. Needed for Plug'n'Play
 
 	bool MakeMeFEI4A(); // creates a NEW instance of FE-I4A classes and deletes existing FE-I4B classes. Returns false if FE-I4A class are already existing.
 	bool MakeMeFEI4B(); // creates a NEW instance of FE-I4B classes and deletes existing FE-I4A classes. Returns false if FE-I4B class are already existing.
@@ -40,7 +40,6 @@ public:
 	void setSelCMD(bool on_off);
 	void SetCMDMode(); // sets system to default mode (use CMD...)
 	void WriteCommand(int the_command, int chip_addr, int GlobalPulseLength=10); // sends command to FE, command definition given in defines.h
-  void SetAndWriteCOLPRReg(int colpr_mode, int colpr_addr);
 	void WriteGlobal(int chip_addr); // writes complete global configuration
 	void WriteGlobalSingleReg(int RegisterNumber, int chip_addr); // writes global register number RegisterNumber 
 	void WritePixel(int chip_addr); // writes complete pixel configuration
@@ -69,7 +68,6 @@ public:
 	void GetPixelVarAddVal(int Variable, int& Address, int& Size, int& Value, int latch, int chip_addr); // writes value, bitsize and address of one item of pixel configuration to given addresses
 	//void GetPixelRBVarAddVal(int Variable, int& Address, int& Size, int& Value, int latch, int chip_addr); // writes value, bitsize and address of one item of read-back pixel configuration to given addresses
 	void GetPixelRBVarAddVal(int Variable, int& Address, int& Size, int& Value, int latch, bool bypass, int chip_addr);
-	void SetChipAdd(int new_chip_add, int chip_addr); // sets chip address
 	void SetChipAddByIndex(int new_chip_add, int chip_index); // sets chip address, given the index of the chip (only for single board readout)
 	void SendReadErrors(int chip_addr); // sends a global pulse to read error counters
 	void ReadEPROMvalues(int chip_addr); // Sends global pulse to read the values from EPROM to GR.
@@ -127,58 +125,58 @@ public:
 	//void EnablePowerChannel(bool on_off, int channel); // disables/enables power channel number "channel", channel defined in defines.h
 	void stopXCK(bool status);
 	void SetAuxClkFreq(int freq); // sets auxiliary clk frequency to 40 MHz / n. n is 1 for freq = 0, 2 for freq[0] = 1, 4 for freq[0] = 0 && freq[1] = 1, 8 for freq[0] = 0 && freq[1] = 0 && freq[2] = 1, ...
-	void incr_phase_shift(int chip_addr); // increments incoming data synchronization by 1/256 clock duration
-	void decr_phase_shift(int chip_addr); // decrements incoming data synchronization by 1/256 clock duration
-	bool check_phase_shift_overflow(int chip_addr); // checks for overflow of phase shift
-	double StartSyncCheck(double min_BitErrorRate, int chip_addr); // starts synchro checker until min_BitErrorRate was achieved
-	bool StartSyncScan(double min_BitErrorRate, int chip_addr);  // Scans for opimal Sync clk-phase 
-	void StoreSyncCheckPattern(int chip_addr); // stores new SyncCheckPattern
-	void ResetSyncCheckPattern(int chip_addr); // resets SyncCheckPattern
-	void ResetSRAMCounter(int chip_addr); // set SRAM address to 0
-	void SetSRAMCounter(int startadd, int chip_addr); // set RAM address to any value
-	void ReadSRAM(int chip_addr); // reads complete SRAM, further data handling dependent on system mode
-	void ReadSRAM(int scan_nr, int chip_addr); // reads complete SRAM, further data handling dependent on system mode and fills correct scansteps of ConfData
-	void ReadSRAM(int StartAdd, int NumberOfWords, int chip_addr); // reads SRAM partially
-	void ClearSRAM(int chip_addr); // clears SRAM
-	void WriteSRAM(int StartAdd, int NumberOfWords, int chip_addr); // writes SRAM, only for debugging purposes needed
+	void incr_phase_shift(); // increments incoming data synchronization by 1/256 clock duration
+	void decr_phase_shift(); // decrements incoming data synchronization by 1/256 clock duration
+	bool check_phase_shift_overflow(); // checks for overflow of phase shift
+	double StartSyncCheck(double min_BitErrorRate); // starts synchro checker until min_BitErrorRate was achieved
+	bool StartSyncScan(double min_BitErrorRate);  // Scans for opimal Sync clk-phase 
+	void StoreSyncCheckPattern(); // stores new SyncCheckPattern
+	void ResetSyncCheckPattern(); // resets SyncCheckPattern
+	void ResetSRAMCounter(); // set SRAM address to 0
+	void SetSRAMCounter(int startadd); // set RAM address to any value
+	void ReadSRAM(); // reads complete SRAM, further data handling dependent on system mode
+	void ReadSRAM(int scan_nr); // reads complete SRAM, further data handling dependent on system mode and fills correct scansteps of ConfData
+	void ReadSRAM(int StartAdd, int NumberOfWords); // reads SRAM partially
+	void ClearSRAM(); // clears SRAM
+	void WriteSRAM(int StartAdd, int NumberOfWords); // writes SRAM, only for debugging purposes needed
 	void GetConfHisto(int col, int row, int confstep, int &Value, int chip_addr); // writes histogram-value for col, row, step to &Value (needs calibration mode)
 	void GetTOTHisto(int col, int row, int tot, int& Value, int chip_addr);
-	void ClearTOTHisto(int chip_addr);
-	void ClearConfHisto(int chip_addr);
+	void ClearTOTHisto();
+	void ClearConfHisto();
 	void GetHitLV1HistoFromRawData(int LV1ID, int& Value, int chip_addr);
 	void GetLV1IDHistoFromRawData(int LV1ID, int& Value, int chip_addr); // Gets the LV1 COMMAND ID. LV1 COMMAND ID is constant within one LV1 window in FE-I4
 	void GetBCIDHistoFromRawData(int BCID, int& Value, int chip_addr);	 // Gets the BCID histogram.
-	void ClearHitLV1HistoFromRawData(int chip_addr);
-	void ClearLV1IDHistoFromRawData(int chip_addr);
-	void ClearBCIDHistoFromRawData(int chip_addr);
+	void ClearHitLV1HistoFromRawData();
+	void ClearLV1IDHistoFromRawData();
+	void ClearBCIDHistoFromRawData();
 
-	void FillHistosFromRawData(int pChipAddress);
+	void FillHistosFromRawData();
 
 	// cluster histograms
-	void GetClusterSizeHistoFromRawData(int Size, int& Value, int chip_addr);
-	void GetClusterTOTHistoFromRawData(int TOT, int Size, int& Value, int chip_addr);
-	void GetClusterChargeHistoFromRawData(int pCharge, int pSize, int& rValue, int pChipAddr);
-	void GetClusterPositionHistoFromRawData(int pX, int pY, int& rValue, int pChipAddr);
-	void ClearClusterSizeHistoFromRawData(int chip_addr);
-	void ClearClusterTOTHistoFromRawData(int chip_addr);
+	void GetClusterSizeHistoFromRawData(int Size, int& Value);
+	void GetClusterTOTHistoFromRawData(int TOT, int Size, int& Value);
+	void GetClusterChargeHistoFromRawData(int pCharge, int pSize, int& rValue);
+	void GetClusterPositionHistoFromRawData(int pX, int pY, int& rValue);
+	void ClearClusterSizeHistoFromRawData();
+	void ClearClusterTOTHistoFromRawData();
 
-	bool ClusterRawData(int pChipAddress, int pColumnRange, int pRowRange, int pTimeRange, int pMinClusterSize, int pMaxClusterSize, int pMaxHitTot, int pMaxEventsIncomplete, int pMaxEventsErrors);	//takes the raw data, converts data to hits and clusters the hits DLP
-	void ResetClusterCounters(int pChipAddress);	//resets the trigger counter, set at the beginning of a source scan DLP
-	void SetChargeCalib(int pChipAddress, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge);	//sets the charge calibration for the clusterizer DLP
+	bool ClusterRawData(int pColumnRange, int pRowRange, int pTimeRange, int pMinClusterSize, int pMaxClusterSize, int pMaxHitTot, int pMaxEventsIncomplete, int pMaxEventsErrors);	//takes the raw data, converts data to hits and clusters the hits DLP
+	void ResetClusterCounters();	//resets the trigger counter, set at the beginning of a source scan DLP
+	void SetChargeCalib(unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge);	//sets the charge calibration for the clusterizer DLP
 
-	bool WriteFileFromRawData(std::string filename, int chip_addr, bool new_file, bool close_file); // new raw data format, human & machine readable file format
-  void FinishFileFromRawData(std::string filename);
-	bool FileSaveRB(const char *filename, int event_quant, bool attach_data, int chip_addr); // old raw data format
-	bool CheckDataConsisty(const char * filename, bool attach_data, bool write_summary, int chip_addr);
-	bool WriteToTHisto(const char *filename, int chip_addr);
-	bool WriteConfHisto(const char *filename, int chip_addr);
+	bool WriteFileFromRawData(std::string filename, bool new_file, bool close_file); // new raw data format, human & machine readable file format
+	void FinishFileFromRawData(std::string filename);
+	bool FileSaveRB(const char *filename, int event_quant, bool attach_data); // old raw data format
+	bool CheckDataConsisty(const char * filename, bool attach_data, bool write_summary);
+	bool WriteToTHisto(const char *filename);
+	bool WriteConfHisto(const char *filename);
 	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate);
 	void GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto);	// Overloaded to add TLU veto flag
-	void BuildWords(int chip_addr); // in run mode: makes array of words out of character array
-	bool WriteSRAMWords(char* filename, int chip_addr);
-	bool WriteSRAMBitsFromWords(char *filename, int chip_addr);
-	bool WriteSRAMBytes(char* filename, int chip_addr);
-	bool WriteSRAMBitsFromBytes(char *filename, int chip_addr);
+	void BuildWords(); // in run mode: makes array of words out of character array
+	bool WriteSRAMWords(char* filename);
+	bool WriteSRAMBitsFromWords(char *filename);
+	bool WriteSRAMBytes(char* filename);
+	bool WriteSRAMBitsFromBytes(char *filename);
 	void GetSystemMode(bool &CalMode, bool &TOTMode);
 	void SetMeasurementMode(int mode); // selects which events to count (LV1, DH, DR...)
 	void StartMeasurement();
@@ -186,56 +184,53 @@ public:
 	void PauseMeasurement();
 	void ResumeMeasurement();
 	void SetNumberOfEvents(int data);
-    void SetSramReadoutThreshold(int value);    // threshold in percent
-    bool GetTluVetoFlag();                      // readback TLU veto state
+	void SetSramReadoutThreshold(int value);    // threshold in percent
+	bool GetTluVetoFlag();                      // readback TLU veto state
 	int GetCountedEvents();
 	void GetScanStatus(bool & scanReady, bool & scanCancelled, bool & scanError, int & scanStep);
 	void SetScanReady();
 	void SetScanCancelled();
 	void SetScanError();
 	void ResetScanStatus();
-	int GetCurrentPhaseshift(int chip_addr);
-	void SetCurrentPhaseshift(int value, int chip_addr);
+	int GetCurrentPhaseshift();
+	void SetCurrentPhaseshift(int value);
 	bool CheckRX0State();
 	bool CheckRX1State();
 	bool CheckRX2State();
 	bool CheckExtTriggerState();
-	void GetSyncScanResult(double* dataX, double* dataY, int size, int chip_addr);
+	void GetSyncScanResult(double* dataX, double* dataY, int size);
 	void GetSRAMWordsRB(unsigned int* data, int size, int chip_addr);
 	void EnableManEnc(bool on_off);
 	void SetManEncPhase(int phase);
-  size_t ConvertChipAddrToIndex(int chip_addr);
-  void StartReadout();
-  void StopReadout();
-  void SetAdapterCardFlavor(int flavor);
-  void ResetReadoutStatusRegisters();
+	size_t ConvertChipAddrToIndex(int chip_addr);
+	void StartReadout();
+	void StopReadout();
+	void SetAdapterCardFlavor(int flavor);
+	void ResetReadoutStatusRegisters();
 
 public:
   std::vector<int> ReadoutChannelAssoc;
   void resetReadoutChannelAssoc();
 
 private:
-	SiUSBDevice * myUSB0;
+  SiUSBDevice * myUSB;
   std::vector<ConfigFEMemory *> confFEMem;
   ConfigFEMemory * confFEBroadcast;
 
   std::vector<int> myChipAdd;
 
-	int myModAdd;
-
-	bool FEI4B;	// is set true in constructor if the chip os flavour FE-I4B...
-
-	bool FEI4Aexisting;
-	bool FEI4Bexisting;
-
-	bool MultiChipWithSingleBoard;
+  bool FEI4B;	// is set true in constructor if the chip os flavour FE-I4B...
+  
+  bool FEI4Aexisting;
+  bool FEI4Bexisting;
+  
   bool isTot14SuppressionRequired();
 
 public:
   std::vector<ReadoutStatusRegister *> readoutStatusRegisters;
   MemoryArbiterStatusRegister * memoryArbiterStatusRegister;
 
-	ConfigRegister * confReg1;
+  ConfigRegister * confReg;
 
   int detectReadoutChannel(int chip_addr);
   bool autoDetectReadoutChannels();

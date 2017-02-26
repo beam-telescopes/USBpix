@@ -22,8 +22,7 @@
 class DllExport ConfigFEMemory {
 
 public:
-  ConfigFEMemory(int c_add, int m_add, SiUSBDevice * Handle, 
-    ConfigRegister * cR, bool isFEI4B, int index = 0);
+  ConfigFEMemory(int c_add, SiUSBDevice * Handle, ConfigRegister * cR, bool isFEI4B, int index = 0);
 	~ConfigFEMemory();
 
 public:
@@ -68,6 +67,7 @@ public:
 	void ReadEPROMvalues(); // Sends global pulse to read the values from EPROM to GR.
 	void BurnEPROMvalues(); // Burns to the EPROM whatever is stored in GR. Note that burning a 1 is non reversibel!
 	bool ReadGADC(int GADCselect); // Configures chip to read value of "voltage_select" and sends global pulse to load GADC to GR40. True if ok, false if fail, esp. if called on FE-I4A!
+	void SetAndWriteCOLPRReg(int colpr_mode, int colpr_addr);
 
 	//void GetConfValue(int col, int row, int step, int &Value);	//writes histogram-value for col, row, step to &Value (needs calibration mode)
 	//void GetTOTHistoValue(int col, int row, int tot, int &Value);

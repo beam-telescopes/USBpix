@@ -9,9 +9,6 @@
 // This is the PixController class for the Bonn USB system.
 //
 
-// @todo: Carefully replace the NBOARDS_MAX where appropriate with
-// m_chipIds vector references.
-
 #include <string.h>
 #include <time.h>
 
@@ -53,10 +50,6 @@
 using namespace PixLib;
 using namespace std;
 
-// m_chipIds previously was an array, is now a vector and should therefore be 
-// initialized with two entries for multi board operation.
-const int initial_chip_ids = 2;
-
 const int RCA_AUTO = -2;
 const int RCA_AUTOSAVE = -1;
 
@@ -82,8 +75,7 @@ PixController(modGrp, dbInquire, gen::MIO2), m_readoutChannelReadsChip(4), m_rin
 	  for (int i = 1; i < 4; i++) m_readoutChannelInput[i] = 0;
 	}
 
-	for(int ib=0;ib<NBOARDS_MAX;ib++)
-		m_BoardHandle[ib] = NULL;
+	m_BoardHandle = NULL;
 	m_USBpix = NULL;
 	m_upcScanBusy = false;
 	m_upcScanInit = false;
@@ -112,13 +104,13 @@ PixController(modGrp, gen::MIO2), m_readoutChannelReadsChip(4) { //! Constructor
 	if((m_AdapterCardFlavor&0x1)==0){ // std. adapter card: no 4-FE-option, so force all related items to default
 	  m_readoutChannelInput[0] = 1;
 	  for (int i = 1; i < 4; i++) m_readoutChannelInput[i] = 0;
+	  m_MultiChipWithSingleBoard = false;
 	} else {
 	  m_MultiChipWithSingleBoard = (m_AdapterCardFlavor==1); // multi-chip mode only for BIC if selected so (m_AdapterCardFlavor==3 is FE-by-fe)
-	  m_AdapterCardFlavor = 1; // FE-by-FE mode was 3 which is otherwise not handles
+	  m_AdapterCardFlavor = 1; // FE-by-FE mode was 3 which is otherwise not handled
 	}
 	m_USBpix = NULL;
-	for(int ib=0;ib<NBOARDS_MAX;ib++)
-		m_BoardHandle[ib] = NULL;
+	m_BoardHandle = NULL;
 	m_upcScanBusy = false;
 	m_upcScanInit = false;
 	m_upcScanCancelled = false;
@@ -139,15 +131,12 @@ PixController(modGrp, gen::MIO2), m_readoutChannelReadsChip(4) { //! Constructor
 
 USBPixController::~USBPixController(){
   delete m_USBpix;
-  for(int ib=0;ib<NBOARDS_MAX;ib++)
-    delete (m_BoardHandle[ib]);
+  delete m_BoardHandle;
   delete m_conf;
 }
 
 void USBPixController::initChipIds()
 {
-  m_chipIds.resize(initial_chip_ids);
-  std::fill(m_chipIds.begin(), m_chipIds.end(), 999);
 }
 
 void USBPixController::configInit(){
@@ -159,10 +148,8 @@ void USBPixController::configInit(){
 	// Group general
 	conf.addGroup("general");
 
-	conf["general"].addInt("BoardID", m_boardID[0], -1,
+	conf["general"].addInt("BoardID", m_boardID, -1,
 		"ID of (master) board to use - leave at -1 to take any", true);
-	conf["general"].addInt("Board2ID", m_boardID[1], -1,
-		"ID of slave board to use - leave at -1 to not use slave board", true);
 	conf["general"].addString("FirmwareFile", m_FPGA_filename, "C:/USBPix/configs/usbpix.bit",
 				  "FPGA firmware file name", true, 1);
 	conf["general"].addString("uCFirmwareFile", m_uC_filename, "",
@@ -197,13 +184,13 @@ void USBPixController::configInit(){
 	conf["general"].addBool("EnableSCAStrobePin", m_enableSCAStrobePin, false, "Enable SCA Strobe Pin", true);
 	conf["general"].addInt("AdapterCardFlavor",m_AdapterCardFlavor, 0,
 		"set adapter card flavor", true);
-	conf["general"].addInt("FEToRead", m_feToRead, 4, "FE Number to read", true);
+	conf["general"].addInt("FEToRead", m_feToRead, 4, "FE Number to read", false);
 	conf["general"].addBool("enaManCode", m_enaManCode, false, "enable Machnester Coding", true);
 	conf["general"].addInt("manCodePhase", m_manCodePhase, 0, "Clk phase when Manchester coding is used", true);
 	conf["general"].addBool("MultiChipWithSingleBoard", 
 			m_MultiChipWithSingleBoard, true, 
 			"Use only a single USBpix unit to read out multiple "
-			"chips as opposted to multiple parallel units.", true);
+			"chips as opposted to multiple parallel units.", false);
 	conf["general"].addBool("OverrideEnableDemux", 
 			m_OverrideEnableDemux, false, 
 			"Always enable demux settings, even if other logic decides against it.",
@@ -387,282 +374,133 @@ void USBPixController::configInit(){
 }
 
 // ***************** Board functionality **************
-void USBPixController::initHWMultipleBoards()
+void USBPixController::initHW()
 {
-	for(unsigned int ib=0;ib<NBOARDS_MAX;ib++){
-		if (ib < m_chipIds.size())
-			m_chipIds.at(ib) = 999;	
-		if(ib==0 ||  m_boardID[ib]>=0) {
-			if(m_BoardHandle[ib]==0){
-				if(UPC_DEBUG_GEN) cout<<"INFO: Creating SiUSBDevice" << endl;
-				m_BoardHandle[ib] = new SiUSBDevice(0);
-				if(UPC_DEBUG_GEN) cout<<"INFO: m_BoardHandle["<<ib<<"] = "<<m_BoardHandle[ib]<<endl;
-			}
-
-			if (m_BoardHandle[ib] != 0) {
-				if (ib < m_chipIds.size())
-					m_chipIds.at(ib) = ib; // default value to start with
-				updateDeviceHandle();
-
-				// check flavour of actually present adapter board and compare with config. setting - throw exception if inconsistent
-				int adapType = detectAdapterCard(ib);
-				if(UPC_DEBUG_GEN) cout<<"INFO: Detected adapter type="<< adapType<<endl;
-				if(adapType<0) throw USBPixControllerExc(USBPixControllerExc::INIT_ERROR, PixControllerExc::ERROR, getCtrlName(), m_boardID[ib]); 
-				if(m_AdapterCardFlavor!=adapType){
-				  m_AdapterCardFlavor=adapType;
-				  int nmod = 0;
-				  for(PixModuleGroup::moduleIterator MI=m_modGroup.modBegin(); MI!=m_modGroup.modEnd(); MI++) nmod++;
-				  m_MultiChipWithSingleBoard = (m_AdapterCardFlavor==0x1 && nmod==1); // BIC with one module -> multi-FE-operation
-				  throw USBPixControllerExc(USBPixControllerExc::WRONG_ADAPTER, PixControllerExc::ERROR, getCtrlName(), m_boardID[ib]); 
-				}
-
-				// write uC firmware
-				if(m_uC_filename!=""){
-					if(UPC_DEBUG_GEN) cout<<"Processing uC firmware" << endl;
-					FILE *g=0;
-#ifdef CF__LINUX
-					g = fopen(m_uC_filename.c_str(),"r");
-#else
-					fopen_s(&g, m_uC_filename.c_str(),"r");
-#endif
-					if(g==0){
-						if(UPC_DEBUG_GEN) cout<<"ERROR: uC bix file doesn't exist"<<endl;
-						throw USBPixControllerExc(USBPixControllerExc::FILE_ERROR, PixControllerExc::ERROR, getCtrlName()); 
-					} else
-						fclose(g);
-					if(!m_BoardHandle[ib]->LoadFirmwareFromFile(m_uC_filename.c_str())){
-						if(UPC_DEBUG_GEN) cout<<"ERROR: uC didn't configure"<<endl;
-						throw USBPixControllerExc(USBPixControllerExc::UC_ERROR, PixControllerExc::ERROR, getCtrlName()); 
-					}
-					// update device list until board has disappered
-					int iw=0;
-					const int iwmax=500;
-					while(!OnDeviceChange() && iw<iwmax){
-						if(UPC_DEBUG_GEN) cout <<"INFO: waiting for device to disappear from list, iteration " << iw << endl;
-						iw++;
-						sleep(50);
-					}
-					// get new handle as soon as uC is ready again
-					iw=0;
-					void *tempHandle=0;
-					while(tempHandle==0 && iw<iwmax){
-						if(OnDeviceChange()) tempHandle = GetUSBDevice(m_boardID[ib]);
-						if(UPC_DEBUG_GEN) cout <<"INFO: waiting for device to be back, iteration " << iw << endl;
-						iw++;
-						sleep(50);
-					}
-					// set handle again
-					if(tempHandle!=0){
-						m_BoardHandle[ib]->SetDeviceHandle(tempHandle);
-						if(UPC_DEBUG_GEN) cout <<"INFO: after uC load - found "<< m_BoardHandle[ib] << " - " << m_BoardHandle[ib]->GetName() << " with ID " << 
-							m_BoardHandle[ib]->GetId() << " and FW " << m_BoardHandle[ib]->GetFWVersion() << endl;
-					} else{
-						if(UPC_DEBUG_GEN) cout<<"ERROR: no board handle found after uC load..."<<endl;
-						throw USBPixControllerExc(USBPixControllerExc::NOBOARD, PixControllerExc::FATAL, getCtrlName(), m_boardID[ib]); 
-					}
-				}
-				// write FPGA firmware
-				if(UPC_DEBUG_GEN) cout<<"INFO: Processing FPGA firmware" << endl;
-				FILE *f = 0;
-#ifdef CF__LINUX
-				f = fopen(m_FPGA_filename.c_str(),"r");
-#else
-				fopen_s(&f, m_FPGA_filename.c_str(),"r");
-#endif
-				if(f==0){
-				  delete m_BoardHandle[ib]; m_BoardHandle[ib]=0; // this will make sure that ctrl. is fully initialised again
-					if(UPC_DEBUG_GEN) cout<<"ERROR: FPGA bit file " << m_FPGA_filename <<" doesn't exist"<<endl;
-					throw USBPixControllerExc(USBPixControllerExc::FILE_ERROR, PixControllerExc::ERROR, getCtrlName()); 
-				} else
-					fclose(f);
-				if(!m_BoardHandle[ib]->DownloadXilinx(m_FPGA_filename.c_str())){
-				  delete m_BoardHandle[ib]; m_BoardHandle[ib]=0; // this will make sure that ctrl. is fully initialised again
-					if(UPC_DEBUG_GEN) cout<<"ERROR: FPGA didn't configure"<<endl;
-					throw USBPixControllerExc(USBPixControllerExc::FPGA_ERROR, PixControllerExc::ERROR, getCtrlName()); 
-				}
-			}
-		}
-	}
-	if(m_BoardHandle[0] != 0) {
-	  // 	        if(UPC_DEBUG_GEN) cout<<"INFO: processing USBpix class matters: " << std::hex << ((int)m_USBpix) << std::dec << endl;
-		// Create USBpix object - contains ConfigFEMemory and ConfigRegister classes    
-		if (m_chipIds.size() < 2) 
-			m_chipIds.resize(2);
-		if (m_chipIds.size() == 0 || m_chipIds.at(1)==999) 
-			m_chipIds.at(0)=8;
-		if(m_USBpix==NULL) m_USBpix = new USBpix(m_chipIds.at(0),0, m_BoardHandle[0], true, m_BoardHandle[1], m_chipIds.at(1), m_MultiChipWithSingleBoard);
-		else m_USBpix->SetUSBHandles(m_BoardHandle[0], m_BoardHandle[1]);
-
-		// re-set phase shift - needed in case of initialisation for more than one time
-		m_USBpix->SetCurrentPhaseshift(0, m_chipIds.at(0));
-    m_USBpix->SetAdapterCardFlavor(m_AdapterCardFlavor&0x1);
-		if(m_chipIds.at(1)==999) m_USBpix->SetCurrentPhaseshift(0,  m_chipIds.at(1));
-		updateRegs();
-	}else{
-		if(UPC_DEBUG_GEN) cout<<"ERROR: no SiUSBDevice found..."<<endl;
-		m_USBpix = NULL;
-		throw USBPixControllerExc(USBPixControllerExc::NOHANDLE, PixControllerExc::FATAL, getCtrlName()); 
-	}
-        // refresh readback ID
-        m_boardIDRB = m_BoardHandle[0]->GetId();
-}
-
-void USBPixController::initHWSingleBoard()
-{
-	if (UPC_DEBUG_GEN) 
-		cout  << "INFO: Creating SiUSBDevice" << endl;
-	m_BoardHandle[0] = new SiUSBDevice(0);
-	if (UPC_DEBUG_GEN) 
-		cout << "INFO: m_BoardHandle[0] = "
-			<< m_BoardHandle[0] << endl;
-
-	for(int ib=0;ib<NBOARDS_MAX;ib++){
-		if (m_BoardHandle[ib] != 0) {
-			updateDeviceHandle();
-			// check flavour of actually present adapter board and compare with config. setting - throw exception if inconsistent
-			int adapType = detectAdapterCard(ib);
-			if(UPC_DEBUG_GEN) cout<<"INFO: Detected adapter type="<< adapType<<endl;
-			if(adapType<0) throw USBPixControllerExc(USBPixControllerExc::INIT_ERROR, PixControllerExc::ERROR, getCtrlName(), m_boardID[ib]); 
-			if(m_AdapterCardFlavor!=adapType){
-			  m_AdapterCardFlavor=adapType;
-			  int nmod = 0;
-			  for(PixModuleGroup::moduleIterator MI=m_modGroup.modBegin(); MI!=m_modGroup.modEnd(); MI++) nmod++;
-			  m_MultiChipWithSingleBoard = (m_AdapterCardFlavor==0x1 && nmod==1); // BIC with one module -> multi-FE-operation
-			  throw USBPixControllerExc(USBPixControllerExc::WRONG_ADAPTER, PixControllerExc::ERROR, getCtrlName(), m_boardID[ib]); 
-			}
-			// write uC firmware
-			if(m_uC_filename!=""){
-				if(UPC_DEBUG_GEN) cout<<"Processing uC firmware" << endl;
-				FILE *g = 0;
-#ifdef CF__LINUX
-				g = fopen(m_uC_filename.c_str(),"r");
-#else
-				fopen_s(&g, m_uC_filename.c_str(),"r");
-#endif
-				if(g==0){
-					if(UPC_DEBUG_GEN) cout<<"ERROR: uC bix file doesn't exist"<<endl;
-					throw USBPixControllerExc(USBPixControllerExc::FILE_ERROR, PixControllerExc::ERROR, getCtrlName()); 
-				} else
-					fclose(g);
-				if(!m_BoardHandle[ib]->LoadFirmwareFromFile(m_uC_filename.c_str())){
-					if(UPC_DEBUG_GEN) cout<<"ERROR: uC didn't configure"<<endl;
-					throw USBPixControllerExc(USBPixControllerExc::UC_ERROR, PixControllerExc::ERROR, getCtrlName()); 
-				}
-				// update device list until board has disappered
-				int iw=0;
-				const int iwmax=500;
-				while(!OnDeviceChange() && iw<iwmax){
-					if(UPC_DEBUG_GEN) cout <<"INFO: waiting for device to disappear from list, iteration " << iw << endl;
-					iw++;
-					sleep(50);
-				}
-				// get new handle as soon as uC is ready again
-				iw=0;
-				void *tempHandle=0;
-				while(tempHandle==0 && iw<iwmax){
-					if(OnDeviceChange()) tempHandle = GetUSBDevice(m_boardID[ib]);
-					if(UPC_DEBUG_GEN) cout <<"INFO: waiting for device to be back, iteration " << iw << endl;
-					iw++;
-					sleep(50);
-				}
-				// set handle again
-				if(tempHandle!=0){
-					m_BoardHandle[ib]->SetDeviceHandle(tempHandle);
-					if(UPC_DEBUG_GEN) cout <<"INFO: after uC load - found "<< m_BoardHandle[ib] << " - " << m_BoardHandle[ib]->GetName() << " with ID " << 
-						m_BoardHandle[ib]->GetId() << " and FW " << m_BoardHandle[ib]->GetFWVersion() << endl;
-				} else{
-					if(UPC_DEBUG_GEN) cout<<"ERROR: no board handle found after uC load..."<<endl;
-					throw USBPixControllerExc(USBPixControllerExc::NOBOARD, PixControllerExc::FATAL, getCtrlName(), m_boardID[ib]); 
-				}
-			}
-			// write FPGA firmware
-			if(UPC_DEBUG_GEN) cout<<"INFO: Processing FPGA firmware" << endl;
-			FILE *f = 0;
-#ifdef CF__LINUX
-			f = fopen(m_FPGA_filename.c_str(),"r");
-#else
-			fopen_s(&f, m_FPGA_filename.c_str(),"r");
-#endif
-			if(f==0){
-			  delete m_BoardHandle[ib]; m_BoardHandle[ib]=0; // this will make sure that ctrl. is fully initialised again
-				if(UPC_DEBUG_GEN) cout<<"ERROR: FPGA bit file " << m_FPGA_filename <<" doesn't exist"<<endl;
-				throw USBPixControllerExc(USBPixControllerExc::FILE_ERROR, PixControllerExc::ERROR, getCtrlName()); 
-			} else
-				fclose(f);
-			if(!m_BoardHandle[ib]->DownloadXilinx(m_FPGA_filename.c_str())){
-			  delete m_BoardHandle[ib]; m_BoardHandle[ib]=0; // this will make sure that ctrl. is fully initialised again
-				if(UPC_DEBUG_GEN) cout<<"ERROR: FPGA didn't configure"<<endl;
-				throw USBPixControllerExc(USBPixControllerExc::FPGA_ERROR, PixControllerExc::ERROR, getCtrlName()); 
-			}
-		}
-	}
-	if(m_BoardHandle[0] != 0) {
-    m_chipIds.clear();
-    const int dummyChipId = 999;
-		if(m_USBpix==NULL) m_USBpix = new USBpix(dummyChipId, 0, m_BoardHandle[0], true, m_BoardHandle[1], dummyChipId, m_MultiChipWithSingleBoard);
-		else m_USBpix->SetUSBHandles(m_BoardHandle[0], m_BoardHandle[1]);
+  if(UPC_DEBUG_GEN){
+    cout<<"INFO: FPGA_filename="<<m_FPGA_filename<<endl;
+    cout<<"INFO: uC_filename="<<m_uC_filename<<endl;
+  }
+  // very simple check for consistency between bit FW file and adapter card
+  if((m_AdapterCardFlavor==2 && m_FPGA_filename.find("gpac")==std::string::npos) || 
+     (m_AdapterCardFlavor<2 && m_FPGA_filename.find("usbpix")==std::string::npos) )
+    throw USBPixControllerExc(USBPixControllerExc::WRONGFW, PixControllerExc::FATAL, getCtrlName()); 
   
+  if(UPC_DEBUG_GEN) cout<<"INFO: Creating SiUSBDevice" << endl;
+  m_BoardHandle = new SiUSBDevice(0);
+  if (UPC_DEBUG_GEN) cout << "INFO: m_BoardHandle = " << m_BoardHandle << endl;
+  
+  if (m_BoardHandle != 0) {
+    updateDeviceHandle();
+    // check flavour of actually present adapter board and compare with config. setting - throw exception if inconsistent
+    int adapType = detectAdapterCard(0);
+    if(UPC_DEBUG_GEN) cout<<"INFO: Detected adapter type="<< adapType<<endl;
+    if(adapType<0) throw USBPixControllerExc(USBPixControllerExc::INIT_ERROR, PixControllerExc::ERROR, getCtrlName(), m_boardID); 
+    if(m_AdapterCardFlavor!=adapType){
+      m_AdapterCardFlavor=adapType;
+      int nmod = 0;
+      for(PixModuleGroup::moduleIterator MI=m_modGroup.modBegin(); MI!=m_modGroup.modEnd(); MI++) nmod++;
+      m_MultiChipWithSingleBoard = (m_AdapterCardFlavor==0x1 && nmod==1); // BIC with one module -> multi-FE-operation
+      throw USBPixControllerExc(USBPixControllerExc::WRONG_ADAPTER, PixControllerExc::ERROR, getCtrlName(), m_boardID); 
+    }
+    // write uC firmware
+    if(m_uC_filename!=""){
+      if(UPC_DEBUG_GEN) cout<<"Processing uC firmware" << endl;
+      FILE *g = 0;
+#ifdef CF__LINUX
+      g = fopen(m_uC_filename.c_str(),"r");
+#else
+      fopen_s(&g, m_uC_filename.c_str(),"r");
+#endif
+      if(g==0){
+	if(UPC_DEBUG_GEN) cout<<"ERROR: uC bix file doesn't exist"<<endl;
+	throw USBPixControllerExc(USBPixControllerExc::FILE_ERROR, PixControllerExc::ERROR, getCtrlName()); 
+      } else
+	fclose(g);
+      if(!m_BoardHandle->LoadFirmwareFromFile(m_uC_filename.c_str())){
+	if(UPC_DEBUG_GEN) cout<<"ERROR: uC didn't configure"<<endl;
+	throw USBPixControllerExc(USBPixControllerExc::UC_ERROR, PixControllerExc::ERROR, getCtrlName()); 
+      }
+      // update device list until board has disappered
+      int iw=0;
+      const int iwmax=500;
+      while(!OnDeviceChange() && iw<iwmax){
+	if(UPC_DEBUG_GEN) cout <<"INFO: waiting for device to disappear from list, iteration " << iw << endl;
+	iw++;
+	sleep(50);
+      }
+      // get new handle as soon as uC is ready again
+      iw=0;
+      void *tempHandle=0;
+      while(tempHandle==0 && iw<iwmax){
+	if(OnDeviceChange()) tempHandle = GetUSBDevice(m_boardID);
+	if(UPC_DEBUG_GEN) cout <<"INFO: waiting for device to be back, iteration " << iw << endl;
+	iw++;
+	sleep(50);
+      }
+      // set handle again
+      if(tempHandle!=0){
+	m_BoardHandle->SetDeviceHandle(tempHandle);
+	if(UPC_DEBUG_GEN) cout <<"INFO: after uC load - found "<< m_BoardHandle << " - " << m_BoardHandle->GetName() << " with ID " << 
+			    m_BoardHandle->GetId() << " and FW " << m_BoardHandle->GetFWVersion() << endl;
+      } else{
+	if(UPC_DEBUG_GEN) cout<<"ERROR: no board handle found after uC load..."<<endl;
+	throw USBPixControllerExc(USBPixControllerExc::NOBOARD, PixControllerExc::FATAL, getCtrlName(), m_boardID); 
+      }
+    }
+    // write FPGA firmware
+    if(UPC_DEBUG_GEN) cout<<"INFO: Processing FPGA firmware" << endl;
+    FILE *f = 0;
+#ifdef CF__LINUX
+    f = fopen(m_FPGA_filename.c_str(),"r");
+#else
+    fopen_s(&f, m_FPGA_filename.c_str(),"r");
+#endif
+    if(f==0){
+      delete m_BoardHandle; m_BoardHandle=0; // this will make sure that ctrl. is fully initialised again
+      if(UPC_DEBUG_GEN) cout<<"ERROR: FPGA bit file " << m_FPGA_filename <<" doesn't exist"<<endl;
+      throw USBPixControllerExc(USBPixControllerExc::FILE_ERROR, PixControllerExc::ERROR, getCtrlName()); 
+    } else
+      fclose(f);
+    if(!m_BoardHandle->DownloadXilinx(m_FPGA_filename.c_str())){
+      delete m_BoardHandle; m_BoardHandle=0; // this will make sure that ctrl. is fully initialised again
+      if(UPC_DEBUG_GEN) cout<<"ERROR: FPGA didn't configure"<<endl;
+      throw USBPixControllerExc(USBPixControllerExc::FPGA_ERROR, PixControllerExc::ERROR, getCtrlName()); 
+    }
+  }
+
+  if(m_BoardHandle != 0) {
+    m_chipIds.clear();
+
+    if(m_USBpix==NULL) m_USBpix = new USBpix(m_BoardHandle);
+    else m_USBpix->SetUSBHandles(m_BoardHandle);
+    
     m_USBpix->SetAdapterCardFlavor(m_AdapterCardFlavor&0x1);
 
-		// re-set phase shift - needed in case of initialisation for more than one time
-		//m_USBpix->SetCurrentPhaseshift(0, m_chipIds.at(0));
+    // re-set phase shift - needed in case of initialisation for more than one time
+    //m_USBpix->SetCurrentPhaseshift(0, m_chipIds.at(0));
 		
     // Update regs is delayed until all chips are configured after first
     // writeModuleConfig
     //updateRegs();
-	}else{
-		if(UPC_DEBUG_GEN) cout<<"ERROR: no SiUSBDevice found..."<<endl;
-		m_USBpix = NULL;
-		throw USBPixControllerExc(USBPixControllerExc::NOHANDLE, PixControllerExc::FATAL, getCtrlName()); 
-	}
-        // refresh readback ID
-        m_boardIDRB = m_BoardHandle[0]->GetId();
-}
-
-void USBPixController::initHW() {
-	
-	if(UPC_DEBUG_GEN){
-		cout<<"INFO: FPGA_filename="<<m_FPGA_filename<<endl;
-		cout<<"INFO: uC_filename="<<m_uC_filename<<endl;
-		if (m_MultiChipWithSingleBoard)
-		{
-			cout << "INFO: Reading multiple chips with single "
-				"board" << endl;
-		}
-		else
-		{
-			cout << "INFO: Reading multiple chips with two "
-				"boards" << endl;
-		}
-	}
-	// very simple check for consistency between bit FW file and adapter card
-	if((m_AdapterCardFlavor==2 && m_FPGA_filename.find("gpac")==std::string::npos) || 
-	   (m_AdapterCardFlavor<2 && m_FPGA_filename.find("usbpix")==std::string::npos) )
-	  throw USBPixControllerExc(USBPixControllerExc::WRONGFW, PixControllerExc::FATAL, getCtrlName()); 
-	  
-
-	if (m_MultiChipWithSingleBoard)
-	{
-		initHWSingleBoard();
-	}
-	else
-	{
-		initHWMultipleBoards();
-	}	
+  }else{
+    if(UPC_DEBUG_GEN) cout<<"ERROR: no SiUSBDevice found..."<<endl;
+    m_USBpix = NULL;
+    throw USBPixControllerExc(USBPixControllerExc::NOHANDLE, PixControllerExc::FATAL, getCtrlName()); 
+  }
+  // refresh readback ID
+  m_boardIDRB = m_BoardHandle->GetId();
 }
 
 void USBPixController::testHW() {
-  for(int ib=0;ib<NBOARDS_MAX;ib++){
-    if(m_BoardHandle[ib]!=0){
-      if(UPC_DEBUG_GEN) cout <<"INFO: found "<< m_BoardHandle[ib]->GetName() << " with ID " << m_BoardHandle[ib]->GetId() <<endl;
-    }else if(ib==0){ // don't complain about missing slave board, not always present
-      throw USBPixControllerExc(USBPixControllerExc::NOBOARD, PixControllerExc::FATAL, getModGroup().getRodName(), m_boardID[ib]); 
-    }
+  if(m_BoardHandle!=0){
+    if(UPC_DEBUG_GEN) cout <<"INFO: found "<< m_BoardHandle->GetName() << " with ID " << m_BoardHandle->GetId() <<endl;
+  }else{ // don't complain about missing slave board, not always present
+    throw USBPixControllerExc(USBPixControllerExc::NOBOARD, PixControllerExc::FATAL, getModGroup().getRodName(), m_boardID); 
   }
   return;
 }
 void USBPixController::updateRegs(){
-	if(m_BoardHandle[0]!=0){
+	if(m_BoardHandle!=0){
 	        if(UPC_DEBUG_GEN) cout<<"INFO: starting USBPixController::updateRegs" << endl;
 		// set cable length
 		m_USBpix->SetCableLengthReg(m_cableLength);
@@ -746,7 +584,6 @@ void USBPixController::sendCommand(int command, int ){
    for (std::vector<int>::iterator it = m_chipIds.begin();
         it != m_chipIds.end(); it++)
      {
-       if(*it==999) break;
        m_USBpix->WriteCommand(FE_GLOBAL_RESET, *it);
      }
  }
@@ -754,7 +591,6 @@ void USBPixController::sendCommand(int command, int ){
    for (std::vector<int>::iterator it = m_chipIds.begin();
         it != m_chipIds.end(); it++)
      {
-       if(*it==999) break;
        m_USBpix->WriteCommand(FE_EN_DATA_TAKE, *it);
      }
    unsigned char reg_data[7]={0xff,0x01,0x03,0x05,1,0xff,0x04};
@@ -765,7 +601,6 @@ void USBPixController::sendCommand(int command, int ){
    for (std::vector<int>::iterator it = m_chipIds.begin();
         it != m_chipIds.end(); it++)
      {
-       if(*it==999) break;
        m_USBpix->WriteCommand(FE_ECR, *it);
      }
  }
@@ -773,7 +608,6 @@ void USBPixController::sendCommand(int command, int ){
    for (std::vector<int>::iterator it = m_chipIds.begin();
         it != m_chipIds.end(); it++)
      {
-       if(*it==999) break;
        m_USBpix->WriteCommand(FE_BCR, *it);
      }
  }
@@ -795,7 +629,6 @@ void USBPixController::writeModuleConfig(PixModule& mod) {
     return;
   }
   
-  // neded for 2-FE-config.
   int nFe=0;
   for(std::vector<PixFe*>::iterator fe = mod.feBegin(); fe != mod.feEnd(); fe++){
     if(dynamic_cast<PixFeI4A*>(*fe)!=0){
@@ -819,18 +652,17 @@ void USBPixController::writeModuleConfig(PixModule& mod) {
   if (m_chipIds.empty())
   {
     m_chipIds = newChipIds;
-    if ((m_MultiChipWithSingleBoard) && (m_boardID[0] != 0))
-    {
+    //if ((m_MultiChipWithSingleBoard) && (m_boardID != 0))
+    //{
       m_USBpix->initializeChips(m_chipIds);
-    }
+      //}
 
     updateRegs();
   }
 
-  // check for consistency (has been canceled, the stuff that happens before
-  // here is just not consistent at all)
-  //if((nFe==1 && m_chipIds.at(1)!=999) || (nFe==2 && m_chipIds.at(1)==999) || nFe<1 || nFe>2)
-  //  throw USBPixControllerExc(USBPixControllerExc::INCONS_FE_CFG, PixControllerExc::WARNING, getCtrlName()); 
+  // check for consistency
+  if((nFe!=1 && !m_MultiChipWithSingleBoard) || (m_AdapterCardFlavor==1 && m_MultiChipWithSingleBoard && nFe>4) || nFe==0)
+    throw USBPixControllerExc(USBPixControllerExc::INCONS_FE_CFG, PixControllerExc::WARNING, getCtrlName()); 
 
   nFe=0;
 
@@ -844,15 +676,15 @@ void USBPixController::writeModuleConfig(PixModule& mod) {
     if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl::writeModuleConfig() : new geogr. addr. of chip " << std::dec << nFe << ", index " << number
                           << ": "  << address << ", old ID: " << m_chipIds.at(nFe) << endl;
     
-    if (m_MultiChipWithSingleBoard)
-    {
-      m_USBpix->SetChipAddByIndex(address, nFe);
-    }
-    else
-    {
-      m_USBpix->SetChipAdd(address, m_chipIds.at(nFe));
-    }
-    newChipIds.at(nFe) = address;
+//     if (m_MultiChipWithSingleBoard)
+//     {
+//        m_USBpix->SetChipAddByIndex(address, nFe);
+//     }
+//     else
+//     {
+//       m_USBpix->SetChipAdd(address, m_chipIds.at(nFe));
+//     }
+//     newChipIds.at(nFe) = address;
 
     if(dynamic_cast<PixFeI4A*>(*fe)!=0){
       m_USBpix->SetGlobalVal(TRIGCNT       , (*fe)->readGlobRegister("TrigCnt")          , newChipIds.at(nFe));
@@ -1284,47 +1116,43 @@ void USBPixController::writeModuleConfig(PixModule& mod) {
 }
 
 void USBPixController::readModuleConfig(PixModule& /*mod*/) {
-	if(m_USBpix!=NULL) {
+  if(m_USBpix!=NULL) {
     for (std::vector<int>::iterator it = m_chipIds.begin();
         it != m_chipIds.end(); it++)
-    {
-      if (*it==999) break;
-			m_USBpix->ReadGlobal(*it);
-		}
-	}
+      {
+	m_USBpix->ReadGlobal(*it);
+      }
+  }
 }
 
 void USBPixController::sendGlobal(unsigned int /*moduleMask*/){
-	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called general sendGlobal "<<endl;
-
-	if(m_USBpix!=NULL && m_configValid){
-		//for(int ib=0;ib<NBOARDS_MAX;ib++){
+  if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called general sendGlobal "<<endl;
+  
+  if(m_USBpix!=NULL && m_configValid){
     for (std::vector<int>::iterator it = m_chipIds.begin();
-        it != m_chipIds.end(); it++)
-    {
-      if (*it==999) break;
-			m_USBpix->WriteGlobal(*it);
-		}
+	 it != m_chipIds.end(); it++)
+      {
+	m_USBpix->WriteGlobal(*it);
+      }
     configureReadoutChannelAssociation();
-	} else {
-		throw USBPixControllerExc(USBPixControllerExc::INIT_ERROR, PixControllerExc::ERROR, getModGroup().getRodName()); 
-	}
+  } else {
+    throw USBPixControllerExc(USBPixControllerExc::INIT_ERROR, PixControllerExc::ERROR, getModGroup().getRodName()); 
+  }
   
 }
 void USBPixController::sendGlobal(unsigned int /*moduleMask*/, std::string regName){
-	if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called sendGlobal for reg. "<< regName<<endl;
-
-	int regNo = m_globRegNames[regName];
-	if(m_USBpix!=NULL && m_configValid && regNo>0){
+  if(UPC_DEBUG_GEN) cout<<"INFO USBPixCtrl: called sendGlobal for reg. "<< regName<<endl;
+  
+  int regNo = m_globRegNames[regName];
+  if(m_USBpix!=NULL && m_configValid && regNo>0){
     for (std::vector<int>::iterator it = m_chipIds.begin();
-        it != m_chipIds.end(); it++)
-    {
-      if (*it==999) break;
-			m_USBpix->WriteGlobalSingleReg(regNo, *it);
-		}
-	} else {
-		throw USBPixControllerExc(USBPixControllerExc::INIT_ERROR, PixControllerExc::ERROR, getModGroup().getRodName()); 
-	}
+	 it != m_chipIds.end(); it++)
+      {
+	m_USBpix->WriteGlobalSingleReg(regNo, *it);
+      }
+  } else {
+    throw USBPixControllerExc(USBPixControllerExc::INIT_ERROR, PixControllerExc::ERROR, getModGroup().getRodName()); 
+  }
 }
 int  USBPixController::readGlobal(int regNo, int feInd){
 	int val = 0;
@@ -1358,20 +1186,19 @@ void USBPixController::sendPixel(unsigned int /*moduleMask*/, std::string regNam
 		DCmax = DC+1;
 	}
 	if(m_USBpix!=NULL && m_configValid && latch>=0){
-    for (std::vector<int>::iterator it = m_chipIds.begin();
-        it != m_chipIds.end(); it++)
-    {
-      if (*it==999) break;
-			if(DC==41) // identical content in all DCs, use fast writing
-			  m_USBpix->WritePixelSingleLatch(latch, *it);
-			else{
-			  for (int doublecolumn = DCmin; doublecolumn < DCmax; doublecolumn++){
-			    m_USBpix->WritePixelSingleLatchDC(latch,doublecolumn, *it);
-			  }
-			}
+	  for (std::vector<int>::iterator it = m_chipIds.begin();
+	       it != m_chipIds.end(); it++)
+	    {
+	      if(DC==41) // identical content in all DCs, use fast writing
+		m_USBpix->WritePixelSingleLatch(latch, *it);
+	      else{
+		for (int doublecolumn = DCmin; doublecolumn < DCmax; doublecolumn++){
+		  m_USBpix->WritePixelSingleLatchDC(latch,doublecolumn, *it);
 		}
+	      }
+	    }
 	} else {
-		throw USBPixControllerExc(USBPixControllerExc::INIT_ERROR, PixControllerExc::ERROR, getModGroup().getRodName()); 
+	  throw USBPixControllerExc(USBPixControllerExc::INIT_ERROR, PixControllerExc::ERROR, getModGroup().getRodName()); 
 	}
 
 	if(sendGlob) sendGlobal(0);  // M.B. Maybe this fixes a problem in DC module cfg.? - not needed for repeated calls
@@ -1399,7 +1226,7 @@ bool USBPixController::testGlobalRegister(int module, std::vector<int> &data_in,
 
   bool retVal = false;
   // check if requested FE exists in config.
-  if (m_chipIds.at(feIndex) == 999) 
+  if (feIndex<0 || feIndex>=(int)m_chipIds.size()) 
     return retVal;
   
   if(UPC_DEBUG_GEN) cout << "starting GR test for FE type " << (m_USBpix->FEisFEI4B()?"B":"A") << endl;
@@ -1448,7 +1275,6 @@ bool USBPixController::testPixelRegister(int module, std::string regName, std::v
 
 	bool retVal = false;
 	if(feIndex<0 || feIndex>=((int) m_chipIds.size())) return retVal;
-	if(m_chipIds.at(feIndex)==999) return retVal;
 
 	bool allDcsIdentical = false;
 	if(DC == 40) allDcsIdentical = true;
@@ -1524,12 +1350,7 @@ void USBPixController::setCalibrationMode() {
   if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: setting USBpix to calib. mode"<<endl;
   m_USBpix->StopMeasurement();
   m_USBpix->StopReadout();
-  for (std::vector<int>::iterator it = m_chipIds.begin();
-      it != m_chipIds.end(); it++)
-  {
-    if(*it==999) break;
-    m_USBpix->ClearSRAM(*it);
-  }
+  m_USBpix->ClearSRAM();
   m_USBpix->SetCalibrationMode();
 }
 
@@ -1539,12 +1360,7 @@ void USBPixController::setConfigurationMode() {
 
 void USBPixController::setRunMode() {
   if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: setting USBpix to run mode"<<endl;
-  for (std::vector<int>::iterator it = m_chipIds.begin();
-       it != m_chipIds.end(); it++)
-    {
-      if(*it==999) break;
-      m_USBpix->ClearSRAM(*it);
-    }
+  m_USBpix->ClearSRAM();
   m_USBpix->SetRunMode();
 }
 
@@ -1555,10 +1371,9 @@ void USBPixController::setFEConfigurationMode(){
   if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: setting FE(s) to config. mode"<<endl;
   for (std::vector<int>::iterator it = m_chipIds.begin();
       it != m_chipIds.end(); it++)
-  {
-    if(*it==999) break;
-    m_USBpix->WriteCommand(FE_CONF_MODE, *it);
-  }
+    {
+      m_USBpix->WriteCommand(FE_CONF_MODE, *it);
+    }
 }
 
 void USBPixController::setFERunMode() {
@@ -1566,7 +1381,6 @@ void USBPixController::setFERunMode() {
   for (std::vector<int>::iterator it = m_chipIds.begin();
       it != m_chipIds.end(); it++)
   {
-    if(*it==999) break;
     m_USBpix->WriteCommand(FE_EN_DATA_TAKE, *it);
   }
 }
@@ -1578,11 +1392,10 @@ void USBPixController::readEPROM()
 {
   for (std::vector<int>::iterator it = m_chipIds.begin();
       it != m_chipIds.end(); it++)
-  {
-    if(*it==999) break;
-		m_USBpix->ReadEPROMvalues(*it);
-	}
-	if(UPC_DEBUG_GEN) cout << "DEBUG M.B.: USBpixController::readEPROM executed. \n";
+    {
+      m_USBpix->ReadEPROMvalues(*it);
+    }
+  if(UPC_DEBUG_GEN) cout << "DEBUG M.B.: USBpixController::readEPROM executed. \n";
 }
 
 void USBPixController::burnEPROM()
@@ -1604,7 +1417,7 @@ void USBPixController::readGADC(int type, std::vector<int> &GADCvalues, int FEin
   int nFe_req = getFECount();
   int ibmin=0, ibmax=nFe_req;
   // check if requested FE exists in config, otherwise assume all FEs need to be processed
-  if (FEindex>=0 && m_chipIds.at(FEindex) != 999) {
+  if (FEindex>=0 && FEindex<(int)m_chipIds.size()) {
     ibmin = FEindex;
     ibmax = ibmin + 1;
     nFe_req = 1;
@@ -1615,7 +1428,6 @@ void USBPixController::readGADC(int type, std::vector<int> &GADCvalues, int FEin
 	if(UPC_DEBUG_GEN) cout << "Result vector cleared and resized. \n";
 	// read GADC for all requested FEs. Results in ConfigFEmemory now...
 	for(int ib=ibmin;ib<ibmax && ib<(int)m_chipIds.size();ib++){
-	  if(m_chipIds.at(ib)==999) break;
 	  if(UPC_DEBUG_GEN) cout << "DEBUG: USBpixController::readGADC calls USBpix::ReadGADC for FE GA " << m_chipIds.at(ib) << ". \n";
 	  m_USBpix->ReadGADC(type, m_chipIds.at(ib));
 	}
@@ -1720,7 +1532,6 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
   for (std::vector<int>::iterator it = m_chipIds.begin();
       it != m_chipIds.end(); it++)
   {
-    if(*it==999) break;
 		if(!m_sourceScanFlag && scn.getAlterFeCfg()){
 		  m_USBpix->SetGlobalVal(m_USBpix->FEisFEI4B()?B_HITDISCCNFG:HITDISCCNFG, 0, *it);
 		  m_USBpix->WriteGlobalSingleReg(m_USBpix->IndexToRegisterNumber(m_USBpix->FEisFEI4B()?B_HITDISCCNFG:HITDISCCNFG),
@@ -1901,10 +1712,10 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 	}
 	m_USBpix->WriteStrbSave(reg_data);
 
-  m_USBpix->SetTX2Output(m_tx2signal);
-  m_USBpix->SetDisableGpacStrb(!m_enableGPACStrobePin);
-  m_USBpix->SetDisableScaStrb(!m_enableSCAStrobePin);
-  m_USBpix->SetFineStrbDelay(scn.getStrobeFineDelay());
+	m_USBpix->SetTX2Output(m_tx2signal);
+	m_USBpix->SetDisableGpacStrb(!m_enableGPACStrobePin);
+	m_USBpix->SetDisableScaStrb(!m_enableSCAStrobePin);
+	m_USBpix->SetFineStrbDelay(scn.getStrobeFineDelay());
 
 	if (scn.getSrcTriggerType()==PixScan::STROBE_SCAN || scn.getSrcTriggerType()==PixScan::STROBE_EXTTRG || 
 	    scn.getSrcTriggerType()==PixScan::STROBE_USBPIX_SELF_TRG || scn.getSrcTriggerType()==PixScan::STROBE_FE_SELF_TRG) {
@@ -1912,26 +1723,25 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 	  if(scn.getSrcTriggerType()==PixScan::STROBE_SCAN){
 	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: m_USBpix->disableExtLV1()"<<endl;
 	    m_USBpix->setTriggerMode(PixScan::STROBE_SCAN);
-	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: STROBE_SCAN trigger mode set" << " - Board-ID: " << m_boardID[0] << endl;
+	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: STROBE_SCAN trigger mode set" << " - Board-ID: " << m_boardID << endl;
 	  } else if (scn.getSrcTriggerType()==PixScan::STROBE_USBPIX_SELF_TRG){
 	    m_USBpix->setTriggerMode(PixScan::USBPIX_SELF_TRG); // USBpixSelftrigger should work without LEMO connection now.
-	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: USBPIX_SELF_TRG trigger mode set" << " - Board-ID: " << m_boardID[0] << endl;
+	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: USBPIX_SELF_TRG trigger mode set" << " - Board-ID: " << m_boardID << endl;
 	  } else if(scn.getSrcTriggerType()==PixScan::STROBE_FE_SELF_TRG){
 	    // enable selftrigger mode in FE
 	    for (std::vector<int>::iterator it = m_chipIds.begin();
 		 it != m_chipIds.end(); it++)
 	      {
-		if(*it==999) break;
 		m_USBpix->SetGlobalVal(m_USBpix->FEisFEI4B()?B_GATEHITOR:GATEHITOR, 1, *it);
 		m_USBpix->WriteGlobalSingleReg(m_USBpix->IndexToRegisterNumber(m_USBpix->FEisFEI4B()?B_GATEHITOR:GATEHITOR), 
 					       *it);
 	      }
 	    // disable ext. trigger in FPGA
 	    m_USBpix->setTriggerMode(PixScan::USBPIX_SELF_TRG);
-	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: FE_SELFTRIGGER trigger mode set" << " - Board-ID: " << m_boardID[0] << endl;
+	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: FE_SELFTRIGGER trigger mode set" << " - Board-ID: " << m_boardID << endl;
 	  } else {
 	    m_USBpix->setTriggerMode(PixScan::EXT_TRG);
-	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: EXT_TRG trigger mode set" << " - Board-ID: " << m_boardID[0] << endl;
+	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: EXT_TRG trigger mode set" << " - Board-ID: " << m_boardID << endl;
 	  }
 	} else {
 	  if (scn.getSrcTriggerType()!=PixScan::USBPIX_SELF_TRG && scn.getSrcTriggerType()!=PixScan::FE_SELFTRIGGER){
@@ -1939,10 +1749,10 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 	    m_USBpix->enableExtLV1(); // JGK: really needed?
 	  }
 	  if (m_triggerReplication == REPLICATION_SLAVE) {
-	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: INIT setting Trigger-Mode to 5 - Board-ID: " << m_boardID[0] << endl;
+	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: INIT setting Trigger-Mode to 5 - Board-ID: " << m_boardID << endl;
 	    m_USBpix->setTriggerMode(PixScan::USBPIX_REPLICATION_SLAVE);
 	  } else {
-	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: INIT setting Trigger-Mode to " << scn.getSrcTriggerType() << " - Board-ID: " << m_boardID[0] << endl;
+	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: INIT setting Trigger-Mode to " << scn.getSrcTriggerType() << " - Board-ID: " << m_boardID << endl;
 	    m_USBpix->setTriggerMode(scn.getSrcTriggerType());
 	    
 	    if (m_triggerReplication == REPLICATION_MASTER)
@@ -1952,14 +1762,13 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 
 	// ******** prepare pixel register masks ***************** 
 	if(scn.getMaskStageTotalSteps()!=PixScan::STEPS_USER && shiftmask) { // if mask pattern set by user, don't touch
-		if(!scn.getLoopOverDcs() && !scn.getAvoidSpecialsCols() && scn.getLoopFEI4GR(0)=="Colpr_Addr" && 
-			scn.getLoopParam(0)==PixScan::FEI4_GR && scn.getLoopActive(0)){
-				// make sure Colpair_Mode ist set to scan only selected DC
-				if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: setting cpmode to 0" << endl;
-        for (std::vector<int>::iterator it = m_chipIds.begin();
-            it != m_chipIds.end(); it++)
-        {
-          if(*it==999) break;
+	  if(!scn.getLoopOverDcs() && !scn.getAvoidSpecialsCols() && scn.getLoopFEI4GR(0)=="Colpr_Addr" && 
+	     scn.getLoopParam(0)==PixScan::FEI4_GR && scn.getLoopActive(0)) {
+	    // make sure Colpair_Mode ist set to scan only selected DC
+	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: setting cpmode to 0" << endl;
+	    for (std::vector<int>::iterator it = m_chipIds.begin();
+		 it != m_chipIds.end(); it++)
+	      {
 					m_USBpix->SetGlobalVal(m_USBpix->FEisFEI4B()?B_COLPR_MODE:COLPR_MODE, 0, *it);
 					m_USBpix->WriteGlobalSingleReg(m_USBpix->IndexToRegisterNumber(m_USBpix->FEisFEI4B()?B_COLPR_ADDR:COLPR_ADDR), *it);
 					// first, set all pixel to off
@@ -1979,21 +1788,21 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 						m_USBpix->WritePixelSingleLatch(HITBUS, *it);
 					if(shiftmask&SHIFT_ENABLE) m_USBpix->WritePixelSingleLatch(ENABLE, *it);
 					if(shiftmask&SHIFT_DIGINJ) m_USBpix->WritePixelSingleLatch(DIGINJ, *it);
-				}
-		}
-		if(maskstages==26880 && !scn.getLoopOverDcs() && !scn.getAvoidSpecialsCols() && scn.getLoopFEI4GR(0)=="Colpr_Addr" && 
-			scn.getLoopParam(0)==PixScan::FEI4_GR && scn.getLoopActive(0)){
-				// 26880 mask loop realised by outer DC loop
-				// set 1st pixel ON in current DC
-				int DC = (int)(scn.getLoopVarValues(0))[scn.scanIndex(0)];
-				if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask for DC " << DC << endl;
-				int index = 819-21*DC;
-				if(index<prWords && index>=0){
-					if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: setting pixel "<< index << " to 1 " << endl;
-          for (std::vector<int>::iterator it = m_chipIds.begin();
-              it != m_chipIds.end(); it++)
-          {
-            if(*it==999) break;
+	      }
+	  }
+
+	  if(maskstages==26880 && !scn.getLoopOverDcs() && !scn.getAvoidSpecialsCols() && scn.getLoopFEI4GR(0)=="Colpr_Addr" && 
+	     scn.getLoopParam(0)==PixScan::FEI4_GR && scn.getLoopActive(0)){
+	    // 26880 mask loop realised by outer DC loop
+	    // set 1st pixel ON in current DC
+	    int DC = (int)(scn.getLoopVarValues(0))[scn.scanIndex(0)];
+	    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask for DC " << DC << endl;
+	    int index = 819-21*DC;
+	    if(index<prWords && index>=0){
+	      if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: setting pixel "<< index << " to 1 " << endl;
+	      for (std::vector<int>::iterator it = m_chipIds.begin();
+		   it != m_chipIds.end(); it++)
+		{
 						// load actual content and write only to current DC
 						//if((shiftmask&SHIFT_CAP1) || scn.getDigitalInjection()){
 						if((shiftmask&SHIFT_CAP1) || (!(shiftmask&SHIFT_CAP1) && shiftmask&SHIFT_CAP0) || scn.getDigitalInjection()){
@@ -2020,11 +1829,11 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 							m_USBpix->SetPixelVal(PIXEL32-index, 1, DIGINJ, *it);
 							m_USBpix->WritePixelSingleLatchDC(DIGINJ,DC, *it);
 						}
-					}
-				} else if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: pixel index "<< index << " out of range (0...839) " << endl;
-		}else{
-		  // prepare mask pattern
-		  for (unsigned int j = 0; j < (m_nColFe*m_nRowFe); j++) {     //JW: this loops over all pixels in the FE
+		}
+	    } else if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: pixel index "<< index << " out of range (0...839) " << endl;
+	  }else{
+	    // prepare mask pattern
+	    for (unsigned int j = 0; j < (m_nColFe*m_nRowFe); j++) {     //JW: this loops over all pixels in the FE
 		    
 		    if(j%maskstages==0) {
 		      //if(!xtalk) 
@@ -2040,15 +1849,14 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 			if(j/32) pixelmask2[j/32-1]= pixelmask2[j/32-1]| 0x80000000;
 		      }
 		    } 
-		  }
-		  // then, load actual content and write to all DCs
-      for (std::vector<int>::iterator it = m_chipIds.begin();
-          it != m_chipIds.end(); it++)
-      {
-        if(*it==999) break;
-        if(*it==999) break;
-        for(int l = PIXEL26880; l <=PIXEL32; l++) { //JW: this loops over the blocks of INTs, including Maltes offset
-
+	    }
+	  }
+	  // then, load actual content and write to all DCs
+	  for (std::vector<int>::iterator it = m_chipIds.begin();
+	       it != m_chipIds.end(); it++)
+	    {
+	      for(int l = PIXEL26880; l <=PIXEL32; l++) { //JW: this loops over the blocks of INTs, including Maltes offset
+		
           if(shiftmask&SHIFT_CAP1){
             if(UPC_DEBUG_GEN && l == PIXEL26880) cout<<"DEBUG USBPixCtrl: turning CAP1 ON" << endl;
             if(!xtalk) m_USBpix->SetPixelVal(l, pixelmask[PIXEL32-l], CAP1, *it);
@@ -2079,52 +1887,49 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
             m_USBpix->SetPixelVal(l, pixelmask[PIXEL32-l], ENABLE, *it);
           if(shiftmask&SHIFT_DIGINJ)
             m_USBpix->SetPixelVal(l, pixelmask[PIXEL32-l], DIGINJ, *it);
-        }
+	      }
 
-        int DC=40;
-        if(!scn.getLoopOverDcs() && !scn.getAvoidSpecialsCols() && scn.getLoopFEI4GR(0)=="Colpr_Addr" && 
-            scn.getLoopParam(0)==PixScan::FEI4_GR && scn.getLoopActive(0)) 
-          DC = (int)(scn.getLoopVarValues(0))[scn.scanIndex(0)];
-        // writes mask to all DCs in the same way, faster
-        if((shiftmask&SHIFT_CAP1) || (!(shiftmask&SHIFT_CAP1) && shiftmask&SHIFT_CAP0) || scn.getDigitalInjection()) {
-          if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask CAP1 for DC "<<DC<< endl;
-          m_USBpix->WritePixelSingleLatchDC(CAP1, DC, *it);
-        }
-        if((shiftmask&SHIFT_CAP0) || (!(shiftmask&SHIFT_CAP0) && shiftmask&SHIFT_CAP1) || scn.getDigitalInjection()) {
-          if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask CAP0 for DC "<<DC<< endl;
-          m_USBpix->WritePixelSingleLatchDC(CAP0, DC, *it);
-        }
-        if(shiftmask&SHIFT_HITBUS || shiftmask&SHIFT_INVHB){
-          if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask HITBUS for DC "<<DC<< endl;
-          m_USBpix->WritePixelSingleLatchDC(HITBUS, DC, *it);
-        }
-        if(shiftmask&SHIFT_ENABLE){
-          if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask ENABLE for DC "<<DC<< endl;
-          m_USBpix->WritePixelSingleLatchDC(ENABLE, DC, *it);
-        }
-        if(shiftmask&SHIFT_DIGINJ){
-          if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask DIGINJ for DC "<<DC<< endl;
-          m_USBpix->WritePixelSingleLatchDC(DIGINJ, DC, *it);
+	      int DC=40;
+	      if(!scn.getLoopOverDcs() && !scn.getAvoidSpecialsCols() && scn.getLoopFEI4GR(0)=="Colpr_Addr" && 
+		 scn.getLoopParam(0)==PixScan::FEI4_GR && scn.getLoopActive(0)) 
+		DC = (int)(scn.getLoopVarValues(0))[scn.scanIndex(0)];
+	      // writes mask to all DCs in the same way, faster
+	      if((shiftmask&SHIFT_CAP1) || (!(shiftmask&SHIFT_CAP1) && shiftmask&SHIFT_CAP0) || scn.getDigitalInjection()) {
+		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask CAP1 for DC "<<DC<< endl;
+		m_USBpix->WritePixelSingleLatchDC(CAP1, DC, *it);
+	      }
+	      if((shiftmask&SHIFT_CAP0) || (!(shiftmask&SHIFT_CAP0) && shiftmask&SHIFT_CAP1) || scn.getDigitalInjection()) {
+		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask CAP0 for DC "<<DC<< endl;
+		m_USBpix->WritePixelSingleLatchDC(CAP0, DC, *it);
+	      }
+	      if(shiftmask&SHIFT_HITBUS || shiftmask&SHIFT_INVHB){
+		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask HITBUS for DC "<<DC<< endl;
+		m_USBpix->WritePixelSingleLatchDC(HITBUS, DC, *it);
+	      }
+	      if(shiftmask&SHIFT_ENABLE){
+		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask ENABLE for DC "<<DC<< endl;
+		m_USBpix->WritePixelSingleLatchDC(ENABLE, DC, *it);
+	      }
+	      if(shiftmask&SHIFT_DIGINJ){
+		if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: writing mask DIGINJ for DC "<<DC<< endl;
+		m_USBpix->WritePixelSingleLatchDC(DIGINJ, DC, *it);
+	      }
+	    }
 	}
-      }
-      delete[] pixelmask;
-      delete[] pixelmask2;
-      for (std::vector<int>::iterator it = m_chipIds.begin();
-          it != m_chipIds.end(); it++)
-      {
-        if(*it==999) break;
-        m_USBpix->WriteGlobal(*it);
-			}
-		}
-	}
-
+	delete[] pixelmask;
+	delete[] pixelmask2;
+	for (std::vector<int>::iterator it = m_chipIds.begin();
+	     it != m_chipIds.end(); it++)
+	  {
+	    m_USBpix->WriteGlobal(*it);
+	  }
+	
 	if(scn.getHistogramFilled(PixScan::DSP_ERRORS)){
 	  // read error GR's and service records to clear them
 	  for (std::vector<int>::iterator it = m_chipIds.begin();
 	       it != m_chipIds.end(); it++)
 	    {
-	      if(*it==999) break;
-	      if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: clearin GR r/o bits for FE "<<(*it)<< endl;
+	      if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: clearing GR r/o bits for FE "<<(*it)<< endl;
 	      m_USBpix->ReadGlobalSingleReg(41, *it);
 	      m_USBpix->ReadGlobalSingleReg(42, *it);
 	    }
@@ -2135,12 +1940,7 @@ void USBPixController::writeScanConfig(PixScan &scn) { // write scan parameters
 	}
 	
 	// after config, switch back to data taking mode
-  for (std::vector<int>::iterator it = m_chipIds.begin();
-      it != m_chipIds.end(); it++)
-  {
-    if(*it==999) break;
-		m_USBpix->WriteCommand(FE_EN_DATA_TAKE, *it);
-	}
+	setFERunMode();
 	// ******** end pixel register settings ************************
 
 	// source scan
@@ -2245,33 +2045,18 @@ void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
 		// set histogram mode in FPGA
 		// clear histograms *here* and *before* calling USBpix::StartScan()
 		if (scn->getHistogramFilled(PixScan::TOT_MEAN) || scn->getHistogramFilled(PixScan::TOT_SIGMA) || scn->getHistogramFilled(PixScan::TOT)|| scn->getHistogramFilled(PixScan::TOT0) || scn->getHistogramFilled(PixScan::TOT1) || scn->getHistogramFilled(PixScan::TOT2) || scn->getHistogramFilled(PixScan::TOT3) || scn->getHistogramFilled(PixScan::TOT4) || scn->getHistogramFilled(PixScan::TOT5) || scn->getHistogramFilled(PixScan::TOT6) || scn->getHistogramFilled(PixScan::TOT7) || scn->getHistogramFilled(PixScan::TOT8) || scn->getHistogramFilled(PixScan::TOT9) || scn->getHistogramFilled(PixScan::TOT10) || scn->getHistogramFilled(PixScan::TOT11) || scn->getHistogramFilled(PixScan::TOT12) || scn->getHistogramFilled(PixScan::TOT13) || scn->getHistogramFilled(PixScan::TOT14) || scn->getHistogramFilled(PixScan::TOT15)) {
-			if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: Filling TOT histo"<<endl;
-			m_USBpix->SetTOTMode();
-      for (std::vector<int>::iterator it = m_chipIds.begin();
-          it != m_chipIds.end(); it++)
-      {
-        if(*it==999) break;
-				m_USBpix->ClearTOTHisto(*it);
-      }
+		  if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: Filling TOT histo"<<endl;
+		  m_USBpix->SetTOTMode();
+		  m_USBpix->ClearTOTHisto();
 		} else if (scn->getHistogramFilled(PixScan::OCCUPANCY)) {
-			m_USBpix->SetCalibrationMode();
-			if(UPC_DEBUG_GEN) cout << "DEBUG Malte: Set Hit histogramming mode.\n";
-      for (std::vector<int>::iterator it = m_chipIds.begin();
-          it != m_chipIds.end(); it++)
-      {
-        if(*it==999) break;
-				m_USBpix->ClearConfHisto(*it);
-      }
+		  m_USBpix->SetCalibrationMode();
+		  if(UPC_DEBUG_GEN) cout << "DEBUG Malte: Set Hit histogramming mode.\n";
+		  m_USBpix->ClearConfHisto();
 		}
 
 		// clear SRAM *here* and *before* calling USBpix::StartScan()
-    for (std::vector<int>::iterator it = m_chipIds.begin();
-        it != m_chipIds.end(); it++)
-    {
-      if(*it==999) break;
-      m_USBpix->ClearSRAM(*it);
-    }
-    // to avoid race conditions:
+		m_USBpix->ClearSRAM();
+		// to avoid race conditions:
 		// reset scan status bits *before* calling the method USBpix::StartScan() and *before* setting m_upcScanInit to false
 		m_USBpix->ResetScanStatus();
 
@@ -2293,11 +2078,7 @@ void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
 		    m_upcStartScanHasFinished = true;
 		    return;
 		  }
-		  for (std::vector<int>::iterator it = m_chipIds.begin();
-		       it != m_chipIds.end(); it++) {
-		    if(*it==999) break;
-		    m_USBpix->ClearSRAM(*it);
-		  }
+		  m_USBpix->ClearSRAM();
 		  m_USBpix->ResetScanStatus();
 		  // shift CAP masks by filling 1, ENABLE by filling 0
 		  shiftPixMask(PixScan::XTALK, 0, 1);
@@ -2434,45 +2215,40 @@ void USBPixController::strobeScan(PixScan* scn) { // Start a strobe scan
 }
 void USBPixController::sourceScan() { // Start a source scan
 
-try {
-	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: starting source scan"<<endl;
+  try {
+    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: starting source scan"<<endl;
     
-	// write new raw file
-	m_newRawDataFile = true;
+    // write new raw file
+    m_newRawDataFile = true;
     
-	// clear SRAM
-	for (auto chipID: m_chipIds) {
-		if(chipID == 999) break;
-		//m_USBpix->ClearSRAM(chipID); // covered by setRunMode
-		m_USBpix->ResetClusterCounters(chipID); //reset the clusterizer counters for the actual scan
-	}
+    m_USBpix->ResetClusterCounters(); //reset the clusterizer counters for the actual scan
     
-	// start source scan here
-  int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
-  m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
-  setRunMode();
-  setFERunMode();
-  m_USBpix->StartMeasurement(); // 
-  m_USBpix->StartReadout();
-  m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
-  m_srcSecStart = clock()/CLOCKS_PER_SEC;  
-  m_sramReadoutReady = false;
-  m_sramFull = false;
-  m_tluVeto = false;
-  m_measurementPause = false;
-  m_measurementRunning = true;
-  m_sramFillLevel = 0;
-  m_collectedTriggers = 0;
-  m_collectedHits = 0;
-  m_triggerRate = 0;
-  m_eventRate = 0;
-  m_upcScanInit = false;
-  m_upcStartScanHasFinished = true;
+    // start source scan here
+    int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
+    m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
+    setRunMode();
+    setFERunMode();
+    m_USBpix->StartMeasurement(); // 
+    m_USBpix->StartReadout();
+    m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
+    m_srcSecStart = clock()/CLOCKS_PER_SEC;  
+    m_sramReadoutReady = false;
+    m_sramFull = false;
+    m_tluVeto = false;
+    m_measurementPause = false;
+    m_measurementRunning = true;
+    m_sramFillLevel = 0;
+    m_collectedTriggers = 0;
+    m_collectedHits = 0;
+    m_triggerRate = 0;
+    m_eventRate = 0;
+    m_upcScanInit = false;
+    m_upcStartScanHasFinished = true;
+    
+    if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: source scan started"<<endl;
 
-	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: source scan started"<<endl;
-
-	// now that we're in a separate thread, we can do the SRAM monitoring outside of ntrigger()
-	while(m_measurementRunning){
+    // now that we're in a separate thread, we can do the SRAM monitoring outside of ntrigger()
+    while(m_measurementRunning){
 		m_measurementRunning = false;
 		m_sramReadoutReady = false;
 		m_measurementPause = false;
@@ -2485,7 +2261,6 @@ try {
 		// to do : check if the displayed quantities can be revised for >1 FE
 		int collectedTriggersTotal = 0;
 
-		//if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: We have:" << m_chipIds.size() << " chips!" << endl;
 
 			bool measurementRunning = true;
 			int sramFillLevel=0, collectedTriggers=0, triggerRate=0, eventRate=0;
@@ -2495,66 +2270,49 @@ try {
 			m_measurementRunning |= measurementRunning;
 
 			if(!measurementRunning && !m_testBeamFlag /* && m_sramReadoutReady*/) { // TODO
-	  		m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
-	  		m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
-	  		m_SourceScanEventQuantity = 0;
-				
-				for(auto chipID: m_chipIds) {
-					m_USBpix->ReadSRAM(chipID);
-					if(m_fillSrcHistos)	m_USBpix->FillHistosFromRawData(chipID);
-		  		writeRawDataFile(false, chipID);
-					if(m_fillClusterHistos)	ClusterRawData(chipID);
-				}
-
-				for(auto chipID: m_chipIds) {
-					m_USBpix->ClearSRAM(chipID);
-				}
+			  m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
+			  m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
+			  m_SourceScanEventQuantity = 0;
+			  
+			  m_USBpix->ReadSRAM();
+			  if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData();
+			  writeRawDataFile(false);
+			  if(m_fillClusterHistos)	ClusterRawData();
+			  
+			  m_USBpix->ClearSRAM();
 
 			} else if(measurementRunning  && !m_testBeamFlag && (m_sramFull || m_tluVeto) ){ // when using TLU, TLU veto seems to be raised before SRAM full flag, so must trigger on the former
-	  		int tbefore = clock()/CLOCKS_PER_SEC;
-	  		int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
-	  		m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
-	  		m_USBpix->PauseMeasurement();
-				int tafter = clock()/CLOCKS_PER_SEC;
-				m_srcSecStart += tafter-tbefore;
+			  int tbefore = clock()/CLOCKS_PER_SEC;
+			  int intEnRJ45 = m_USBpix->ReadRegister(CS_ENABLE_RJ45);
+			  m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
+			  m_USBpix->PauseMeasurement();
+			  int tafter = clock()/CLOCKS_PER_SEC;
+			  m_srcSecStart += tafter-tbefore;
 
-				for(auto chipID: m_chipIds) {	
-					m_USBpix->ReadSRAM(chipID);
-					if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData(chipID);
-					writeRawDataFile(false, chipID);
-					if(m_fillClusterHistos) ClusterRawData(chipID);
-				}
+			  m_USBpix->ReadSRAM();
+			  if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData();
+			  writeRawDataFile(false);
+			  if(m_fillClusterHistos) ClusterRawData();
+			  m_USBpix->ClearSRAM();
 
-				for(auto chipID: m_chipIds) {
-					m_USBpix->ClearSRAM(chipID);
-				}
+			  m_USBpix->ResumeMeasurement();
+			  m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
+			  //m_USBpix->StartReadout();
 
-	  		m_USBpix->ResumeMeasurement();
-	  		m_USBpix->WriteRegister(CS_ENABLE_RJ45, intEnRJ45);
-	  		//m_USBpix->StartReadout();
-			} else if(measurementRunning  && m_testBeamFlag && (m_sramFull || m_tluVeto) || (!measurementRunning  && m_testBeamFlag)) {
-				m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
-	  		m_USBpix->PauseMeasurement();
-				if(!measurementRunning) {
-					m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
-					m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
-					m_SourceScanEventQuantity = 0;
-				}
+			} else if((measurementRunning  && m_testBeamFlag && (m_sramFull || m_tluVeto)) || (!measurementRunning  && m_testBeamFlag)) {
+			  m_USBpix->WriteRegister(CS_ENABLE_RJ45, 0);
+			  m_USBpix->PauseMeasurement();
+			  if(!measurementRunning) {
+			    m_USBpix->WriteStrbStop(); // to be sure injection/trigger FSM is stopped. Additional call does no harm.
+			    m_USBpix->SetNumberOfEvents(0); // Make sure number of events to count is 0 after scan. Might be troublesome in strobe scan with external/self triggering otherwise.
+			    m_SourceScanEventQuantity = 0;
+			  }
 
-				const int data_size = SRAM_WORDSIZE/MAX_CHIP_COUNT;
-				auto ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
-				//for(auto it = m_chipIds.begin(); it != m_chipIds.end(); it++) {
-				// stop loop if no more meaningful chip IDs
+			  const int data_size = SRAM_WORDSIZE/MAX_CHIP_COUNT;
+			  auto ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
+			  m_USBpix->ReadSRAM();
 
-				for(auto it =  m_chipIds.begin(); it !=  m_chipIds.end();  ++it) {
-
-					if(*it==999){	
-						if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
-						break;
-					}
-
-					m_USBpix->ReadSRAM(*it);
-
+			  for(auto it =  m_chipIds.begin(); it !=  m_chipIds.end();  ++it) {
 					if(!m_ringbuffersInit) {
 						for(size_t idx = 0; idx < m_chipIds.size(); ++idx){
 							if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::sourceScan: Creating ringbuffer for FE: " << m_chipIds.at(idx) << std::endl;
@@ -2572,17 +2330,14 @@ try {
 					}
 					
 					delete[] di;
-					if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData(*it);
-					writeRawDataFile(false, *it);
-					if(m_fillClusterHistos) ClusterRawData(*it);
-				}
-
-				for(auto chipID: m_chipIds) {
-					m_USBpix->ClearSRAM(chipID);
-				}
+			  }
+			  if(m_fillSrcHistos) m_USBpix->FillHistosFromRawData();
+			  writeRawDataFile(false);
+			  if(m_fillClusterHistos) ClusterRawData();
+			  m_USBpix->ClearSRAM();
 				
-	  		m_USBpix->ResumeMeasurement();
-	  		m_USBpix->WriteRegister(CS_ENABLE_RJ45, true);
+			  m_USBpix->ResumeMeasurement();
+			  m_USBpix->WriteRegister(CS_ENABLE_RJ45, true);
 			}
 			sleep(500);
     
@@ -2678,13 +2433,11 @@ bool USBPixController::getErrorHistos(unsigned int dsp, Histo* &his) {          
 	int histsize = 0; 
 	for (std::vector<int>::iterator it = m_chipIds.begin();
 	     it != m_chipIds.end(); it++){
-	  if(*it==999) break;
 	  histsize += errbins;
 	}
 	his = new Histo(nam.str(), tit.str(), histsize, -0.5, histsize-0.5);
 
 	for (int ib=0; ib< (int) m_chipIds.size();ib++){
-	  if(m_chipIds.at(ib)==999) break;
 	  his->set(nSrvRec+0+ib*errbins,  readGlobal(42, ib)&0x3f);
 	  his->set(nSrvRec+1+ib*errbins, (readGlobal(42, ib)&0x7c0)>>6);
 	  his->set(nSrvRec+2+ib*errbins, (readGlobal(42, ib)&0x3800)>>11);
@@ -2702,25 +2455,20 @@ bool USBPixController::getErrorHistos(unsigned int dsp, Histo* &his) {          
 	return true;
 }
 
-void USBPixController::writeRawDataFile(bool close_file, int chipIndex) {
+void USBPixController::writeRawDataFile(bool close_file) {
 	// to do: currently called if any of the boards has a full SRAM
-	bool retval = m_USBpix->WriteFileFromRawData(m_rawDataFilename, chipIndex, m_newRawDataFile, close_file);
+	bool retval = m_USBpix->WriteFileFromRawData(m_rawDataFilename, m_newRawDataFile, close_file);
 	//create a new raw file only once per scan
 	m_newRawDataFile = false; 
   m_createdRawDataFile = true;
 	if (UPC_DEBUG_GEN) cout << "DEBUG USBPixCtrl: WriteFileFromRawData return " << (retval?"true":"false") << endl;
 }
 
-void USBPixController::ClusterRawData(int pChipIndex)	//DLP
+void USBPixController::ClusterRawData()	//DLP
 {
-	if (UPC_DEBUG_GEN)
-		std::cout<<"DEBUG USBPixCtrl::ClusterRawData(): chip adress "<<pChipIndex<<", col range "<<m_clusterPars[0]<<", row range "<<m_clusterPars[1]
-			 <<", BCID range "<<m_clusterPars[2]<<", min cluster hits "<<m_clusterPars[3]<<", max cluster hits "<<m_clusterPars[4]
-			 <<", max cluster hit tot "<<m_clusterPars[5]<<", max event incomplete "<<m_clusterPars[6]<<", max event errors "<<m_clusterPars[7]<<"\n";
-	if(!m_USBpix->ClusterRawData(pChipIndex, m_clusterPars[0], m_clusterPars[1], m_clusterPars[2], m_clusterPars[3], m_clusterPars[4], m_clusterPars[5], m_clusterPars[6], m_clusterPars[7])){
-		if (UPC_DEBUG_GEN) std::cout<<"USBPixController::ClusterRawData: Bad data, clustering aborted"<<std::endl;
-		m_errBuff += "USBPixController::ClusterRawData: Bad data, clustering aborted\n";
-	}
+  if(!m_USBpix->ClusterRawData(m_clusterPars[0], m_clusterPars[1], m_clusterPars[2], m_clusterPars[3], m_clusterPars[4], m_clusterPars[5], m_clusterPars[6], m_clusterPars[7])){
+    m_errBuff += "USBPixController::ClusterRawData: Bad data, clustering aborted\n";
+  }
 }
 
 void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int , std::vector< std::vector<Histo*> > &his) { // Read a histogram
@@ -2969,13 +2717,11 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 		    
 		  if(type == OCCUPANCY || type==HITOCC || TOTmode) {
 			if(UPC_DEBUG_GEN) cout<<"Calling ConfigRegister functions with TOTmode="<<(TOTmode?"true":"false")<<endl;
-			//for(int ib=0;ib<NBOARDS_MAX;ib++){
       
 			int nFe = 0;
 			for (std::vector<int>::iterator it = m_chipIds.begin();
 			     it != m_chipIds.end(); it++, nFe++)
 			  {
-			    if(*it == 999) break;
 			    for(unsigned int col=0; col<pm->nColsFe(); col++) {
 			      for(unsigned int row=0; row<pm->nRowsFe(); row++) {
 				unsigned int colm = pm->iColMod(nFe, col);
@@ -3039,7 +2785,6 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
         for (std::vector<int>::iterator it = m_chipIds.begin();
             it != m_chipIds.end(); it++)
         {
-					if(*it==999) break;
 					switch(type){
 					  case LVL1:
 						  m_USBpix->GetHitLV1HistoFromRawData(i, cvalue, *it);
@@ -3057,13 +2802,8 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 			for(int i=0;i<__MAXTOTBINS;i++){
 				for(int j=0;j<__MAXCLUSTERHITSBINS;j++){
 					value = 0;
-          for (std::vector<int>::iterator it = m_chipIds.begin();
-              it != m_chipIds.end(); it++)
-          {
-						if(*it==999) break;
-						m_USBpix->GetClusterTOTHistoFromRawData(i, j, cvalue, *it);
-						value += cvalue;
-					}
+					m_USBpix->GetClusterTOTHistoFromRawData(i, j, cvalue);
+					value += cvalue;
 					h->set(i, j, (double)value);
 				}
 			}
@@ -3073,13 +2813,8 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 			for(int i=0;i<__MAXCHARGEBINS;i++){
 				for(int j=0;j<__MAXCLUSTERHITSBINS;j++){
 					value = 0;
-          for (std::vector<int>::iterator it = m_chipIds.begin();
-              it != m_chipIds.end(); it++)
-          {
-						if(*it==999) break;
-						m_USBpix->GetClusterChargeHistoFromRawData(i, j, cvalue, *it);
-						value += cvalue;
-					}
+					m_USBpix->GetClusterChargeHistoFromRawData(i, j, cvalue);
+					value += cvalue;
 					h->set(i, j, (double)value);
 				}
 			}
@@ -3088,14 +2823,9 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 		if(type==SEED_TOT) {
 			for(int i=0;i<16;i++){
 				value = 0;
-        for (std::vector<int>::iterator it = m_chipIds.begin();
-            it != m_chipIds.end(); it++)
-        {
-					if(*it==999) break;
-					if(type==CLUSTER_TOT)
-						m_USBpix->GetClusterTOTHistoFromRawData(i, 0, cvalue, *it); // j = 0: every cluster size
-					value += cvalue;
-				}
+				if(type==CLUSTER_TOT)
+				  m_USBpix->GetClusterTOTHistoFromRawData(i, 0, cvalue); // j = 0: every cluster size
+				value += cvalue;
 				h->set(i, (double)value);
 			}
 		}
@@ -3103,13 +2833,8 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 		if(type==CLUSTER_TOT){
 			for(int i=0;i<__MAXTOTBINS;i++){
 				value = 0;
-        for (std::vector<int>::iterator it = m_chipIds.begin();
-            it != m_chipIds.end(); it++)
-        {
-					if(*it==999) break;
-					m_USBpix->GetClusterTOTHistoFromRawData(i, 0, cvalue, *it); // j = 0: every cluster size
-					value += cvalue;
-				}
+				m_USBpix->GetClusterTOTHistoFromRawData(i, 0, cvalue); // j = 0: every cluster size
+				value += cvalue;
 				h->set(i, (double)value);
 			}
 		}
@@ -3117,13 +2842,8 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 		if(type==CLUSTER_SIZE){
 			for(int i=0;i<__MAXCLUSTERHITSBINS;i++){
 				value = 0;
-        for (std::vector<int>::iterator it = m_chipIds.begin();
-            it != m_chipIds.end(); it++)
-        {
-					if(*it == 999) break;
-					m_USBpix->GetClusterSizeHistoFromRawData(i, cvalue, *it);
-					value += cvalue;
-				}
+				m_USBpix->GetClusterSizeHistoFromRawData(i, cvalue);
+				value += cvalue;
 				h->set(i, (double)value);
 			}
 		}
@@ -3131,13 +2851,8 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 		if(type==CLUSTER_CHARGE){
 			for(int i=0;i<__MAXCHARGEBINS;i++){
 				value = 0;
-        for (std::vector<int>::iterator it = m_chipIds.begin();
-            it != m_chipIds.end(); it++)
-        {
-					if(*it) break;
-					m_USBpix->GetClusterChargeHistoFromRawData(i, 0, cvalue, *it); // j = 0: every cluster size
-					value += cvalue;
-				}
+				m_USBpix->GetClusterChargeHistoFromRawData(i, 0, cvalue); // j = 0: every cluster size
+				value += cvalue;
 				h->set(i, (double)value);
 			}
 		}
@@ -3146,13 +2861,8 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 			for(int i=0;i<__MAXPOSXBINS;++i){
 				for(int j=0;j<__MAXPOSYBINS;++j){
 					value = 0;
-          for (std::vector<int>::iterator it = m_chipIds.begin();
-              it != m_chipIds.end(); it++)
-          {
-						if(*it==999) break;
-						m_USBpix->GetClusterPositionHistoFromRawData(i, j, cvalue, *it);
-						value += cvalue;
-					}
+					m_USBpix->GetClusterPositionHistoFromRawData(i, j, cvalue);
+					value += cvalue;
 					h->set(i, j, (double)value);
 				}
 			}
@@ -3161,13 +2871,12 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 		if(type==LV1ID) {
 			for(int i=0;i<4096;i++){
 				value = 0;
-        for (std::vector<int>::iterator it = m_chipIds.begin();
-            it != m_chipIds.end(); it++)
-        {
-					if(*it==999) break;
+				for (std::vector<int>::iterator it = m_chipIds.begin();
+				     it != m_chipIds.end(); it++)
+				  {
 					m_USBpix->GetLV1IDHistoFromRawData(i, cvalue, *it);
 					value += cvalue;
-				}
+				  }
 				h->set(i, (double)value);
 			}
 		}
@@ -3175,13 +2884,12 @@ void USBPixController::getHisto(HistoType type, unsigned int mod, unsigned int ,
 		if(type==BCID) {
 			for(int i=0;i<8192;i++){
 				value = 0;
-        for (std::vector<int>::iterator it = m_chipIds.begin();
-            it != m_chipIds.end(); it++)
-        {
-					if(*it==999) break;
+				for (std::vector<int>::iterator it = m_chipIds.begin();
+				     it != m_chipIds.end(); it++)
+				  {
 					m_USBpix->GetBCIDHistoFromRawData(i, cvalue, *it); 
 					value += cvalue;
-				}
+				  }
 				h->set(i, (double)value);
 			}
 		}
@@ -3244,16 +2952,11 @@ void USBPixController::clearSourceScanHistos() {
 
 	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: entered clearSourceScanHistos()"<<endl;
 
-  for (std::vector<int>::iterator it = m_chipIds.begin();
-      it != m_chipIds.end(); it++)
-  {
-		if(*it==999) break;
-    m_USBpix->ClearConfHisto(*it);
-		m_USBpix->ClearTOTHisto(*it);
-		m_USBpix->ClearHitLV1HistoFromRawData(*it);
-		m_USBpix->ClearLV1IDHistoFromRawData(*it);
-		m_USBpix->ClearBCIDHistoFromRawData(*it);
-	}
+	m_USBpix->ClearConfHisto();
+	m_USBpix->ClearTOTHisto();
+	m_USBpix->ClearHitLV1HistoFromRawData();
+	m_USBpix->ClearLV1IDHistoFromRawData();
+	m_USBpix->ClearBCIDHistoFromRawData();
 }
 
 int USBPixController::nTrigger() {                 //! Returns the number of trigger processed so far
@@ -3434,128 +3137,38 @@ int USBPixController::nTrigger() {                 //! Returns the number of tri
 	}
 }
 
-bool USBPixController::getSourceScanData(std::vector<unsigned int *>* data, bool forceReadSram) 
-{	
-	const int data_size = SRAM_WORDSIZE/MAX_CHIP_COUNT;
-
-	if(m_sourceScanBusy && !m_upcScanInit) 
-	{
-    	bool caseA = (m_measurementRunning && m_sramFull) || (!m_measurementRunning && forceReadSram)/* && m_sramReadoutReady*/;  // TODO
-		bool caseB = !m_measurementRunning/* && m_sramReadoutReady*/ && !caseA; // TODO
-
-		if(caseA || caseB)
-		{
-			if(UPC_DEBUG_GEN && caseA) std::cout << "DEBUG USBPixController::getSourceScanData : m_sramFull=" << (m_sramFull?"true":"false") <<
-			" || "<<"forceReadSram=" << (forceReadSram?"true":"false") << " => reading SRAM..." << std::endl;
-			if(UPC_DEBUG_GEN && caseB) std::cout << "DEBUG USBPixController::getSourceScanData : m_measurementRunning=false => reading SRAM..." << std::endl;
-
-			std::vector<int> ch_assoc = m_USBpix->GetReverseReadoutChannelAssoc();
-
-			for(std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++)
-			{
-				// stop loop if no more meaningful chip IDs
-				if(*it==999)
-				{	
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
-					break;
-				}
-
-				m_USBpix->ReadSRAM(*it);
-				// copy sram-data to array in testbeam mode
-
-				if(m_testBeamFlag)
-				{
-					if(!m_ringbuffersInit) {
-						if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Creating ringbuffer for FE: " << it - m_chipIds.begin() << std::endl;
-						m_circularBuffer.emplace_back(std::make_shared<UintCircBuff1MByte>());
-					}
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData : Copying data"<<std::endl;
-					unsigned int* di = new unsigned int[data_size];
-					m_USBpix->GetSRAMWordsRB(di, data_size, it - m_chipIds.begin());
-        	  		for(size_t index = 0; index < data_size; ++index){
-						std::cout << di[index] << ", ";
-						if(di[index] == 0) break;
-						m_circularBuffer[it - m_chipIds.begin()]->push(di[index]);
-					}
-					std::cout << std::endl;	
-					delete[] di;
-       			}
-
-        		if(m_fillSrcHistos)
-				{
-        	  			m_USBpix->FillHistosFromRawData(*it);
-				}
-
-				writeRawDataFile(false, *it);
-
-				if(m_fillClusterHistos)
-				{
-					ClusterRawData(*it);
-				}
-      		}
-			m_ringbuffersInit=true;
-
-			//clear SRAM loop
-			for(std::vector<int>::iterator it = m_chipIds.begin(); it != m_chipIds.end(); it++)
-			{
-        			// stop loop if no more meaningful chip IDs
-				if(*it==999)
-				{	
-					if(UPC_DEBUG_GEN) std::cout << "DEBUG USBPixController::getSourceScanData: no meaningfull ID" << std::endl;
-					break;
-				}
-				m_USBpix->ClearSRAM(*it);
-			}
-			if(caseB) m_sourceScanDone=true;
-      			return true;
-		} 
-		else //not (caseA || caseB) 
-		{
-			return false;
-    		}
-  	}
-	else //not (m_sourceScanBusy && !m_upcScanInit) 
-	{
-		return false;
-  	}
-}
-
 void USBPixController::hwInfo(string &txt){
-	txt = "";
-	for(int ib=0;ib<NBOARDS_MAX;ib++){
-		std::stringstream a;
-		a << ib;
-		if(m_BoardHandle[ib]!=0){
-			txt  += "Board "+a.str()+" Name:  " + string(m_BoardHandle[ib]->GetName()) + "\n";
-			stringstream a;
-			a << m_BoardHandle[ib]->GetId();
-			txt += "Board ID: " + a.str() + "\n";
-			stringstream b;
-			b << m_BoardHandle[ib]->GetFWVersion();
-			txt += "uC Firmware: " + b.str() + "\n";
-			// create temporary adapter card interace to read ID
-			if (m_AdapterCardFlavor == 2) {
-			  gpac::logical * gl = getGpac();
-			  if (gl) {
-			    stringstream c;
-			    c << gl->getId();
-			    txt += "Adapter card ID: " + c.str() + "\n";
-			  }
-			} else {
-			  USBPixDCS *USBADC;
-			  if(m_AdapterCardFlavor==1)
-			    USBADC = new USBPixBIDCS(m_BoardHandle[ib]);
-			  else
-			    USBADC = new USBPixSTDDCS(m_BoardHandle[ib]);
-			  USBADC->Init();
-			  stringstream c;
-			  c <<     USBADC->GetId();
-			  txt += "Adapter card ID: " + c.str() + "\n";
-			  delete USBADC;
-			}
-		}
-	}
-	return;
+  txt = "";
+  if(m_BoardHandle!=0){
+    txt  += "Board Name:  " + string(m_BoardHandle->GetName()) + "\n";
+    stringstream a;
+    a << m_BoardHandle->GetId();
+    txt += "Board ID: " + a.str() + "\n";
+    stringstream b;
+    b << m_BoardHandle->GetFWVersion();
+    txt += "uC Firmware: " + b.str() + "\n";
+    // create temporary adapter card interace to read ID
+    if (m_AdapterCardFlavor == 2) {
+      gpac::logical * gl = getGpac();
+      if (gl) {
+	stringstream c;
+	c << gl->getId();
+	txt += "Adapter card ID: " + c.str() + "\n";
+      }
+    } else {
+      USBPixDCS *USBADC;
+      if(m_AdapterCardFlavor==1)
+	USBADC = new USBPixBIDCS(m_BoardHandle);
+      else
+	USBADC = new USBPixSTDDCS(m_BoardHandle);
+      USBADC->Init();
+      stringstream c;
+      c <<     USBADC->GetId();
+      txt += "Adapter card ID: " + c.str() + "\n";
+      delete USBADC;
+    }
+  }
+  return;
 }
 
 void USBPixController::shiftPixMask(int mask, int cap, int steps){
@@ -3582,15 +3195,9 @@ void USBPixController::shiftPixMask(int mask, int cap, int steps){
     for(int imask=0;imask<nmasks;imask++){
       if(shiftmask&maskTags1[imask]){ // shift only if mask is selected
 	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: shifting mask " << maskTags1[imask] << " via register " << maskTags2[imask] << endl;
-	//for(int ib=0;ib<NBOARDS_MAX;ib++){
-        for (std::vector<int>::iterator it = m_chipIds.begin();
-	     it != m_chipIds.end(); it++)
-	  {
-	    if(*it==999) break;
-	    m_USBpix->ShiftPixMask(maskTags2[imask], steps, *it, (maskTags1[imask]==SHIFT_HITBUS || 
-								  maskTags1[imask]==0x40 || 
-								  maskTags1[imask]==0x80));
-	  }
+	m_USBpix->ShiftPixMask(maskTags2[imask], steps, -1, (maskTags1[imask]==SHIFT_HITBUS || 
+							     maskTags1[imask]==0x40 || 
+							     maskTags1[imask]==0x80));
       }
     }
   }
@@ -3604,21 +3211,18 @@ int USBPixController::readHitBusScaler(int mod, int /*ife*/, PixScan* /*scn*/){
 }
 
 void USBPixController::updateDeviceHandle(){
-  for(int ib=0;ib<NBOARDS_MAX;ib++){
-    if(m_BoardHandle[ib]!=0){
-      if(UPC_DEBUG_GEN) cout <<"INFO: USBPixController::updateDeviceHandle is calling GetUSBDevice for board " << ib << endl;
-      void * tempHandle = GetUSBDevice(m_boardID[ib]);
-      //      if(UPC_DEBUG_GEN) cout <<"INFO: USBPixController::updateDeviceHandle got " << std::hex << ((int)tempHandle) << std::dec << " from GetUSBDevice" << endl;
-      if(tempHandle!=0){
-	m_BoardHandle[ib]->SetDeviceHandle(tempHandle);
-	if(UPC_DEBUG_GEN) cout <<"INFO: USBPixController::updateDeviceHandle found "<< m_BoardHandle[ib]->GetName() << " with ID " << m_BoardHandle[ib]->GetId() <<endl;
-	m_boardIDRB = m_BoardHandle[ib]->GetId();
-      } else{
-	if(UPC_DEBUG_GEN) cout<<"WARNING: no board handle found for board ID " << m_boardID[ib] << endl;
-	delete m_BoardHandle[ib]; m_BoardHandle[ib]=0;
-	throw USBPixControllerExc(USBPixControllerExc::NOBOARD, PixControllerExc::WARNING, getCtrlName(), m_boardID[ib]); 
-      }  
-    }
+  if(m_BoardHandle!=0){
+    if(UPC_DEBUG_GEN) cout <<"INFO: USBPixController::updateDeviceHandle is calling GetUSBDevice for board ID " << m_boardID << endl;
+    void * tempHandle = GetUSBDevice(m_boardID);
+    if(tempHandle!=0){
+      m_BoardHandle->SetDeviceHandle(tempHandle);
+      if(UPC_DEBUG_GEN) cout <<"INFO: USBPixController::updateDeviceHandle found "<< m_BoardHandle->GetName() << " with ID " << m_BoardHandle->GetId() <<endl;
+      m_boardIDRB = m_BoardHandle->GetId();
+    } else{
+      if(UPC_DEBUG_GEN) cout<<"WARNING: no board handle found for board ID " << m_boardID << endl;
+      delete m_BoardHandle; m_BoardHandle=0;
+      throw USBPixControllerExc(USBPixControllerExc::NOBOARD, PixControllerExc::WARNING, getCtrlName(), m_boardID); 
+    }  
   }
 
   if (m_AdapterCardFlavor == 2)
@@ -3626,28 +3230,13 @@ void USBPixController::updateDeviceHandle(){
     gpac::logical * gl = getGpac();
     if (gl)
     {
-      gl->updateDev(m_BoardHandle[0]);
+      gl->updateDev(m_BoardHandle);
     }
   }
 }
 
-SiUSBDevice* USBPixController::getUsbHandle(int id){
-  if (m_MultiChipWithSingleBoard)
-  {
-    if (id)
-      return 0;
-    return m_BoardHandle[0];
-  }
-  else
-  {
-    if(id<0 || id>=NBOARDS_MAX) return 0;
-    try{
-      if(m_chipIds.at(id)==999) return 0;
-    }catch(...){
-      return 0;
-    }
-    return m_BoardHandle[id];
-  }
+SiUSBDevice* USBPixController::getUsbHandle(int /*id*/){
+  return m_BoardHandle;
 }
 
 bool USBPixController::checkRxState(rxTypes type){
@@ -3688,7 +3277,6 @@ void USBPixController::getServiceRecords(std::string &txt, std::vector<int> &srv
   for (std::vector<int>::iterator it = m_chipIds.begin();
       it != m_chipIds.end(); it++)
   {
-    if(*it==999) break;
     m_USBpix->SendReadErrors(*it);
     if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: finished m_USBpix->SendReadErrors(m_chipIds.at(ib)) for chip " << *it << endl;
   }
@@ -3708,7 +3296,6 @@ void USBPixController::getServiceRecords(std::string &txt, std::vector<int> &srv
 	      if(recID<nRec) srvCounts[recID+ib*nRec] = recCnt;
 	    }
 	  }
-	  m_USBpix->ClearSRAM(m_chipIds.at(ib));
 	  // printf out - do it here such that record appear in order of their ID
 	  srvrecStream << "FE " << ib << std::endl;
 	  for(unsigned int recID=0;recID<nRec;recID++)
@@ -3716,6 +3303,7 @@ void USBPixController::getServiceRecords(std::string &txt, std::vector<int> &srv
 	}
 	txt = srvrecStream.str();
 	delete SRAMwordsRB;
+	m_USBpix->ClearSRAM();
 	if(UPC_DEBUG_GEN) cout<<"DEBUG USBPixCtrl: service record request returns " << txt << endl;
 }
 bool USBPixController::testScanChain(std::string chainName, std::vector<int> data_in, std::string &data_out, std::string data_cmp, 
@@ -3781,19 +3369,13 @@ void USBPixController::sendGlobalPulse(int length){
   for (std::vector<int>::iterator it = m_chipIds.begin();
       it != m_chipIds.end(); it++)
   {
-		if (*it==999) break;
     m_USBpix->WriteCommand(FE_GLOBAL_PULSE, *it, length);
   }
 }
 
 void USBPixController::sendPixelChargeCalib(int /*pModuleID*/, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge)
 {
-  for (std::vector<int>::iterator it = m_chipIds.begin();
-      it != m_chipIds.end(); it++)
-  {
-		if (*it==999) break;
-		m_USBpix->SetChargeCalib(*it, pCol, pRow, pTot, pCharge);
-	}
+  m_USBpix->SetChargeCalib(pCol, pRow, pTot, pCharge);
 }
 bool USBPixController::getGenericBuffer(const char *type, std::string &textBuf) {
   textBuf="";
@@ -3813,14 +3395,7 @@ bool USBPixController::getGenericBuffer(const char *type, std::string &textBuf) 
 
 int USBPixController::getFECount()
 {
-  int nFe = 0;
-  for (std::vector<int>::iterator it = m_chipIds.begin();
-      it != m_chipIds.end(); it++)
-  {
-		if (*it==999) continue;
-		nFe++;
-	}
-  return nFe;
+  return (int) m_chipIds.size();
 }
 void USBPixController::measureEvtTrgRate(PixScan *scn, int /*mod*/, double &erval, double &trval){
   int nmeas = scn->getNptsRateAvg();
@@ -3866,11 +3441,7 @@ void USBPixController::finalizeScan()
 
   if (m_createdRawDataFile)
   {
-    for (std::vector<int>::iterator it = m_chipIds.begin();
-        it != m_chipIds.end(); it++)
-    {
-      writeRawDataFile(true, *it);
-    }
+    writeRawDataFile(true);
     m_createdRawDataFile = false;
     m_USBpix->FinishFileFromRawData(m_rawDataFilename);
   }
@@ -3975,7 +3546,7 @@ void USBPixController::configureReadoutChannelAssociation()
     
 gpac::logical* USBPixController::getGpac()
 {
-  if (!m_BoardHandle[0])
+  if (!m_BoardHandle)
   {
     if (m_gpac.get() != nullptr)
     {
@@ -3986,20 +3557,19 @@ gpac::logical* USBPixController::getGpac()
   
   if (!m_gpac.get())
   {
-    m_gpac.reset(new gpac::logical(m_BoardHandle[0]));
+    m_gpac.reset(new gpac::logical(m_BoardHandle));
   }
   return m_gpac.get();
 }
-int USBPixController::detectAdapterCard(unsigned int boardId){
-  if(boardId>=NBOARDS_MAX) return -1;
-  if(m_BoardHandle[boardId]==0) return -1;
+int USBPixController::detectAdapterCard(unsigned int /*boardId*/){
+  if(m_BoardHandle==0) return -1;
 
   // read info about adapter board from EEPROM
   bool status;
   unsigned char addBuf[2]={0,0}, data[2]={0,0};
   
-  status = m_BoardHandle[boardId]->WriteI2C(CAL_EEPROM_ADD, addBuf, 2);
-  status &= m_BoardHandle[boardId]->ReadI2C(CAL_EEPROM_ADD | 0x01, &data[0], 2);
+  status = m_BoardHandle->WriteI2C(CAL_EEPROM_ADD, addBuf, 2);
+  status &= m_BoardHandle->ReadI2C(CAL_EEPROM_ADD | 0x01, &data[0], 2);
 
   if (!status) return -1;
 
@@ -4014,14 +3584,14 @@ int USBPixController::detectAdapterCard(unsigned int boardId){
     nPages = size / CAL_EEPROM_PAGE_SIZE;
     nBytes = size % CAL_EEPROM_PAGE_SIZE;
     unsigned char *dataBuf = new unsigned char[size];
-    status = m_BoardHandle[boardId]->WriteI2C(CAL_EEPROM_ADD, addBuf, 2);
+    status = m_BoardHandle->WriteI2C(CAL_EEPROM_ADD, addBuf, 2);
     dataPtr = 0;
     for (unsigned int i = 0; i < nPages; i++){ // 64 byte page write
-      status &= m_BoardHandle[boardId]->ReadI2C(CAL_EEPROM_ADD | 0x01, &dataBuf[dataPtr], CAL_EEPROM_PAGE_SIZE);
+      status &= m_BoardHandle->ReadI2C(CAL_EEPROM_ADD | 0x01, &dataBuf[dataPtr], CAL_EEPROM_PAGE_SIZE);
       dataPtr += CAL_EEPROM_PAGE_SIZE;
     }
     if (nBytes > 0){
-      status &= m_BoardHandle[boardId]->ReadI2C(CAL_EEPROM_ADD | 0x01, &dataBuf[dataPtr], nBytes);
+      status &= m_BoardHandle->ReadI2C(CAL_EEPROM_ADD | 0x01, &dataBuf[dataPtr], nBytes);
     }
     char cal_name[MAX_PSU_NAME_SIZE];
     memcpy((unsigned char*)cal_name, &dataBuf[4], MAX_PSU_NAME_SIZE);

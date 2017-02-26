@@ -11,45 +11,24 @@
   
 const int FE_ADDR_BROADCAST = 8;
 
-// do not use namespace if not needed
-//using namespace std;
-
-USBpix::USBpix(int chip_add_0, int mod_add, SiUSBDevice * Handle0, 
-	       bool isFEI4B, SiUSBDevice * Handle1, int /*chip_add_1*/,
-    bool MultiChipWithSingleBoard):
+USBpix::USBpix(SiUSBDevice * Handle):
   ReadoutChannelAssoc(MAX_CHIP_COUNT)
 {
-  this->MultiChipWithSingleBoard = MultiChipWithSingleBoard;
-  this->FEI4B = isFEI4B;
-  this->myModAdd = mod_add;
+  this->FEI4B = true;
 
-  this->myUSB0 = Handle0;
-
-  if(Handle1) {
-    throw WrongMultiBoardMode("The 2FE mode is no longer supported.");
-  }
+  this->myUSB = Handle;
 
   resetReadoutChannelAssoc();
 
-  confReg1 = new ConfigRegister(Handle0, FEI4B, MultiChipWithSingleBoard);
+  confReg = new ConfigRegister(Handle, true);
 
-  if (!MultiChipWithSingleBoard)
-  {
-    confReg1 = new ConfigRegister(Handle0, FEI4B, MultiChipWithSingleBoard);
-    myChipAdd.push_back(chip_add_0);
-    confFEMem.push_back(new ConfigFEMemory(myChipAdd.at(0), mod_add, Handle0, confReg1, FEI4B));
-  }
-  
   memoryArbiterStatusRegister = 0;
   ReinitializeStatusRegisters();
 
-  confFEBroadcast = new ConfigFEMemory(FE_ADDR_BROADCAST, mod_add, Handle0, 
-      confReg1, FEI4B);
+  confFEBroadcast = new ConfigFEMemory(FE_ADDR_BROADCAST, Handle, confReg, true);
 
-  FEI4Aexisting = !isFEI4B;
-  FEI4Bexisting = isFEI4B;
-
-  //WriteRegister(CS_CONF_SM_FIFO_CONTROL, 0);
+  FEI4Aexisting = false;
+  FEI4Bexisting = true;
 }
 
 USBpix::~USBpix(){
@@ -63,7 +42,7 @@ USBpix::~USBpix(){
 
   delete memoryArbiterStatusRegister;
   
-  delete confReg1;
+  delete confReg;
   delete confFEBroadcast;
 }
   
@@ -86,20 +65,20 @@ void USBpix::ReinitializeStatusRegisters()
 
   for (int ro_ch = 0; ro_ch < 4; ro_ch++)
   {
-    readoutStatusRegisters.push_back(new ReadoutStatusRegister(confReg1, ro_ch));
+    readoutStatusRegisters.push_back(new ReadoutStatusRegister(confReg, ro_ch));
   }
-  memoryArbiterStatusRegister = new MemoryArbiterStatusRegister(confReg1);
+  memoryArbiterStatusRegister = new MemoryArbiterStatusRegister(confReg);
 }
 
-void USBpix::SetUSBHandles(SiUSBDevice * hUSB0, SiUSBDevice * /*hUSB1*/) // sets pointer hUSB to correct instance SiUSBDevice. Needed for Plug'n'Play
+void USBpix::SetUSBHandles(SiUSBDevice * hUSB) // sets pointer hUSB to correct instance SiUSBDevice. Needed for Plug'n'Play
 {
-  confReg1->SetUSBHandle(hUSB0);
+  confReg->SetUSBHandle(hUSB);
 
   for(auto it : confFEMem) {
-    it->SetUSBHandle(hUSB0);
+    it->SetUSBHandle(hUSB);
   }
 
-  confFEBroadcast->SetUSBHandle(hUSB0);
+  confFEBroadcast->SetUSBHandle(hUSB);
 }
 
 bool USBpix::MakeMeFEI4A()
@@ -114,12 +93,12 @@ bool USBpix::MakeMeFEI4A()
   if (FEI4Bexisting)
   {
     FEI4Bexisting =  false;
-    delete confReg1;
+    delete confReg;
     delete confFEBroadcast;
 
-    confReg1 = new ConfigRegister(myUSB0, FEI4B, MultiChipWithSingleBoard);
+    confReg = new ConfigRegister(myUSB, FEI4B);
     initializeChips();
-    confFEBroadcast = new ConfigFEMemory(FE_ADDR_BROADCAST, myModAdd, myUSB0, confReg1, FEI4B);
+    confFEBroadcast = new ConfigFEMemory(FE_ADDR_BROADCAST, myUSB, confReg, FEI4B);
   }
   
   ReinitializeStatusRegisters();
@@ -140,12 +119,12 @@ bool USBpix::MakeMeFEI4B()
   if (FEI4Aexisting)
   {
     FEI4Aexisting =  false;
-    delete confReg1;
+    delete confReg;
     delete confFEBroadcast;
 
-    confReg1 = new ConfigRegister(myUSB0, FEI4B, MultiChipWithSingleBoard);
+    confReg = new ConfigRegister(myUSB, FEI4B);
     initializeChips();
-    confFEBroadcast = new ConfigFEMemory(FE_ADDR_BROADCAST, myModAdd, myUSB0, confReg1, FEI4B);
+    confFEBroadcast = new ConfigFEMemory(FE_ADDR_BROADCAST, myUSB, confReg, FEI4B);
   }
 
   ReinitializeStatusRegisters();
@@ -161,34 +140,12 @@ bool USBpix::FEisFEI4B()
 
 void USBpix::StartReadout()
 {
-  confReg1->StartReadout(); // Needed for both boards, as needed for histogramming
+  confReg->StartReadout(); // Needed for both boards, as needed for histogramming
 }
 
 void USBpix::StopReadout()
 {
-  confReg1->StopReadout(); // Needed for both boards, as needed for histogramming
-}
-
-void USBpix::SetAndWriteCOLPRReg(int colpr_mode, int colpr_addr)
-{
-  int colpr_mode_reg, colpr_addr_reg;
-  if(FEI4B)
-  {
-    colpr_mode_reg = B_COLPR_MODE;
-    colpr_addr_reg = B_COLPR_ADDR;
-  }
-  else
-  {
-    colpr_mode_reg = COLPR_MODE;
-    colpr_addr_reg = COLPR_ADDR;
-  }
-
-  for(auto it : confFEMem)
-  {
-    it->SetGlobalVal(colpr_mode_reg, colpr_mode);
-    it->SetGlobalVal(colpr_addr_reg, colpr_addr);
-    it->WriteGlobal(IndexToRegisterNumber(colpr_addr_reg));
-  }
+  confReg->StopReadout(); // Needed for both boards, as needed for histogramming
 }
 
 bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int ScanValStepSize, int InjCount, int MaskStepSize, int MaskStepCount, int ShiftMask, bool all_DCs, bool special_dc_loop, bool singleDCloop)
@@ -199,35 +156,22 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
 
   this->memoryArbiterStatusRegister->reset();
 
-  StartReadout();
+  //StartReadout();
   // check for inconsistencies, if not true then scan error flag is set
-  if ((ScanVarIndex >= 0) && /*(ScanVarIndex < GLOBAL_REG_ITEMS) && */(ScanStartVal >= 0) && (ScanStopVal >= 0) && (ScanValStepSize >= 0) && (ScanStartVal <= ScanStopVal) && (((ScanStopVal - ScanStartVal) == 0) || (((ScanStopVal - ScanStartVal)%ScanValStepSize) == 0)) && ((ScanValStepSize == 0) || (((ScanStopVal - ScanStartVal)/ScanValStepSize) < 1024)) && (InjCount >= 0) && (InjCount < 256) && (MaskStepSize >= 0) && (MaskStepCount >= 0) && (ShiftMask >= 0) && (ShiftMask < 16))
+  if ((ScanVarIndex >= 0) && /*(ScanVarIndex < GLOBAL_REG_ITEMS) && */(ScanStartVal >= 0) && (ScanStopVal >= 0) && (ScanValStepSize >= 0) && (ScanStartVal <= ScanStopVal) && 
+      (((ScanStopVal - ScanStartVal) == 0) || (((ScanStopVal - ScanStartVal)%ScanValStepSize) == 0)) && ((ScanValStepSize == 0) || (((ScanStopVal - ScanStartVal)/ScanValStepSize) < 1024)) && 
+      (InjCount >= 0) && (InjCount < 256) && (MaskStepSize >= 0) && (MaskStepCount >= 0) && (ShiftMask >= 0) && (ShiftMask < 16))
   {
     // turn on scan LED (LED 3)
     WriteRegister(CS_SCAN_LED, 1);
 
+    // store Colpr register content for restoring them later
     int add = 0;
     int size = 0;
     int colpr_mode = 0;
     int colpr_addr = 0;
-    int old_chip_add0 = 0;
-
     std::vector<int> colpr_modes;
     std::vector<int> colpr_addrs;
-
-    if (!MultiChipWithSingleBoard)
-    {
-      // It's not supportet to have the same chip ID for both chips...
-      old_chip_add0 = myChipAdd.at(0);
-      SetChipAdd((int)8, old_chip_add0);	// scans all FEs at the same time... Change of chip_add only needed for board connected
-    }
-    // clear SRAM and histograms
-    // do not delete here
-    // this is done in USBPixController for reasons
-    //ClearSRAM(old_chip_add);
-    //ClearConfHisto();
-    //ClearTOTHisto();
-
     int colpr_mode_reg, colpr_addr_reg;
     if(FEI4B)
     {
@@ -248,6 +192,11 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
       colpr_addrs.push_back(colpr_addr);
     }
 
+    // scan all FEs at the same time - (ab)use first FE and set address to 8 - to be re-set after scan
+    int old_chip_add0 = myChipAdd.at(0);
+    SetChipAddByIndex((int)8, 0);
+    ConfigFEMemory * scanfe = confFEMem.at(ConvertChipAddrToIndex(8));
+
     // read out length of LVL1
     //m_lengthLVL1 = ReadRegister(CS_L_LV1);
 
@@ -255,34 +204,31 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
     WriteRegister(CS_QUANTITY, InjCount);
 
     // set scanStep to zero
-    confReg1->m_scanStep = 0;
-    WriteRegister(CS_CONFIGURATION_NR, confReg1->m_scanStep); // automatically sets the same for slave board...
+    confReg->m_scanStep = 0;
+    WriteRegister(CS_CONFIGURATION_NR, confReg->m_scanStep); // automatically sets the same for slave board...
 
     // configuration parameter loop
     // total number of steps is ((ScanStopVal - ScanStartVal) / ScanValStepSize) + 1
-    for (int ScanVal = ScanStartVal; (ScanVal <= ScanStopVal) && (confReg1->m_scanCancelled == false) && (confReg1->m_scanError == false); ScanVal += ScanValStepSize, confReg1->m_scanStep++)
+    for (int ScanVal = ScanStartVal; (ScanVal <= ScanStopVal) && (confReg->m_scanCancelled == false) && (confReg->m_scanError == false); ScanVal += ScanValStepSize, confReg->m_scanStep++)
     {
       StartReadout();
-      WriteRegister(CS_CONFIGURATION_NR, (confReg1->m_scanStep%32)); // set configuration step in FPGA, do not crop to 5 bit value for interrupt readout
+      WriteRegister(CS_CONFIGURATION_NR, (confReg->m_scanStep%32)); // set configuration step in FPGA, do not crop to 5 bit value for interrupt readout
 
       // set scan variable to start value
-
-      for(auto it : confFEMem) {
-        it->SetGlobalVal(ScanVarIndex, ScanVal);
-        it->WriteGlobal(IndexToRegisterNumber(ScanVarIndex));
-      }
+      scanfe->SetGlobalVal(ScanVarIndex, ScanVal);
+      scanfe->WriteGlobal(IndexToRegisterNumber(ScanVarIndex));
 
       // pixel mask loop
-      for (int maskStep = 0; (maskStep < MaskStepCount) && (confReg1->m_scanCancelled == false) && (confReg1->m_scanError == false); maskStep++)
+      for (int maskStep = 0; (maskStep < MaskStepCount) && (confReg->m_scanCancelled == false) && (confReg->m_scanError == false); maskStep++)
       {
         if (all_DCs) // ((colpr_mode == 1) | (colpr_mode == 2))) // for debugging one might want to use other settings also???
         {
           if (!special_dc_loop && !singleDCloop)
           {
             //scan loop for COLPR_ADDR. Scans every 8th (FE-I4A) DC at once!
-            for (int col_add = 1; (col_add <= 8/*colpr_mode * 4*/) && (confReg1->m_scanCancelled == false) && (confReg1->m_scanError == false); col_add++)
+            for (int col_add = 1; (col_add <= 8/*colpr_mode * 4*/) && (confReg->m_scanCancelled == false) && (confReg->m_scanError == false); col_add++)
             {
-              SetAndWriteCOLPRReg(2, col_add);
+              scanfe->SetAndWriteCOLPRReg(2, col_add);
               // enable data take mode
               // WriteCommand(FE_EN_DATA_TAKE);
 
@@ -294,7 +240,7 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
                 WriteRegister(CS_STATUS_REG, received_DH);
 
                 WriteRegister(CS_TRIGGER_STRB_LV1, 1);
-                while ((myUSB0->HandlePresent() == true) && (confReg1->ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
+                while ((myUSB->HandlePresent() == true) && (confReg->ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
                 {
                   ;
                 }
@@ -306,20 +252,17 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
             //scan loop for COLPR_ADDR. Scans single DCs! Needed for ToT scans like FDAC-Tuning
             for (int col_add = 0; col_add <= 39; col_add++)
             {
-              SetAndWriteCOLPRReg(0, col_add);
+              scanfe->SetAndWriteCOLPRReg(0, col_add);
               // enable data take mode
               // WriteCommand(FE_EN_DATA_TAKE);
 
-              //for (int injection = 0; injection < InjCount; injection++)
-              {
-                // start injections
-                int received_DH = 0;
-                //reset event counter
-                WriteRegister(CS_STATUS_REG, received_DH);
-
-                WriteRegister(CS_TRIGGER_STRB_LV1, 1);
-                while ((myUSB0->HandlePresent()) && (confReg1->ReadRegister(CS_TRIGGER_STRB_LV1) != 0));
-              }
+	      // start injections
+	      int received_DH = 0;
+	      //reset event counter
+	      WriteRegister(CS_STATUS_REG, received_DH);
+	      
+	      WriteRegister(CS_TRIGGER_STRB_LV1, 1);
+	      while ((myUSB->HandlePresent()) && (confReg->ReadRegister(CS_TRIGGER_STRB_LV1) != 0));
             }
           }
           else
@@ -327,182 +270,150 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
 
             for (int col_add = 1; col_add <= 6/*8*//*colpr_mode * 4*/; col_add++)
             {
-              SetAndWriteCOLPRReg(2, col_add);
+              scanfe->SetAndWriteCOLPRReg(2, col_add);
               // enable data take mode
               // WriteCommand(FE_EN_DATA_TAKE);
 
-              //for (int injection = 0; injection < InjCount; injection++)
-              {
-                // start injections
-                int received_DH = 0;
-                //reset event counter
-                WriteRegister(CS_STATUS_REG, received_DH);
-
-                WriteRegister(CS_TRIGGER_STRB_LV1, 1);
-                while ((myUSB0->HandlePresent() == true) && (confReg1->ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
+	      // start injections
+	      int received_DH = 0;
+	      //reset event counter
+	      WriteRegister(CS_STATUS_REG, received_DH);
+	      
+	      WriteRegister(CS_TRIGGER_STRB_LV1, 1);
+	      while ((myUSB->HandlePresent() == true) && (confReg->ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
                 {
                   ;
                 }
-              }
             }
 
             for (int col_add = 0; col_add <= 39; col_add = col_add + 8)
             {
-              SetAndWriteCOLPRReg(0, col_add);
+              scanfe->SetAndWriteCOLPRReg(0, col_add);
 
 
               // enable data take mode
               // WriteCommand(FE_EN_DATA_TAKE);
 
-              //for (int injection = 0; injection < InjCount; injection++)
-              {
-                // start injections
-                int received_DH = 0;
-                //reset event counter
-                WriteRegister(CS_STATUS_REG, received_DH);
-
-                WriteRegister(CS_TRIGGER_STRB_LV1, 1);
-                while ((myUSB0->HandlePresent() == true) && (ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
+	      // start injections
+	      int received_DH = 0;
+	      //reset event counter
+	      WriteRegister(CS_STATUS_REG, received_DH);
+	      
+	      WriteRegister(CS_TRIGGER_STRB_LV1, 1);
+	      while ((myUSB->HandlePresent() == true) && (ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
                 {
                   ;
                 }
-              }
             }
 
             for (int col_add = 7; col_add <= 39; col_add = col_add + 8)
             {
-              SetAndWriteCOLPRReg(0, col_add);
+              scanfe->SetAndWriteCOLPRReg(0, col_add);
 
               // enable data take mode
               // WriteCommand(FE_EN_DATA_TAKE);
 
-              //for (int injection = 0; injection < InjCount; injection++)
-              {
-                // start injections
-                int received_DH = 0;
-                //reset event counter
-                WriteRegister(CS_STATUS_REG, received_DH);
-
-                WriteRegister(CS_TRIGGER_STRB_LV1, 1);
-                while ((myUSB0->HandlePresent() == true) && (ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
+	      // start injections
+	      int received_DH = 0;
+	      //reset event counter
+	      WriteRegister(CS_STATUS_REG, received_DH);
+	      
+	      WriteRegister(CS_TRIGGER_STRB_LV1, 1);
+	      while ((myUSB->HandlePresent() == true) && (ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
                 {
                   ;
                 }
-              }
             }
           }
 
-          SetAndWriteCOLPRReg(3, 0);
+          scanfe->SetAndWriteCOLPRReg(3, 0);
         }
           //}
         else // (!all_DCs)
         {
-          //for (int injection = 0; injection < InjCount; injection++)
-          {
-            // start injections
-            int received_DH = 0;
-            // reset event counter
-            WriteRegister(CS_STATUS_REG, received_DH);
-
-            WriteRegister(CS_TRIGGER_STRB_LV1, 1);
-            while ((myUSB0->HandlePresent() == true) && (ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
+	  // start injections
+	  int received_DH = 0;
+	  // reset event counter
+	  WriteRegister(CS_STATUS_REG, received_DH);
+	  
+	  WriteRegister(CS_TRIGGER_STRB_LV1, 1);
+	  while ((myUSB->HandlePresent() == true) && (ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
             {
               ;
             }
-          }
         }
-
-        //int add, size, OldVthinAltFine1, OldVthinAltCoarse1;
 
         //WriteCommand(FE_CONF_MODE, myChipAdd0); // needed to avoid triggering while chip gets configured in hitbus triggering modes...
         int oldtriggermode = ReadRegister(CS_TRIGGER_MODE); // needed to avoid triggering while chip gets configured in hitbus triggering modes...
         setTriggerMode(0);
 
-        for(auto it : confFEMem)
-        {
-          if(ShiftMask & SHIFT_HITBUS)
-            it->ShiftPixMask(HITBUS, MaskStepSize, true);
-          if(ShiftMask & SHIFT_CAP0)
-            it->ShiftPixMask(CAP0, MaskStepSize);
-          if(ShiftMask & SHIFT_CAP1)
-            it->ShiftPixMask(CAP1, MaskStepSize);
-          if(ShiftMask & SHIFT_ENABLE)
-            it->ShiftPixMask(ENABLE, MaskStepSize);
-          if(ShiftMask & SHIFT_INVHB)
-            it->ShiftPixMask(HITBUS, MaskStepSize, false);
-          if(ShiftMask & SHIFT_DIGINJ)
-            it->ShiftPixMask(DIGINJ, MaskStepSize);
-        }
+	if(ShiftMask & SHIFT_HITBUS)
+	  scanfe->ShiftPixMask(HITBUS, MaskStepSize, true);
+	if(ShiftMask & SHIFT_CAP0)
+	  scanfe->ShiftPixMask(CAP0, MaskStepSize);
+	if(ShiftMask & SHIFT_CAP1)
+	  scanfe->ShiftPixMask(CAP1, MaskStepSize);
+	if(ShiftMask & SHIFT_ENABLE)
+	  scanfe->ShiftPixMask(ENABLE, MaskStepSize);
+	if(ShiftMask & SHIFT_INVHB)
+	  scanfe->ShiftPixMask(HITBUS, MaskStepSize, false);
+	if(ShiftMask & SHIFT_DIGINJ)
+	  scanfe->ShiftPixMask(DIGINJ, MaskStepSize);
 
         setTriggerMode(oldtriggermode);// needed to avoid triggering while chip gets configured in hitbus triggering modes...
 
-        if (MultiChipWithSingleBoard)
-        {
-          for(auto it : confFEMem)
-          {
-            if(ScanVarIndex!=(FEI4B ? B_PLSRDAC : PLSRDAC))
-              it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_PLSRDAC : PLSRDAC));
-            it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_VTHIN_ALTCOARSE : VTHIN_ALTCOARSE));
-          }
-        }
+	// restore individual register settings that were previously overwritten
+	SetChipAddByIndex(old_chip_add0, 0); 
+	for(auto it : confFEMem) {
+	  if(ScanVarIndex!=(FEI4B ? B_PLSRDAC : PLSRDAC))
+	    it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_PLSRDAC : PLSRDAC));
+	  it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_VTHIN_ALTCOARSE : VTHIN_ALTCOARSE));
+	}
+	SetChipAddByIndex((int)8, 0);
 
-        //WriteCommand(FE_EN_DATA_TAKE, myChipAdd0); // needed to avoid triggering while chip gets configured in hitbus triggering modes...
       } // end for masksteps
 
       // reload Mask after 32 Masksteps...
-      //WriteCommand(FE_CONF_MODE, myChipAdd0); // needed to avoid triggering while chip gets configured in hitbus triggering modes...
       int oldtriggermode = ReadRegister(CS_TRIGGER_MODE); // needed to avoid triggering while chip gets configured in hitbus triggering modes...
       setTriggerMode(0);
 
-      for(auto it : confFEMem)
-      {
-        if(ShiftMask & SHIFT_HITBUS)
-          it->WritePixel(HITBUS);
-        if(ShiftMask & SHIFT_CAP0)
-          it->WritePixel(CAP0);
-        if(ShiftMask & SHIFT_CAP1)
-          it->WritePixel(CAP1);
-        if(ShiftMask & SHIFT_ENABLE)
-          it->WritePixel(ENABLE);
-        if(ShiftMask & SHIFT_INVHB)
-          it->WritePixel(HITBUS);
-        if(ShiftMask & SHIFT_DIGINJ)
-          it->WritePixel(DIGINJ);
-      }
+      if(ShiftMask & SHIFT_HITBUS)
+	scanfe->WritePixel(HITBUS);
+      if(ShiftMask & SHIFT_CAP0)
+	scanfe->WritePixel(CAP0);
+      if(ShiftMask & SHIFT_CAP1)
+	scanfe->WritePixel(CAP1);
+      if(ShiftMask & SHIFT_ENABLE)
+	scanfe->WritePixel(ENABLE);
+      if(ShiftMask & SHIFT_INVHB)
+	scanfe->WritePixel(HITBUS);
+      if(ShiftMask & SHIFT_DIGINJ)
+	scanfe->WritePixel(DIGINJ);
 
       setTriggerMode(oldtriggermode);// needed to avoid triggering while chip gets configured in hitbus triggering modes...
 
-      if (MultiChipWithSingleBoard)
-      {
-        for(auto it : confFEMem)
-        {
-          if(ScanVarIndex!=(FEI4B ? B_PLSRDAC : PLSRDAC))
-            it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_PLSRDAC : PLSRDAC));
-          it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_VTHIN_ALTCOARSE : VTHIN_ALTCOARSE));
-        }
+      // restore individual register settings that were previously overwritten
+      SetChipAddByIndex(old_chip_add0, 0); 
+      for(auto it : confFEMem) {
+	if(ScanVarIndex!=(FEI4B ? B_PLSRDAC : PLSRDAC))
+	  it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_PLSRDAC : PLSRDAC));
+	it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_VTHIN_ALTCOARSE : VTHIN_ALTCOARSE));
       }
-      //WriteCommand(FE_EN_DATA_TAKE, myChipAdd0); // needed to avoid triggering while chip gets configured in hitbus triggering modes...
+      SetChipAddByIndex((int)8, 0);
 
       // read SRAM if CONF_NR[4:0] == 5'b11111 or if last step is reached
 
       // We only have one conf step left, so always read and make conf histos!
-      //if ((confReg1->m_scanStep%32 == 31) || (confReg1->m_scanStep == ((ScanStopVal - ScanStartVal) / ScanValStepSize)))
-      {
-        // to be sure that FSM is not working
-        WriteRegister(CS_TRIGGER_STRB_LV1, 0);
-        //while ((USB->HandlePresent() == true) && (ReadRegister(CS_SRAM_READOUT_READY) == 0)) // TODO
-        //{
-        //	;
-        //}
+      // to be sure that FSM is not working
+      WriteRegister(CS_TRIGGER_STRB_LV1, 0);
 
-        confReg1->ReadSRAM(confReg1->m_scanStep);
-        confReg1->ClearSRAM();
-      }
+      confReg->ReadSRAM(confReg->m_scanStep);
+      confReg->ClearSRAM();
 
       // this is needed to avoid wrong m_scanStep value that is read out by GetScanStatus()
       // expression m_scanStep is updated before tested by for loop entry condition
       // so GetScanStatus() will read wrong value for the last step (increased by one which is not the case)
-      if (confReg1->m_scanStep  == ((ScanStopVal - ScanStartVal) / ScanValStepSize))
+      if (confReg->m_scanStep  == ((ScanStopVal - ScanStartVal) / ScanValStepSize))
       {
         break;
       }
@@ -513,11 +424,14 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
 
     // you never know...
     WriteRegister(CS_TRIGGER_STRB_LV1, 0);
-    //while ((USB->HandlePresent() == true) && (ReadRegister(CS_SRAM_READOUT_READY) == 0)) // TODO
-    //{
-    //	;
-    //}
 
+    // turn off scan LED (LED 3)
+    WriteRegister(CS_SCAN_LED, 0);
+
+    // revert broadcast FE's settings
+    SetChipAddByIndex(old_chip_add0, 0); 
+
+    // restore Colpr settings
     std::vector<int>::iterator modeit = colpr_modes.begin();
     std::vector<int>::iterator addrit = colpr_addrs.begin();
     for(auto it : confFEMem)
@@ -527,37 +441,21 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
       it->WriteGlobal(IndexToRegisterNumber(colpr_mode_reg));
     }
 
-    // turn off scan LED (LED 3)
-    WriteRegister(CS_SCAN_LED, 0);
-
     // setting of scan status bits
-    if (confReg1->m_scanCancelled) // scan externally cancelled
+    if (confReg->m_scanCancelled) // scan externally cancelled
     {
-      //SetScanCancelled(); // not needed this has to be set externally
       SetScanReady();
-      if (!MultiChipWithSingleBoard)
-      {
-        SetChipAdd(old_chip_add0, (int)8);	// scans all FEs at the same time...
-      }
       return false;
     }
-    else if (confReg1->m_scanError) // internal scan abort, e.g. timeout, ...
+    else if (confReg->m_scanError) // internal scan abort, e.g. timeout, ...
     {
       SetScanError();
       SetScanReady();
-      if (!MultiChipWithSingleBoard)
-      {
-        SetChipAdd(old_chip_add0, (int)8);	// scans all FEs at the same time...
-      }
       return false;
     }
     else
     {
       SetScanReady();
-      if (!MultiChipWithSingleBoard)
-      {
-        SetChipAdd(old_chip_add0, (int)8);	// scans all FEs at the same time...
-      }
       return true;
     }
   }
@@ -571,9 +469,6 @@ bool USBpix::StartScan(int ScanVarIndex, int ScanStartVal, int ScanStopVal, int 
 
 void USBpix::StartHitORScan()
 {
-  //int old_chip_add = myChipAdd0;
-  //SetChipAdd((int)8, old_chip_add);	// scans all FEs at the same time...
-
   // resetting scan status bits
   // this should be done *before* calling StartHitORScan()
   ResetScanStatus();
@@ -583,68 +478,79 @@ void USBpix::StartHitORScan()
 
   SetCalibrationMode();
 
-  int old_chip_add0 = 0;
+  // store Colpr register content for restoring them later
+  int add = 0;
+  int size = 0;
+  int colpr_mode = 0;
+  int colpr_addr = 0;
+  std::vector<int> colpr_modes;
+  std::vector<int> colpr_addrs;
+  int colpr_mode_reg, colpr_addr_reg;
+  if(FEI4B)
+    {
+      colpr_mode_reg = B_COLPR_MODE;
+      colpr_addr_reg = B_COLPR_ADDR;
+    }
+  else
+    {
+      colpr_mode_reg = COLPR_MODE;
+      colpr_addr_reg = COLPR_ADDR;
+    }
+  
+  for(auto it : confFEMem) {
+    it->GetGlobalVarAddVal(colpr_mode_reg, add, size, colpr_mode);
+    colpr_modes.push_back(colpr_mode);
+    
+    it->GetGlobalVarAddVal(colpr_addr_reg, add, size, colpr_addr);
+    colpr_addrs.push_back(colpr_addr);
+  }
 
-  // It's not supportet to have the same chip ID for both chips...
-
-  old_chip_add0 = myChipAdd.at(0);
-  SetChipAdd((int)8, old_chip_add0);	// scans all FEs at the same time... Change of chip_add only needed for board connected
+  // scan all FEs at the same time - (ab)use first FE and set address to 8 - to be re-set after scan
+  int old_chip_add0 = myChipAdd.at(0);
+  SetChipAddByIndex((int)8, 0);
+  ConfigFEMemory * scanfe = confFEMem.at(ConvertChipAddrToIndex(8));
 
   if(FEI4B)
   {
-    SetGlobalVal(DIGHITIN_SEL, 1, myChipAdd.at(0));
-    WriteGlobalSingleReg(IndexToRegisterNumber(DIGHITIN_SEL), myChipAdd.at(0));
+    scanfe->SetGlobalVal(DIGHITIN_SEL, 1);
+    scanfe->WriteGlobal(IndexToRegisterNumber(DIGHITIN_SEL));
   }
   else
   {
-    SetGlobalVal(B_DIGHITIN_SEL, 1, myChipAdd.at(0));
-    WriteGlobalSingleReg(IndexToRegisterNumber(B_DIGHITIN_SEL), myChipAdd.at(0));
+    scanfe->SetGlobalVal(B_DIGHITIN_SEL, 1);
+    scanfe->WriteGlobal(IndexToRegisterNumber(B_DIGHITIN_SEL));
   }
 
   WriteCommand(FE_EN_DATA_TAKE, myChipAdd.at(0));
 
   WriteRegister(CS_CONFIGURATION_NR, 0);
 
-  ClearSRAM(myChipAdd.at(0));
-  ClearConfHisto(myChipAdd.at(0));
-  ClearTOTHisto(myChipAdd.at(0));
+  ClearSRAM();
+  ClearConfHisto();
+  ClearTOTHisto();
 
-  //WriteRegister(CS_QUANTITY, 1);
   WriteRegister(CS_QUANTITY, 10);
 
-  for (int DC = 0; (DC < 40) && (confReg1->m_scanCancelled == false); DC++)
+  for (int DC = 0; (DC < 40) && (confReg->m_scanCancelled == false); DC++)
   {
-    for (int pixel = PIXEL26880; (pixel <= PIXEL26240) && (confReg1->m_scanCancelled == false); pixel++)
+    for (int pixel = PIXEL26880; (pixel <= PIXEL26240) && (confReg->m_scanCancelled == false); pixel++)
     {
       int pixelmask = 0xffffffff;
       for (int i = PIXEL26880; i <= PIXEL32; i++)
       {
-        SetPixelVal(i, pixelmask, HITBUS, myChipAdd.at(0));
-        SetPixelVal(i, ~pixelmask, ENABLE, myChipAdd.at(0));
+        scanfe->SetPixelVal(i, pixelmask, HITBUS);
+        scanfe->SetPixelVal(i, ~pixelmask, ENABLE);
       }
-      WritePixelSingleLatch(HITBUS, myChipAdd.at(0));
-      WritePixelSingleLatch(ENABLE, myChipAdd.at(0));
+      scanfe->WritePixel(HITBUS);
+      scanfe->WritePixel(ENABLE);
 
-      SetPixelVal(HITBUS, DC, pixel, 0xfffffffe, myChipAdd.at(0));
-      WritePixelSingleLatchDC(HITBUS, DC, myChipAdd.at(0));
-      SetPixelVal(ENABLE, DC, pixel, ~0xfffffffe, myChipAdd.at(0));
-      WritePixelSingleLatchDC(ENABLE, DC, myChipAdd.at(0));
-
-      if(FEI4B)
-      {
-        SetGlobalVal(B_COLPR_MODE, 0, myChipAdd.at(0));
-        SetGlobalVal(B_COLPR_ADDR, DC, myChipAdd.at(0));
-        WriteGlobalSingleReg(IndexToRegisterNumber(B_COLPR_MODE), myChipAdd.at(0));
-      }
-      else
-      {
-        SetGlobalVal(COLPR_MODE, 0, myChipAdd.at(0));
-        SetGlobalVal(COLPR_ADDR, DC, myChipAdd.at(0));
-        WriteGlobalSingleReg(IndexToRegisterNumber(COLPR_MODE), myChipAdd.at(0));
-      }
-
+      scanfe->SetPixelVal(HITBUS, DC, pixel, 0xfffffffe);
+      scanfe->WritePixel(HITBUS, DC);
+      scanfe->SetPixelVal(ENABLE, DC, pixel, ~0xfffffffe);
+      scanfe->WritePixel(ENABLE, DC);
+      scanfe->SetAndWriteCOLPRReg(0, DC);
       WriteRegister(CS_TRIGGER_STRB_LV1, 1);
-      while ((myUSB0->HandlePresent() == true) && (ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
+      while ((myUSB->HandlePresent() == true) && (ReadRegister(CS_TRIGGER_STRB_LV1) != 0))
       {
         ;
       }
@@ -653,17 +559,26 @@ void USBpix::StartHitORScan()
 
   // to be sure that FSM is not working
   WriteRegister(CS_TRIGGER_STRB_LV1, 0);
-  //while ((USB->HandlePresent() == true) && (ReadRegister(CS_SRAM_READOUT_READY) == 0)) // TODO
-  //{
-  //	;
-  //}
 
-  ReadSRAM(myChipAdd.at(0));
-  ClearSRAM(myChipAdd.at(0));
-
-  SetChipAdd(old_chip_add0, (int)8);	// scans all FEs at the same time...
+  ReadSRAM();
+  ClearSRAM();
 
   SetRunMode();
+
+  // revert broadcast FE's settings
+  SetChipAddByIndex(old_chip_add0, 0); 
+
+  // restore individual register settings that were previously overwritten
+  std::vector<int>::iterator modeit = colpr_modes.begin();
+  std::vector<int>::iterator addrit = colpr_addrs.begin();
+  for(auto it : confFEMem)
+    {
+      it->SetGlobalVal(colpr_mode_reg, *(modeit++));
+      it->SetGlobalVal(colpr_addr_reg, *(addrit++));
+      it->WriteGlobal(IndexToRegisterNumber(colpr_mode_reg));
+      it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_PLSRDAC : PLSRDAC));
+      it->WriteGlobal(IndexToRegisterNumber(FEI4B ? B_VTHIN_ALTCOARSE : VTHIN_ALTCOARSE));
+    }
 
   // turn off LED 3
   WriteRegister(CS_SCAN_LED, 0);
@@ -695,278 +610,200 @@ void USBpix::WriteCommand(int the_command, int chip_addr, int GlobalPulseLength)
 {
   // only slow commands send FE by FE. Fast commands are accepted by both...
   if (the_command == FE_LV1_TRIGGER || the_command == FE_BCR || the_command == FE_ECR || the_command == FE_CAL){ // fast commands, accepted by all chips...
-    ConfigFEMemory * femem;
-    if (MultiChipWithSingleBoard)
-      femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
-    else
-      femem = confFEMem.at(0);
+    ConfigFEMemory *femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
     femem->WriteCommand(the_command);
   } else {
-    if (MultiChipWithSingleBoard)
-    {
-      ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
-      femem->WriteCommand(the_command, GlobalPulseLength);
-    }
-    else if (chip_addr == myChipAdd.at(0))
-      confFEMem.at(0)->WriteCommand(the_command, GlobalPulseLength);
+    ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+    femem->WriteCommand(the_command, GlobalPulseLength);
   }
 }
 
 void USBpix::WriteGlobal(int chip_addr) // writes complete global configuration
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->WriteGlobal();
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->WriteGlobal();
 }
 
 void USBpix::WriteGlobalSingleReg(int RegisterNumber, int chip_addr) // writes global register number RegisterNumber 
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->WriteGlobal(RegisterNumber);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->WriteGlobal(RegisterNumber);
 }
 
 void USBpix::WritePixel(int chip_addr) // writes complete pixel configuration
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->WritePixel();
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->WritePixel();
 }
 
 void USBpix::WritePixelSingleLatch(int latch, int chip_addr) // writes one latch in all DCs. Will be overloaded later to write variable DCs
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->WritePixel(latch);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->WritePixel(latch);
 }
 
 void USBpix::WritePixelSingleLatchDC(int latch, int DC, int chip_addr) // writes one latch in given DCs.
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->WritePixel(latch, DC);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->WritePixel(latch, DC);
 }
 
 void USBpix::ShiftPixMask(int latch, int steps, int chip_addr, bool fillOnes) // shifts pixel masks - last parameter allows to fill with ones, not zeros
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->ShiftPixMask(latch, steps, fillOnes);
+  ConfigFEMemory * femem = 0;
+  if(chip_addr<0 || chip_addr>=(int)confFEMem.size()) { // broadcast to all FE
+    femem = confFEMem.at(0);
+    femem->SetChipAdd(8);
+  } else {
+    femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  }
+  femem->ShiftPixMask(latch, steps, fillOnes);
+  if(chip_addr<0 || chip_addr>=(int)confFEMem.size())
+    femem->SetChipAdd(myChipAdd.at(0));
 }
 
 void USBpix::ReadGlobal(int chip_addr) // reads complete global configuration, will be overloaded later to read just one global register
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->ReadGlobal();
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->ReadGlobal();
 }
 
  int USBpix::ReadGlobalSingleReg(int RegisterNumber, int chip_addr) // reads global register number RegisterNumber
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return femem->ReadGlobal(RegisterNumber); 
-  else
-    return 0;
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  return femem->ReadGlobal(RegisterNumber); 
 }
 
 void USBpix::ReadPixel(int chip_addr) // reads complete pixel configuration
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->ReadPixel(); 
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->ReadPixel(); 
 }
-
-//void USBpix::ReadPixelSingleLatch(int latch, int chip_addr) // reads one latch of all DCs. Will be overloaded later to read variable DCs
-//{
-//	if (chip_addr == myChipAdd0)
-//		confFEMem1->ReadPixel(latch);
-//
-//	else if (chip_addr == myChipAdd1)
-//		confFEMem0->ReadPixel(latch);
-//}
 
 void USBpix::ReadPixelSingleLatch(int latch, bool bypass, int chip_addr)
 {
-  if (MultiChipWithSingleBoard && ((chip_addr == myChipAdd.at(0)) || (!bypass)))
+  if ((chip_addr == myChipAdd.at(0)) || (!bypass))
   {
     ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
     femem->ReadPixel(latch, bypass); 
   }
-  else if (chip_addr == myChipAdd.at(0))
-    confFEMem.at(0)->ReadPixel(latch, bypass);
 }
 
 void USBpix::ReadPixelSingleLatchDC(int latch, int DC, int chip_addr) // reads one latch of the given DC.
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->ReadPixel(latch, DC);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->ReadPixel(latch, DC);
 }
 
 void USBpix::ReadPixelSingleLatchDC(int latch, int DC, bool bypass, int chip_addr)
 {
-  if (MultiChipWithSingleBoard)
-  {
-    ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
-    femem->ReadPixel(latch, DC, bypass);
-  }
-  else if (chip_addr == myChipAdd.at(0))
-    confFEMem.at(0)->ReadPixel(latch, DC, bypass);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->ReadPixel(latch, DC, bypass);
 }
 
 void USBpix::SetGlobalVal(int the_index, int the_value, int chip_addr) // sets one item in global configuration
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->SetGlobalVal(the_index, the_value);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->SetGlobalVal(the_index, the_value);
 }
 
 void USBpix::SetPixelVal(int the_index, int the_value, int latch, int chip_addr) // sets one item in pixel configuration
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->SetPixelVal(the_index, the_value, latch);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->SetPixelVal(the_index, the_value, latch);
 }
 
 void USBpix::SetPixelVal(int latch, int theDC, int the_DCindex, int the_value, int chip_addr)
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->SetPixelVal(latch, theDC, the_DCindex, the_value);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->SetPixelVal(latch, theDC, the_DCindex, the_value);
 }
 
 bool USBpix::ReadGlobalFile(const char * globalfilename, int chip_addr) // reads global configuration from file
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return femem->ReadGlobalFile(globalfilename); 
-  else
-    return false;
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  return femem->ReadGlobalFile(globalfilename); 
 }
 
 void USBpix::ReadPixelFile(const char * pixelfilename, int latch, int chip_addr) //reads pixel configuration for one latch from file
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->ReadPixelFile(pixelfilename, latch); 
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->ReadPixelFile(pixelfilename, latch); 
 }
 
 void USBpix::SaveGlobal(const char * newfilename, int chip_addr) // saves global configuration to file
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->SaveGlobal(newfilename); 
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->SaveGlobal(newfilename); 
 }
 
 void USBpix::SaveGlobalRB(const char * newfilename, int chip_addr) // saves read-back global configuration to file
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->SaveGlobalRB(newfilename);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->SaveGlobalRB(newfilename);
 }
 
 void USBpix::LoadGlobalDefault(int chip_addr) // loads default configuration
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->LoadGlobalDefault(); 
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->LoadGlobalDefault(); 
 }
 
 void USBpix::SavePixel(const char * newfilename, int latch, int doublecolumn, int chip_addr) //saves pixel configuration for one latch/DC to file
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->SavePixel(newfilename, latch, doublecolumn); 
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->SavePixel(newfilename, latch, doublecolumn); 
 }
 
 void USBpix::SavePixelRB(const char * newfilename, int latch, int doublecolumn, int chip_addr) // saves read-back pixel configuration for one latch/DC to file
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->SavePixelRB(newfilename, latch, doublecolumn);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->SavePixelRB(newfilename, latch, doublecolumn);
 }
 
 void USBpix::GetGlobalVarAddVal(int Variable, int& Address, int& Size, int& Value, int chip_addr) // writes value, bitsize and address of one item of global configuration to given addresses
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->GetGlobalVarAddVal(Variable, Address, Size, Value);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->GetGlobalVarAddVal(Variable, Address, Size, Value);
 }
 
 void USBpix::GetGlobalRBVarAddVal(int Variable, int& Address, int& Size, int& Value, int chip_addr) // writes value, bitsize and address of one item of read-back global configuration to given addresses
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->GetGlobalRBVarAddVal(Variable, Address, Size, Value); 
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->GetGlobalRBVarAddVal(Variable, Address, Size, Value); 
 }
 
 void USBpix::GetPixelVarAddVal(int Variable, int& Address, int& Size, int& Value, int latch, int chip_addr) // writes value, bitsize and address of one item of pixel configuration to given addresses
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->GetPixelVarAddVal(Variable, Address, Size, Value, latch); 
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->GetPixelVarAddVal(Variable, Address, Size, Value, latch); 
 }
-
-//void USBpix::GetPixelRBVarAddVal(int Variable, int& Address, int& Size, int& Value, int latch, int chip_addr) // writes value, bitsize and address of one item of read-back pixel configuration to given addresses
-//{
-//	if (chip_addr == myChipAdd0)
-//		confFEMem1->GetPixelRBVarAddVal(Variable, Address, Size, Value, latch);
-//
-//	else if (chip_addr == myChipAdd1)
-//		confFEMem0->GetPixelRBVarAddVal(Variable, Address, Size, Value, latch);
-//}
 
 void USBpix::GetPixelRBVarAddVal(int Variable, int& Address, int& Size, int& Value, int latch, bool bypass, int chip_addr)
 {
-  if (MultiChipWithSingleBoard && ((chip_addr == myChipAdd.at(0)) || (!bypass)))
+  if ((chip_addr == myChipAdd.at(0)) || (!bypass))
   {
     ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
     femem->GetPixelRBVarAddVal(Variable, Address, Size, Value, latch, bypass); 
-  }
-  else if (chip_addr == myChipAdd.at(0))
-    confFEMem.at(0)->GetPixelRBVarAddVal(Variable, Address, Size, Value, latch, bypass);
-}
-
-void USBpix::SetChipAdd(int new_chip_add, int chip_addr) // sets chip address
-{
-  if (MultiChipWithSingleBoard)
-  {
-    throw WrongMultiBoardMode("USBpix::SetChipAdd can not be called when "
-        "MultiChipWithSingleBoard == true");
-  }
-
-  if (chip_addr == myChipAdd.at(0))
-  {
-    myChipAdd.at(0) = new_chip_add;
-    confFEMem.at(0)->SetChipAdd(new_chip_add);
   }
 }
 
 void USBpix::SetChipAddByIndex(int new_chip_add, int chip_index) // sets chip address
 {
-  if (!MultiChipWithSingleBoard)
-  {
-    throw WrongMultiBoardMode("USBpix::SetChipAddByIndex can not be called "
-        "when MultiChipWithSingleBoard == false");
-  }
-
   myChipAdd.at(chip_index) = new_chip_add;
   confFEMem.at(chip_index)->SetChipAdd(new_chip_add);
 }
 
 void USBpix::SendReadErrors(int chip_addr) // sends a global pulse to read error counters
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->SendReadErrors(); 
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->SendReadErrors(); 
 }
 
 void USBpix::ReadEPROMvalues(int chip_addr) // Sends global pulse to read the values from EPROM to GR.
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->ReadEPROMvalues(); 
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->ReadEPROMvalues(); 
 }
 
 void USBpix::BurnEPROMvalues() // Burns to the EPROM whatever is stored in GR. Note that burning a 1 is non reversibel! Does not respect chip ID.
@@ -976,18 +813,14 @@ void USBpix::BurnEPROMvalues() // Burns to the EPROM whatever is stored in GR. N
 
 bool USBpix::ReadGADC(int GADCselect, int chip_addr)
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return femem->ReadGADC(GADCselect); 
-  else
-    return false;
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  return femem->ReadGADC(GADCselect); 
 }
 
 void USBpix::SendBitstream(unsigned char * bitstream, int bitsize, int chip_addr) // sends bitsream to FE
 {
-  ConfigFEMemory * femem = MultiChipWithSingleBoard ? confFEMem.at(ConvertChipAddrToIndex(chip_addr)) : confFEMem.at(0);
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    femem->SendBitstream(bitstream, bitsize);
+  ConfigFEMemory * femem = confFEMem.at(ConvertChipAddrToIndex(chip_addr));
+  femem->SendBitstream(bitstream, bitsize);
 }
 
 std::string USBpix::getGlobalVarName(int Variable)
@@ -1081,375 +914,311 @@ int USBpix::IndexToRegisterNumber(int the_index)   // needed to hide FE-I4 / FE-
  
 void USBpix::ResetAll() // sets all registers in the fpga to zero
 {
-	confReg1->ResetAll();
+	confReg->ResetAll();
 }
 
 	// access to FPGA configuration registers
  int USBpix::ReadRegister(int CS) // read 8bit register, wrapper for ReadXilinx() to protect against accidental misuse
  {
-	 return confReg1->ReadRegister(CS); // also for board 1 needed? Very likely not...
+	 return confReg->ReadRegister(CS); // also for board 1 needed? Very likely not...
  }
 void USBpix::WriteRegister(int CS, int data) // write 8bit register, wrapper for WriteXilinx() to protect against accidental misuse
 {
-	confReg1->WriteRegister(CS, data); // Needed for both boards, as needed for histogramming
+	confReg->WriteRegister(CS, data); // Needed for both boards, as needed for histogramming
 }
 	//---write strb & LV1 registers---------------
 void USBpix::WriteStrbSave(unsigned char *data) // saves all parameters for injection / LV1 generating state machine
 {
-	confReg1->WriteStrbSave(data); // only board 0 can inject or trigger...
+	confReg->WriteStrbSave(data); // only board 0 can inject or trigger...
 }
 
 void USBpix::WriteStrbStart() // start measurements / LV1 FSM
 {
-	confReg1->WriteStrbStart(); // only board 0 can trigger and inject
+	confReg->WriteStrbStart(); // only board 0 can trigger and inject
 }
 
 void USBpix::WriteStrbStop() // stop measurements / LV1 FSM
 {
-	confReg1->WriteStrbStop(); // only board 0 can trigger and inject
+	confReg->WriteStrbStop(); // only board 0 can trigger and inject
 }
 	//---write ConfigSM registers-----------------
 void USBpix::SetCableLengthReg(int value)
 {
-	confReg1->SetCableLengthReg(value); // only in single chip mode CMOS is used...
+	confReg->SetCableLengthReg(value); // only in single chip mode CMOS is used...
 }
 
 //void USBpix::WriteFEMemBlockRAMReset() // resets BlockRAM. FE-configurations are stored in the BlockRAM
 //{
-//	confReg1->WriteFEMemBlockRAMReset(); // only board 0 can cfg chips...		
+//	confReg->WriteFEMemBlockRAMReset(); // only board 0 can cfg chips...		
 //}
 
 void USBpix::resetRunModeAdd()
 {
-	confReg1->resetRunModeAdd();
+	confReg->resetRunModeAdd();
 }
 
 void USBpix::SetCalibrationMode() // sets system to calibration mode (HIT-HISTOGRAMMING)
 {
-	confReg1->SetCalibrationMode();
+	confReg->SetCalibrationMode();
 }
 
 void USBpix::SetRunMode() // sets system to run mode (FULL DATA STORAGE)
 {
-	confReg1->SetRunMode();
+	confReg->SetRunMode();
 }
 
 void USBpix::SetTOTMode() // sets system to tot mode (TOT-HISTOGRAMMING)
 {
-	confReg1->SetTOTMode();
+	confReg->SetTOTMode();
 }
 
 void USBpix::SetTLUMode() // sets system to TLU Mode (FULL DATA Storage + Trigger Number recieved from TLU)
 {
-	confReg1->SetTLUMode();								// NEEDS WORK FOR 2nd BOARD !!! DATA SYNCHRONISATION WITH FIRST BOARD...
+	confReg->SetTLUMode();								// NEEDS WORK FOR 2nd BOARD !!! DATA SYNCHRONISATION WITH FIRST BOARD...
 }
 
 void USBpix::WriteStrbQuantity(int value) // writes quantity of generated strobe and LV1 signals
 {
-	confReg1->WriteStrbQuantity(value); // only board 0 can strobe or trigger, but board 1 needs to know also...
+	confReg->WriteStrbQuantity(value); // only board 0 can strobe or trigger, but board 1 needs to know also...
 }
 
 void USBpix::enableExtLV1() // sets TriggerMode to 2 => simple external trigger via LEMO or RJ45
 {
 	// both boards need to know for FE selftriggering
-	confReg1->enableExtLV1();
+	confReg->enableExtLV1();
 }
 
 void USBpix::disableExtLV1() // disables external triggers via LEMO (TX0) or ethernet connector
 {
 	// both boards need to know for FE selftriggering
-	confReg1->disableExtLV1();
+	confReg->disableExtLV1();
 }
 
 void USBpix::setTriggerMode(int TriggerMode) // sets mode for external triggers via LEMO, RJ45 or MULTI_IO pins: enum TriggerType    {STROBE_SCAN=0, USBPIX_SELF_TRG=1, EXT_TRG=2,TLU_SIMPLE=3, TLU_DATA_HANDSHAKE=4, USBPIX_REPLICATION_SLAVE=5};
 
 {
-	confReg1->setTriggerMode(TriggerMode);								// Use Trigger Repli for second 2nd BOARD !!!
+	confReg->setTriggerMode(TriggerMode);								// Use Trigger Repli for second 2nd BOARD !!!
 }
 
 void USBpix::enableTriggerReplicationMaster() // enables forwarding of triggers via MULTI_IO pins
 {
-	confReg1->enableTriggerReplicationMaster();		//	Board one should be master...
+	confReg->enableTriggerReplicationMaster();		//	Board one should be master...
 }
 
 void USBpix::disableTriggerReplicationMaster() // disables forwarding of triggers via MULTI_IO pins
 {
-	confReg1->disableTriggerReplicationMaster();		//	Board one should be master...
+	confReg->disableTriggerReplicationMaster();		//	Board one should be master...
 }
 
 void USBpix::enable_8b10_Decoding() // enables decoding
 {
-	confReg1->enable_8b10_Decoding();		//	MUST be the same for all Boards...
+	confReg->enable_8b10_Decoding();		//	MUST be the same for all Boards...
 }
 
 void USBpix::disable_8b10_Decoding() // disables decoding
 {
-	confReg1->disable_8b10_Decoding();		//	MUST be the same for all Boards...
+	confReg->disable_8b10_Decoding();		//	MUST be the same for all Boards...
 }
 
 void USBpix::enableCMDLV1() // sets LV1 generating state machine to CMD mode
 {
-	confReg1->enableCMDLV1();		//	Can be the same for all Boards...
+	confReg->enableCMDLV1();		//	Can be the same for all Boards...
 }
 
 void USBpix::disableCMDLV1() // sets LV1 generating state machine to external pad mode
 {
-	confReg1->disableCMDLV1();		//	Can be the same for all Boards...
+	confReg->disableCMDLV1();		//	Can be the same for all Boards...
 }
-
-//void USBpix::EnablePowerChannel(bool on_off, int channel) // disables/enables power channel number "channel", channel defined in defines.h
-//{
-//	confReg1->EnablePowerChannel(on_off, channel);		//	Should it be the same for all Boards? Powering still an open question...
-//	if (myChipAdd1 != 999)
-//		confReg0->EnablePowerChannel(on_off, channel);
-//}
 
 void USBpix::stopXCK(bool status)
 {
-	confReg1->stopXCK(status);   // only board 0 provides module clk...
+  confReg->stopXCK(status);   // only board 0 provides module clk...
 }
 
 void USBpix::SetAuxClkFreq(int freq)
 {
-	confReg1->SetAuxClkFreq(freq);   // No AuxClk on modules anyway...
+  confReg->SetAuxClkFreq(freq);   // No AuxClk on modules anyway...
 }
 
-void USBpix::incr_phase_shift(int chip_addr) // increments incoming data synchronization by 1/256 clock duration
+void USBpix::incr_phase_shift() // increments incoming data synchronization by 1/256 clock duration
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->incr_phase_shift();
+  confReg->incr_phase_shift();
 }
 
-void USBpix::decr_phase_shift(int chip_addr) // decrements incoming data synchronization by 1/256 clock duration
+void USBpix::decr_phase_shift() // decrements incoming data synchronization by 1/256 clock duration
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->decr_phase_shift();
+  confReg->decr_phase_shift();
 }
 
-bool USBpix::check_phase_shift_overflow(int chip_addr) // checks for overflow of phase shift
+bool USBpix::check_phase_shift_overflow() // checks for overflow of phase shift
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->check_phase_shift_overflow();
-  else
-    return false;
+  return confReg->check_phase_shift_overflow();
 }
 
-double USBpix::StartSyncCheck(double min_BitErrorRate, int chip_addr) // starts synchro checker until min_BitErrorRate was achieved
+double USBpix::StartSyncCheck(double min_BitErrorRate) // starts synchro checker until min_BitErrorRate was achieved
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->StartSyncCheck(min_BitErrorRate);
-  else
-    return -1;
+  return confReg->StartSyncCheck(min_BitErrorRate);
 }
 
-bool USBpix::StartSyncScan(double min_BitErrorRate, int chip_addr)  // Scans for opimal Sync clk-phase 
+bool USBpix::StartSyncScan(double min_BitErrorRate)  // Scans for opimal Sync clk-phase 
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->StartSyncScan(min_BitErrorRate);
-  else
-  	return false;
+  return confReg->StartSyncScan(min_BitErrorRate);
 }
 
-void USBpix::StoreSyncCheckPattern(int chip_addr) // stores new SyncCheckPattern
+void USBpix::StoreSyncCheckPattern() // stores new SyncCheckPattern
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->StoreSyncCheckPattern();
+  confReg->StoreSyncCheckPattern();
 }
 
-void USBpix::ResetSyncCheckPattern(int chip_addr) // resets SyncCheckPattern
+void USBpix::ResetSyncCheckPattern() // resets SyncCheckPattern
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ResetSyncCheckPattern();
+  confReg->ResetSyncCheckPattern();
 }
 
-void USBpix::ResetSRAMCounter(int chip_addr) // set SRAM address to 0
+void USBpix::ResetSRAMCounter() // set SRAM address to 0
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ResetSRAMCounter();
+  confReg->ResetSRAMCounter();
 }
 
-void USBpix::SetSRAMCounter(int startadd, int chip_addr) // set RAM address to any value
+void USBpix::SetSRAMCounter(int startadd) // set RAM address to any value
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->SetSRAMCounter(startadd);
+  confReg->SetSRAMCounter(startadd);
 }
 
-void USBpix::ReadSRAM(int chip_addr) // reads complete SRAM, further data handling dependent on system mode
+void USBpix::ReadSRAM() // reads complete SRAM, further data handling dependent on system mode
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ReadSRAM();
+  confReg->ReadSRAM();
 }
 
-void USBpix::ReadSRAM(int scan_nr, int chip_addr) // reads complete SRAM, further data handling dependent on system mode and fills correct scansteps of ConfData
+void USBpix::ReadSRAM(int scan_nr) // reads complete SRAM, further data handling dependent on system mode and fills correct scansteps of ConfData
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ReadSRAM(scan_nr);
+  confReg->ReadSRAM(scan_nr);
 }
 
-void USBpix::ReadSRAM(int StartAdd, int NumberOfWords, int chip_addr) // reads SRAM partially
+void USBpix::ReadSRAM(int StartAdd, int NumberOfWords) // reads SRAM partially
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ReadSRAM(StartAdd, NumberOfWords);
+  confReg->ReadSRAM(StartAdd, NumberOfWords);
 }
 
-void USBpix::ClearSRAM(int chip_addr) // clears SRAM
+void USBpix::ClearSRAM() // clears SRAM
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ClearSRAM();
+  confReg->ClearSRAM();
 }
 
-void USBpix::WriteSRAM(int StartAdd, int NumberOfWords, int chip_addr) // writes SRAM, only for debugging purposes needed
+void USBpix::WriteSRAM(int StartAdd, int NumberOfWords) // writes SRAM, only for debugging purposes needed
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->WriteSRAM(StartAdd, NumberOfWords);
+  confReg->WriteSRAM(StartAdd, NumberOfWords);
 }
 
 void USBpix::GetConfHisto(int col, int row, int confstep, int &Value, int chip_addr) // writes histogram-value for col, row, step to &Value (needs calibration mode)
 {
-  if (MultiChipWithSingleBoard)
-  {
-    int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
-    confReg1->GetConfHisto(col, row, confstep, roch, Value);
-  }
-  else if (chip_addr == myChipAdd.at(0))		// needs to be called for both boards independently for sure!!!
-    confReg1->GetConfHisto(col, row, confstep, 0, Value);
+  int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
+  confReg->GetConfHisto(col, row, confstep, roch, Value);
 }
 
 void USBpix::GetTOTHisto(int col, int row, int tot, int& Value, int chip_addr)
 {
-  if (MultiChipWithSingleBoard)
-  {
-    int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
-    confReg1->GetTOTHisto(col, row, tot, Value, roch);
-  }
-  else if (chip_addr == myChipAdd.at(0))		// needs to be called for both boards independently for sure!!!
-    confReg1->GetTOTHisto(col, row, tot, Value);
+  int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
+  confReg->GetTOTHisto(col, row, tot, Value, roch);
 }
 
-void USBpix::ClearTOTHisto(int chip_addr)
+void USBpix::ClearTOTHisto()
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ClearTOTHisto();
+  confReg->ClearTOTHisto();
 }
 
-void USBpix::ClearConfHisto(int chip_addr)
+void USBpix::ClearConfHisto()
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ClearConfHisto();
+  confReg->ClearConfHisto();
 }
 
 void USBpix::GetHitLV1HistoFromRawData(int LV1ID, int& Value, int chip_addr)
 {
-  if (MultiChipWithSingleBoard)
-  {
-    int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
-    confReg1->GetHitLV1HistoFromRawData(LV1ID, Value, roch);
-  }
-  else if (chip_addr == myChipAdd.at(0))		// needs to be called for both boards independently for sure!!!
-    confReg1->GetHitLV1HistoFromRawData(LV1ID, Value, 0);
+  int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
+  confReg->GetHitLV1HistoFromRawData(LV1ID, Value, roch);
 }
 
 
 void USBpix::GetLV1IDHistoFromRawData(int LV1ID, int& Value, int chip_addr)
 {
-  if (MultiChipWithSingleBoard)
-  {
-    int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
-    confReg1->GetLV1IDHistoFromRawData(LV1ID, Value, roch);
-  }
-  else if (chip_addr == myChipAdd.at(0))		// needs to be called for both boards independently for sure!!!
-    confReg1->GetLV1IDHistoFromRawData(LV1ID, Value, 0);
+  int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
+  confReg->GetLV1IDHistoFromRawData(LV1ID, Value, roch);
 }
 
 void USBpix::GetBCIDHistoFromRawData(int BCID, int& Value, int chip_addr)
 {
-  if (MultiChipWithSingleBoard)
-  {
-    int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
-    confReg1->GetBCIDHistoFromRawData(BCID, Value, roch);
-  }
-  else if (chip_addr == myChipAdd.at(0))		// needs to be called for both boards independently for sure!!!
-    confReg1->GetBCIDHistoFromRawData(BCID, Value, 0);
+  int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
+  confReg->GetBCIDHistoFromRawData(BCID, Value, roch);
 }
 
-void USBpix::ClearHitLV1HistoFromRawData(int chip_addr)
+void USBpix::ClearHitLV1HistoFromRawData()
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ClearHitLV1HistoFromRawData();
+  confReg->ClearHitLV1HistoFromRawData();
 }
 
-void USBpix::ClearLV1IDHistoFromRawData(int chip_addr)
+void USBpix::ClearLV1IDHistoFromRawData()
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ClearLV1IDHistoFromRawData();
+  confReg->ClearLV1IDHistoFromRawData();
 }
 
-void USBpix::ClearBCIDHistoFromRawData(int chip_addr)
+void USBpix::ClearBCIDHistoFromRawData()
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->ClearBCIDHistoFromRawData();
+  confReg->ClearBCIDHistoFromRawData();
 }
 
 void USBpix::SetDisableScaStrb(bool value)
 {
-  confReg1->SetDisableScaStrb(value);
+  confReg->SetDisableScaStrb(value);
 }
 
 void USBpix::SetDisableGpacStrb(bool value)
 {
-  confReg1->SetDisableGpacStrb(value);
+  confReg->SetDisableGpacStrb(value);
 }
 
 void USBpix::SetFineStrbDelay(int delay)
 {
-  confReg1->SetFineStrbDelay(delay);
+  confReg->SetFineStrbDelay(delay);
 }
 
 void USBpix::SetTX2Output(short value)
 {
-  confReg1->SetTX2Output(value);
+  confReg->SetTX2Output(value);
 }
 
 	// cluster histograms
-void USBpix::GetClusterSizeHistoFromRawData(int Size, int& Value, int chip_addr)
+void USBpix::GetClusterSizeHistoFromRawData(int Size, int& Value)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->GetClusterSizeHistoFromRawData(Size, Value);
+  confReg->GetClusterSizeHistoFromRawData(Size, Value);
 }
 
-void USBpix::GetClusterTOTHistoFromRawData(int TOT, int Size, int& Value, int chip_addr)
+void USBpix::GetClusterTOTHistoFromRawData(int TOT, int Size, int& Value)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->GetClusterTOTHistoFromRawData(TOT, Size, Value);
+  confReg->GetClusterTOTHistoFromRawData(TOT, Size, Value);
 }
 
-void USBpix::GetClusterChargeHistoFromRawData(int pCharge, int pSize, int& rValue, int pChipAddr)
+void USBpix::GetClusterChargeHistoFromRawData(int pCharge, int pSize, int& rValue)
 {
-  if(MultiChipWithSingleBoard || pChipAddr == myChipAdd.at(0))
-    confReg1->GetClusterChargeHistoFromRawData(pCharge, pSize, rValue);
+  confReg->GetClusterChargeHistoFromRawData(pCharge, pSize, rValue);
 }
 
-void USBpix::GetClusterPositionHistoFromRawData(int pX, int pY, int& rValue, int pChipAddr)
+void USBpix::GetClusterPositionHistoFromRawData(int pX, int pY, int& rValue)
 {
-  if(MultiChipWithSingleBoard || pChipAddr == myChipAdd.at(0))
-    confReg1->GetClusterPositionHistoFromRawData(pX, pY, rValue);
+  confReg->GetClusterPositionHistoFromRawData(pX, pY, rValue);
 }
 
-bool USBpix::WriteFileFromRawData(std::string filename, int chip_addr, bool new_file, bool close_file) // new raw data format, human & machine readable file format
+bool USBpix::WriteFileFromRawData(std::string filename, bool new_file, bool close_file) // new raw data format, human & machine readable file format
 {
-  if (MultiChipWithSingleBoard)
-  {
+  bool retval=true;
+  for(auto chip_addr : myChipAdd){
     int roch = ReadoutChannelAssoc.at(ConvertChipAddrToIndex(chip_addr));
-    return confReg1->WriteFileFromRawData(filename, new_file, close_file, roch);
+    retval &= confReg->WriteFileFromRawData(filename, new_file, close_file, roch);
   }
-  else if (chip_addr == myChipAdd.at(0))		// needs to be called for both boards independently for sure!!!
-    return confReg1->WriteFileFromRawData(filename, new_file, close_file, 0);
-  else
-    return false;
+  return retval;
 }
 void USBpix::FinishFileFromRawData(std::string filename)
 {
-	confReg1->FinishFileFromRawData(filename);
+  confReg->FinishFileFromRawData(filename);
 }
   
 bool USBpix::isTot14SuppressionRequired()
@@ -1486,245 +1255,208 @@ bool USBpix::isTot14SuppressionRequired()
   return suppress_tot_14;
 }
 
-void USBpix::FillHistosFromRawData(int pChipAddress)
+void USBpix::FillHistosFromRawData()
 {
   bool suppress_tot_14 = isTot14SuppressionRequired();
-
-  if(MultiChipWithSingleBoard || pChipAddress == myChipAdd.at(0))
-    confReg1->FillHistosFromRawData(suppress_tot_14);
+  confReg->FillHistosFromRawData(suppress_tot_14);
 }
 
-bool USBpix::ClusterRawData(int pChipAddress, int pColumnRange, int pRowRange, int pTimeRange, int pMinClusterSize, int pMaxClusterSize, int pMaxHitTot, int pMaxEventsIncomplete, int pMaxEventsErrors)
+bool USBpix::ClusterRawData(int pColumnRange, int pRowRange, int pTimeRange, int pMinClusterSize, int pMaxClusterSize, int pMaxHitTot, int pMaxEventsIncomplete, int pMaxEventsErrors)
 {
-  if(MultiChipWithSingleBoard || pChipAddress == myChipAdd.at(0))
-    return confReg1->ClusterRawData(pColumnRange, pRowRange, pTimeRange, pMinClusterSize, pMaxClusterSize, pMaxHitTot, pMaxEventsIncomplete, pMaxEventsErrors);
-  else
-    return false;
+  return confReg->ClusterRawData(pColumnRange, pRowRange, pTimeRange, pMinClusterSize, pMaxClusterSize, pMaxHitTot, pMaxEventsIncomplete, pMaxEventsErrors);
 }
 
-void USBpix::ResetClusterCounters(int pChipAddress)
+void USBpix::ResetClusterCounters()
 {
-  if(MultiChipWithSingleBoard || pChipAddress == myChipAdd.at(0))
-		confReg1->ResetClusterCounters();
+  confReg->ResetClusterCounters();
 }
 
-bool USBpix::FileSaveRB(const char *filename, int event_quant, bool attach_data, int chip_addr) // old raw data format
+bool USBpix::FileSaveRB(const char *filename, int event_quant, bool attach_data) // old raw data format
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->FileSaveRB(filename, event_quant, attach_data);
-  else
-    return false;
+  return confReg->FileSaveRB(filename, event_quant, attach_data);
 }
 
-bool USBpix::CheckDataConsisty(const char * filename, bool attach_data, bool write_summary, int chip_addr)
+bool USBpix::CheckDataConsisty(const char * filename, bool attach_data, bool write_summary)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-		return confReg1->CheckDataConsisty(filename, attach_data, write_summary);
-	else
-		return false;
+  return confReg->CheckDataConsisty(filename, attach_data, write_summary);
 }
 
-bool USBpix::WriteToTHisto(const char *filename, int chip_addr)
+bool USBpix::WriteToTHisto(const char *filename)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->WriteToTHisto(filename);
-  else
-    return false;
+  return confReg->WriteToTHisto(filename);
 }
 
-bool USBpix::WriteConfHisto(const char *filename, int chip_addr)
+bool USBpix::WriteConfHisto(const char *filename)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->WriteConfHisto(filename);
-  else
-	return false;
+  return confReg->WriteConfHisto(filename);
 }
 
 void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate)
 {
-    confReg1->GetSourceScanStatus(SRAMFull, MeasurementRunning, SRAMFillLevel, CollectedEvents, TriggerRate, EventRate);
+    confReg->GetSourceScanStatus(SRAMFull, MeasurementRunning, SRAMFillLevel, CollectedEvents, TriggerRate, EventRate);
 }
 
 // overloaded to add TLU veto flag while keeping compatability
 void USBpix::GetSourceScanStatus(bool &SRAMFull, bool &MeasurementRunning, int &SRAMFillLevel, int &CollectedEvents, int &TriggerRate, int &EventRate, bool &TluVeto)
 {
-    confReg1->GetSourceScanStatus(SRAMFull, MeasurementRunning, SRAMFillLevel, CollectedEvents,
+    confReg->GetSourceScanStatus(SRAMFull, MeasurementRunning, SRAMFillLevel, CollectedEvents,
                 TriggerRate, EventRate, TluVeto);
 }
 
-void USBpix::BuildWords(int chip_addr) // in run mode: makes array of words out of character array
+void USBpix::BuildWords() // in run mode: makes array of words out of character array
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->BuildWords();
+  confReg->BuildWords();
 }
 
-bool USBpix::WriteSRAMWords(char* filename, int chip_addr)
+bool USBpix::WriteSRAMWords(char* filename)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->WriteSRAMWords(filename);
-  else
-    return false;
+  return confReg->WriteSRAMWords(filename);
 }
 
-bool USBpix::WriteSRAMBitsFromWords(char *filename, int chip_addr)
+bool USBpix::WriteSRAMBitsFromWords(char *filename)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->WriteSRAMBitsFromWords(filename);
-  else
-    return false;
+  return confReg->WriteSRAMBitsFromWords(filename);
 }
 
-bool USBpix::WriteSRAMBytes(char* filename, int chip_addr)
+bool USBpix::WriteSRAMBytes(char* filename)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->WriteSRAMBytes(filename);
-  else
-    return false;
+  return confReg->WriteSRAMBytes(filename);
 }
 
-bool USBpix::WriteSRAMBitsFromBytes(char *filename, int chip_addr)
+bool USBpix::WriteSRAMBitsFromBytes(char *filename)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->WriteSRAMBitsFromBytes(filename);
-  else
-    return false;
+  return confReg->WriteSRAMBitsFromBytes(filename);
 }
 
 void USBpix::GetSystemMode(bool &CalMode, bool &TOTMode)
 {
-	confReg1->GetSystemMode(CalMode, TOTMode); // both systems MUST always be in the same mode...
+	confReg->GetSystemMode(CalMode, TOTMode); // both systems MUST always be in the same mode...
 }
 
 void USBpix::SetMeasurementMode(int mode) // selects which events to count (LV1, DH, DR...)
 {
-	confReg1->SetMeasurementMode(mode); // both systems MUST always be in the same mode...
+	confReg->SetMeasurementMode(mode); // both systems MUST always be in the same mode...
 }
 
 void USBpix::StartMeasurement()
 {
-	confReg1->StartMeasurement();		//	MUST be the same for all Boards...
+	confReg->StartMeasurement();		//	MUST be the same for all Boards...
 }
   
 void USBpix::StopMeasurement()
 {
-	confReg1->StopMeasurement();		//	MUST be the same for all Boards...
+	confReg->StopMeasurement();		//	MUST be the same for all Boards...
 }
 
 void USBpix::PauseMeasurement()
 {
-	confReg1->PauseMeasurement();		//	MUST be the same for all Boards...
+	confReg->PauseMeasurement();		//	MUST be the same for all Boards...
 }
 
 void USBpix::ResumeMeasurement()
 {
-	confReg1->ResumeMeasurement();		//	MUST be the same for all Boards...
+	confReg->ResumeMeasurement();		//	MUST be the same for all Boards...
 }
 
 void USBpix::SetNumberOfEvents(int data)
 {
-	confReg1->SetNumberOfEvents(data);		//	Counts only #events for chip 0, except Lv1 triggers. Just to be sure, real stop will be done in software.
+	confReg->SetNumberOfEvents(data);		//	Counts only #events for chip 0, except Lv1 triggers. Just to be sure, real stop will be done in software.
 }
 
 void USBpix::SetSramReadoutThreshold(int data)
 {
-	confReg1->SetSramReadoutThreshold(data);
+	confReg->SetSramReadoutThreshold(data);
 }
 
 // readback state of TLU veto
 bool USBpix::GetTluVetoFlag()
 {
-    return confReg1->GetTluVetoFlag();
+    return confReg->GetTluVetoFlag();
 }
 
  int USBpix::GetCountedEvents()
 {
-	return confReg1->GetCountedEvents();
+	return confReg->GetCountedEvents();
 }
 
 void USBpix::GetScanStatus(bool & scanReady, bool & scanCancelled, bool & scanError, int & scanStep)
 {
-	confReg1->GetScanStatus(scanReady, scanCancelled, scanError, scanStep);		//	Scan status only in board 0...
+	confReg->GetScanStatus(scanReady, scanCancelled, scanError, scanStep);		//	Scan status only in board 0...
 }
 
 void USBpix::SetScanReady()
 {
-	confReg1->SetScanReady();		//	Scan status only in board 0...
+	confReg->SetScanReady();		//	Scan status only in board 0...
 }
 
 void USBpix::SetScanCancelled()
 {
-	confReg1->SetScanCancelled();		//	Scan status only in board 0...
+	confReg->SetScanCancelled();		//	Scan status only in board 0...
 }
 
 void USBpix::SetScanError()
 {
-	confReg1->SetScanError();		//	Scan status only in board 0...
+	confReg->SetScanError();		//	Scan status only in board 0...
 }
 
 void USBpix::ResetScanStatus()
 {
-	confReg1->ResetScanStatus();		//	Scan status only in board 0...
+	confReg->ResetScanStatus();		//	Scan status only in board 0...
 }
 
- int USBpix::GetCurrentPhaseshift(int chip_addr)
+ int USBpix::GetCurrentPhaseshift()
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    return confReg1->GetCurrentPhaseshift();
-  else
-    return -1;
+  return confReg->GetCurrentPhaseshift();
 }
 
-void USBpix::SetCurrentPhaseshift(int value, int chip_addr)
+void USBpix::SetCurrentPhaseshift(int value)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->SetCurrentPhaseshift(value);
+  confReg->SetCurrentPhaseshift(value);
 }
 
 bool USBpix::CheckRX0State()
 {
-	return confReg1->CheckRX0State();		//	Status only in board 0...
+  return confReg->CheckRX0State();		//	Status only in board 0...
 }
 
 bool USBpix::CheckRX1State()
 {
-	return confReg1->CheckRX1State();		//	Status only in board 0...
+  return confReg->CheckRX1State();		//	Status only in board 0...
 }
 
 bool USBpix::CheckRX2State()
 {
-	return confReg1->CheckRX2State();		//	Status only in board 0...
+  return confReg->CheckRX2State();		//	Status only in board 0...
 }
 
 bool USBpix::CheckExtTriggerState()
 {
-	return confReg1->CheckExtTriggerState();		//	Status only in board 0...
+  return confReg->CheckExtTriggerState();		//	Status only in board 0...
 }
 
-void USBpix::GetSyncScanResult(double* dataX, double* dataY, int size, int chip_addr)
+void USBpix::GetSyncScanResult(double* dataX, double* dataY, int size)
 {
-  if(MultiChipWithSingleBoard || chip_addr == myChipAdd.at(0))
-    confReg1->GetSyncScanResult(dataX, dataY, size);
+  confReg->GetSyncScanResult(dataX, dataY, size);
 }
 
 void USBpix::GetSRAMWordsRB(unsigned int* data, int size, int chip_addr)
 {
-  confReg1->GetSRAMWordsRB(data, size, chip_addr);
+  confReg->GetSRAMWordsRB(data, size, chip_addr);
 }
 
-void USBpix::SetChargeCalib(int pChipAddress, unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge)
+void USBpix::SetChargeCalib(unsigned int pCol, unsigned int pRow, unsigned int pTot, float pCharge)
 {
-  if(MultiChipWithSingleBoard || pChipAddress == myChipAdd.at(0))
-    confReg1->SetChargeCalib(pCol, pRow, pTot, pCharge);
+  confReg->SetChargeCalib(pCol, pRow, pTot, pCharge);
 }
  
 void USBpix::EnableManEnc(bool on_off)
 {
-	confReg1->EnableManEnc(on_off); // Only board 0 sends anything
+	confReg->EnableManEnc(on_off); // Only board 0 sends anything
 }
 
 void USBpix::SetManEncPhase(int phase)
 {
-	confReg1->SetManEncPhase(phase); // Only board 0 sends anything
+	confReg->SetManEncPhase(phase); // Only board 0 sends anything
 }
 
 void USBpix::initializeChips(std::vector<int> chipAdds)
@@ -1747,8 +1479,7 @@ void USBpix::initializeChips()
 
   for(auto cit : myChipAdd)
   {
-    confFEMem.push_back(new ConfigFEMemory(cit, myModAdd, myUSB0,
-          confReg1, FEI4B, index));
+    confFEMem.push_back(new ConfigFEMemory(cit, myUSB, confReg, FEI4B, index));
     index++;
   }
 }
@@ -1763,17 +1494,12 @@ size_t USBpix::ConvertChipAddrToIndex(int chip_addr)
 
 void USBpix::SetAdapterCardFlavor(int flavor)
 {
-  confReg1->SetAdapterCardFlavor(flavor);
+  confReg->SetAdapterCardFlavor(flavor);
 }
 
 
 int USBpix::detectReadoutChannel(int chipid)
 {
-	if (!MultiChipWithSingleBoard)
-  {
-    return -1;
-  }
-
   const bool debug_detection = false;
   
   int test_register = 0;

@@ -33,11 +33,9 @@ void __stdcall debug_out(std::string text)
 
 //---Konstruktor/Destruktor----------
 
-ConfigFEMemory::ConfigFEMemory(int c_add, int m_add, SiUSBDevice * Handle, 
-    ConfigRegister * cR, bool isFEI4B, int index)
+ConfigFEMemory::ConfigFEMemory(int c_add, SiUSBDevice * Handle, ConfigRegister * cR, bool isFEI4B, int index)
 {
 	chip_addr = c_add;
-	mod_addr  = m_add;
 	myUSB = Handle;
 	FEI4B = isFEI4B;
   this->index = index;
@@ -3434,4 +3432,22 @@ bool ConfigFEMemory::dummyRegisterSelected()
       return false;
   }
   return true;
+}
+void ConfigFEMemory::SetAndWriteCOLPRReg(int colpr_mode, int colpr_addr)
+{
+  int colpr_mode_reg, colpr_addr_reg;
+  if(FEI4B)
+  {
+    colpr_mode_reg = B_COLPR_MODE;
+    colpr_addr_reg = B_COLPR_ADDR;
+  }
+  else
+  {
+    colpr_mode_reg = COLPR_MODE;
+    colpr_addr_reg = COLPR_ADDR;
+  }
+
+  SetGlobalVal(colpr_mode_reg, colpr_mode);
+  SetGlobalVal(colpr_addr_reg, colpr_addr);
+  WriteGlobal(IndexToRegisterNumber(colpr_addr_reg));
 }

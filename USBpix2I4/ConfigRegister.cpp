@@ -36,49 +36,47 @@ struct sp {
   ~sp() {delete[] p;}
 };
 
-ConfigRegister::ConfigRegister(SiUSBDevice * Handle, bool isFEI4B, 
-    bool MultiChipWithSingleBoard):
-  ConfHisto(MultiChipWithSingleBoard?MAX_CHIP_COUNT:1, 
+ConfigRegister::ConfigRegister(SiUSBDevice * Handle, bool isFEI4B) :
+  ConfHisto(MAX_CHIP_COUNT, 
     std::vector<std::vector<std::vector<int> > > (80,
       std::vector<std::vector<int> > (336,
         std::vector<int> (1024)
       )
     )
   ),
-  TOTHisto(MultiChipWithSingleBoard?MAX_CHIP_COUNT:1, 
+  TOTHisto(MAX_CHIP_COUNT, 
     std::vector<std::vector<std::vector<int> > > (80,
       std::vector<std::vector<int> > (336,
         std::vector<int> (16)
       )
     )
   ),
-  HitLV1Histo(MultiChipWithSingleBoard?MAX_CHIP_COUNT:1,
+  HitLV1Histo(MAX_CHIP_COUNT,
     std::vector<int>(16)
   ),
-  LV1IDHisto(MultiChipWithSingleBoard?MAX_CHIP_COUNT:1,
+  LV1IDHisto(MAX_CHIP_COUNT,
     std::vector<int>(4096)
   ),
-  BCIDHisto(MultiChipWithSingleBoard?MAX_CHIP_COUNT:1,
+  BCIDHisto(MAX_CHIP_COUNT,
     std::vector<int>(8192)
   ),
 
   sram_cleared(false),
-  record_streams(MultiChipWithSingleBoard?MAX_CHIP_COUNT:1),
-  rawDataHistogrammers((MultiChipWithSingleBoard?MAX_CHIP_COUNT:1), RawDataHistogrammer(TOTHisto, ConfHisto, HitLV1Histo, LV1IDHisto, BCIDHisto, isFEI4B))
+  record_streams(MAX_CHIP_COUNT),
+  rawDataHistogrammers((MAX_CHIP_COUNT), RawDataHistogrammer(TOTHisto, ConfHisto, HitLV1Histo, LV1IDHisto, BCIDHisto, isFEI4B))
 {
-	this->myUSB = Handle;
-	this->FEI4B = isFEI4B;
-  this->MultiChipWithSingleBoard = MultiChipWithSingleBoard;
-
-	isCalMode = 0;
-	isTOTMode = 0;
-
-	m_lengthLVL1 = 0;
-
-	current_phaseshift = 0;
-	full_bcid = 0;
-	full_lv1id = 0;
-
+  this->myUSB = Handle;
+  this->FEI4B = isFEI4B;
+  
+  isCalMode = 0;
+  isTOTMode = 0;
+  
+  m_lengthLVL1 = 0;
+  
+  current_phaseshift = 0;
+  full_bcid = 0;
+  full_lv1id = 0;
+  
   for (std::vector<RecordStream*>::iterator it = record_streams.begin();
       it != record_streams.end(); it++)
   {

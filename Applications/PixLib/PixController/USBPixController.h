@@ -12,7 +12,6 @@
 
 #define PIXEL_REG_INT 90
 #define NSCANCFG 12
-#define NBOARDS_MAX 2
 
 #include <map>
 #include <string>
@@ -202,7 +201,7 @@ namespace PixLib {
       std::vector< Histo * > &noise,
       std::vector< Histo * > &chi2);                 //! Read a Fit from Dsp
     void clearSourceScanHistos();
-    void writeRawDataFile(bool close_file, int chipIndex);
+    void writeRawDataFile(bool close_file);
 
 
     //JW: Setup, start und stop Datennahme Run
@@ -225,7 +224,7 @@ namespace PixLib {
     int getCollectedHits() {return m_collectedHits;}
     int getTriggerRate() {return m_triggerRate;}
     int getEventRate() {return m_eventRate;}
-    bool getSourceScanData(std::vector<unsigned int *>* data, bool forceReadSram);
+    bool getSourceScanData(std::vector<unsigned int *>* /*data*/, bool /*forceReadSram*/){return false;};
 
     bool moduleActive(int nmod);            //! True if module is active during scan or run
 
@@ -265,17 +264,15 @@ namespace PixLib {
 
   private:
     void configInit();         //! Init configuration structure
-    void ClusterRawData(int pChipIndex);
+    void ClusterRawData();
     void sendPixel(unsigned int moduleMask, std::string regName, int DC, bool sendGlob) ;  //! mother of all send pixel register functions
-    void initHWMultipleBoards();
-    void initHWSingleBoard();
     int getFECount();
     void initChipIds();
     int detectAdapterCard(unsigned int boadId);
     void strobeScan(PixScan* scn);
     void sourceScan();
 
-    SiUSBDevice* m_BoardHandle[NBOARDS_MAX];        //! handle of one or two USB boards
+    SiUSBDevice* m_BoardHandle;        //! handle of USB board
 
     long int m_hscanDataSize;          //! Size of the scan data structure
     long int* m_hscanData;             //! Scan data structure
@@ -293,7 +290,7 @@ namespace PixLib {
 
     std::vector<unsigned char*> m_fifo;  //! JW: FIFO content
     std::string m_FPGA_filename, m_uC_filename;
-    int m_boardID[NBOARDS_MAX];
+    int m_boardID;
     int m_boardIDRB;
     int m_readoutSpeed;
     int m_triggerReplication;
