@@ -45,13 +45,10 @@
 #endif
 
 #include <QDateTime>
-#include <QDebug>
 #include <QFuture>
 #include <QtConcurrentRun>
 
 #include <TMath.h>
-
-#define STEP_DEBUG 0
 
 using namespace PixLib;
 using namespace SctPixelRod;
@@ -915,7 +912,6 @@ void STPixModuleGroup::CtrlThread::scan()
 	      getSTPixModuleGroup()->m_nMasks=tmpScans[ife]->getMaskStageIndex();
 	      
 	      // run all scans as usual - requires PixController to return immediately after scan init
-	      if(STEP_DEBUG) qDebug() << "Running scan in main thread!";
 	      getSTPixModuleGroup()->scanExecute(tmpScans[ife]);
 
 	      // wait till the controller knows it is in scanning mode
@@ -958,11 +954,6 @@ void STPixModuleGroup::CtrlThread::scan()
 	      int nAbortWait=0;
 
 		
-	      //For console output merely
-	      int debug_counter1 = 5;
-	      int debug_counter2 = 10;
-
-
 	      do{
 
 	
@@ -988,15 +979,6 @@ void STPixModuleGroup::CtrlThread::scan()
 		    getSTPixModuleGroup()->m_currTriggerRate = pc->getTriggerRate();
 		    getSTPixModuleGroup()->m_currEvtRate = pc->getEventRate();
 		   
-		    if(cfg.getTestBeamFlag()) {	
-				if(STEP_DEBUG) {
-			    	if(debug_counter1%5==0) {
-						qDebug() << "Board("<< pc->getBoardID() << ") SRAM_READOUT_AT: " <<cfg.getSramReadoutAt()
-						<< "%, Currently at: " <<getSTPixModuleGroup()->m_currSRAMFillLevel<<"%";
-					}
-			    	debug_counter1++;	
-				}
-			}
 		}
 
 		else if(cfg.getDspMaskStaging()) {
@@ -1023,12 +1005,12 @@ void STPixModuleGroup::CtrlThread::scan()
 		    getSTPixModuleGroup()->m_abortScan = false;
 		}
 		
-		// read buffer every now and then - only ROD
+		// read buffer every now and then
 		m_checkScanCount++;
 		int freq=10;
 		if(m_checkScanCount>100) freq=100;   //check less often for successful scans
 		if(m_checkScanCount>1000) freq=1000; //check even less often for long scans
-		if((m_checkScanCount%freq)==0 && pc==0){
+		if((m_checkScanCount%freq)==0){
 		  std::string msg = "Info while scanning (#";
 		  std::stringstream a;
 		  int ncheck = m_checkScanCount/freq;
@@ -1038,9 +1020,8 @@ void STPixModuleGroup::CtrlThread::scan()
 		  msg += a.str();
 		  msg += "):";
 		  readRodBuff(msg);
-
-		
 		}
+
 	      } while ((pc->runStatus()==1 && nAbortWait<100));
 	      // end controller scan loop
 	      
