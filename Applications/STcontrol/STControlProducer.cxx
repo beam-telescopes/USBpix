@@ -52,13 +52,13 @@ void STControlProducer::OnInitialise(const eudaq::Configuration& config){
 		return;
 	}
 
-	scan_options.SRAM_READOUT_AT = config.Get("SRAM_READOUT_AT", 13);
+	scan_options.SRAM_READOUT_AT = config.Get("SRAM_READOUT_AT", 70);
 	scan_options.UseSingleBoardConfig = (QString::fromStdString(config.Get("UseSingleBoardConfigs", "no")).toLower()=="yes");
 	scan_options.config_file = QString::fromStdString( config.Get("config_file", ""));
 	scan_options.fpga_file = QString::fromStdString( config.Get("fpga_file", ""));
 	scan_options.adapterCardFlavour = config.Get("adapterCardFlavour", 0);
      
-	if (scan_options.UseSingleBoardConfig || scan_options.config_file=="") {
+	if (scan_options.UseSingleBoardConfig || scan_options.config_file== "" ) {
 		scan_options.UseSingleBoardConfig = true;
 
 		bool send_error=false;
