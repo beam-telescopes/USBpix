@@ -51,7 +51,7 @@ using namespace PixLib;
 using namespace SctPixelRod;
 
 RodPixController::RodPixController(PixModuleGroup &modGrp, DBInquire *dbInquire) : 
-                                   PixController(modGrp, dbInquire) { //! Constructor
+  PixController(modGrp, dbInquire, PixLib::DUMMYGEN) { //! Constructor
   configInit();
   createVmeInterface();
   if(dbInquire!=0) m_conf->read(dbInquire);
@@ -61,7 +61,7 @@ RodPixController::RodPixController(PixModuleGroup &modGrp, DBInquire *dbInquire)
 }
 
 RodPixController::RodPixController(PixModuleGroup &modGrp) : 
-                                   PixController(modGrp) { //! Constructor
+                                   PixController(modGrp, PixLib::DUMMYGEN) { //! Constructor
   configInit();
   createVmeInterface();
   m_preAmpOff = false;
