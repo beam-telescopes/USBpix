@@ -23,8 +23,8 @@
 #include <map>
 #include <string>
 #include <qapplication.h>
-#include "STControlEngine.h"
 #include <qobject.h>
+#include "STCdefines.h"
 
 class STPixModuleGroup;
 class QTimer;
@@ -32,6 +32,7 @@ class ChipTest;
 
 namespace PixLib{
   class PixModuleGroup;
+  class PixModule;
   class PixConfDBInterface;
   class DBInquire;
   class Config;
@@ -133,8 +134,6 @@ class STRodCrate : public QObject {
   void clearModuleInfo();
   /** abort scan on all module groups */
   void abortScan();
-  /** force all module groups to read out data*/
-  void forceRead();
   /** returns two lists, one with slots of existing RODs, one with their rev. no's */
   void listRODs(std::vector<int> &rod_slots, std::vector<unsigned int> &revs);
   /** return number of module groups in this crate */

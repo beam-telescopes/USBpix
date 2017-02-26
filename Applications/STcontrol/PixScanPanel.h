@@ -2,8 +2,8 @@
 #define PIXSCANPANEL
 
 #include "ui_PixScanPanel.h"
-#include "STControlEngine.h"
 #include <PixController/PixScan.h>
+#include "STCdefines.h"
 
 #include <map>
 #include <string>

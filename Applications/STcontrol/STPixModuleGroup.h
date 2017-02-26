@@ -20,7 +20,7 @@
 #define STPIXMODULEGROUP_H
 
 #include <PixModuleGroup/PixModuleGroup.h>
-#include "STControlEngine.h"
+#include "STCdefines.h"
 
 #include <QObject>
 #include <QEvent>
@@ -194,8 +194,6 @@ class STPixModuleGroup : public QObject, public PixLib::PixModuleGroup {
   int setPixScan(PixLib::PixScan *inPixScan);
   /** returns a ref. to the PixScan object to the one owned by this group */
   PixLib::PixScan* getPixScan(){return m_PixScan;};
-  /** returns pointer to the loop status array */
-  bool* getLoopStatus(){return m_pixScanLoop;};
   // start Thread
   void ThreadExecute(ThreadTag tag);
   void ThreadExecute(ThreadTag tag, std::vector<int> opts);
@@ -225,10 +223,6 @@ class STPixModuleGroup : public QObject, public PixLib::PixModuleGroup {
   void abortScan(){m_abortScan = true;};
   /* allows scan abort from outside */
   bool doAbortScan(){return m_abortScan;};
-  /* allows readout initiation from outside */
-  void forceRead(){m_forceRead = true;};
-  /* allows scan abort from outside */
-  bool doForceRead(){return m_forceRead;};
   /** Read status of a module if found. */
   modStatus getPixModuleStatus(int modAddr);
   /** Change property of entry in map <StatusTag> m_pixModuleSTatus(Info). */
@@ -257,9 +251,6 @@ class STPixModuleGroup : public QObject, public PixLib::PixModuleGroup {
   void setModuleActive(int modID, bool active);
   /** reload controller configs - will only work for USBPixController registers */
   void reloadCtrlCfg();
-  // connectivity test helper functions - obsolete
-/*   bool runConnPart1(STControlEngine::connTestOpts opts, PixModule *mod); */
-/*   bool runConnPart2(STControlEngine::connTestOpts opts, PixModule *mod); */
 
  private:
   int m_ID;
@@ -269,13 +260,9 @@ class STPixModuleGroup : public QObject, public PixLib::PixModuleGroup {
   // @TODO move module status from STcontrolEngine to this class
   /* stores the PixScan object to run a scan on this group (see set/getPixScan) */
   PixLib::PixScan *m_PixScan;
-  /** stores the state of a scan loop (necessary because we don't have a continuously
-      running loop, but something that's called by QTimer */
-  // @TODO move scan loop from STControlEngine to this class so that
-  //       the loop can be run as one set of nested loops in the background:
-  //       the m_pixScanLoop variable would be obsoleted then
-  bool m_pixScanLoop[3];  
-  bool m_abortScan, m_forceRead;
+  /** set if user aborts scan */
+  bool m_abortScan;
+
   PixLib::Config &m_options;
 
   QApplication* m_app;

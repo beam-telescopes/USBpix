@@ -20,7 +20,7 @@
 
 #include <ui_ToolPanel.h>
 #ifdef WITHEUDAQ
-#include "STeudaq.h"
+//#include "STeudaq.h"
 #endif
 
 class STControlEngine;

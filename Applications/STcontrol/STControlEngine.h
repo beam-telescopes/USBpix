@@ -22,14 +22,14 @@
 #include <vector>
 
 #include <map>
-#include <string> 
+#include <string>
+#include <memory>
 
 #include <qobject.h>
 #include <QString>
 #include <QStringList>
 #include <QMetaType>
 
-#include <GeneralDBfunctions.h>
 #include "STCdefines.h"
 
 namespace PixLib{
@@ -41,6 +41,10 @@ class PixScan;
 class Histo;
 class DBInquire;
 class Config;
+struct grpData;
+struct rodData;
+struct bocData;
+struct modData;
 }
 namespace SctPixelRod{
 class VmeInterface;
@@ -56,7 +60,7 @@ class QProcess;
 class ChipTest;
 
 #ifdef WITHEUDAQ
-#include "STControlProducer.h"
+class STControlProducer;
 #endif
 
 /**This class encapsulates most of the actual work of Stcontrol. This includes in particular the interaction with PixLib.
@@ -123,8 +127,6 @@ public:
   int pixScan(pixScanRunOptions, bool start_monitor=true);
   /** stop all running PixScans */
   void stopPixScan();
-  /** force data reading on all crates (for test beam usage) */
-  void forceRead();
   /** get reference to our options Config object */
   PixLib::Config &getOptions(){return *m_options;};
   /** access to global chip test configuration */

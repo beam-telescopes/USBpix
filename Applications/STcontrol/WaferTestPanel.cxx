@@ -7,6 +7,7 @@
 #include <Config/Config.h>
 #include <PixDcs/SleepWrapped.h>
 #include <PixConfDBInterface/RootDB.h>
+#include <GeneralDBfunctions.h>
 
 #include <QMessageBox>
 #include <QFileDialog>

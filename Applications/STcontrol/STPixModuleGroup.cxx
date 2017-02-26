@@ -9,6 +9,7 @@
 #include <PixDcs/SleepWrapped.h>
 #include <PixConfDBInterface/PixConfDBInterface.h>
 #include <PixConfDBInterface/RootDB.h>
+#include <GeneralDBfunctions.h>
 #include <PixController/PixScan.h>
 #include <PixController/PixController.h>
 #ifndef NOTDAQ
@@ -16,7 +17,6 @@
 #include <PixBoc/PixBoc.h>
 #endif
 #include <PixController/USBPixController.h>
-#include <PixController/PixScan.h>
 #include <PixDcs/PixDcs.h>
 #include <PixMcc/PixMcc.h>
 #include <PixFe/PixFe.h>
@@ -125,7 +125,6 @@ STPixModuleGroup::STPixModuleGroup(int ID, PixConfDBInterface *db, DBInquire *db
   m_BocStatus=tblocked;
   m_PixScan = new PixScan();
   for(int i=0;i<3;i++)
-    m_pixScanLoop[i] = false;  
   m_app = application;
   m_ctrlThr = new STPixModuleGroup::CtrlThread(*this, m_app);
   processing = false;
@@ -192,7 +191,6 @@ STPixModuleGroup::STPixModuleGroup(int ID, QApplication* application, bool &file
   m_BocStatus=tblocked;
   m_PixScan = new PixScan();  
   for(int i=0;i<3;i++)
-    m_pixScanLoop[i] = false;
   m_app=application;
   m_ctrlThr = new STPixModuleGroup::CtrlThread(*this, m_app);
   processing = false;
@@ -495,7 +493,6 @@ void STPixModuleGroup::CtrlThread::scan()
   // init counter which is used later to check if ROD buffer should be read
   m_checkScanCount = 0;
   getSTPixModuleGroup()->m_scanDcsReadings.clear();
-  getSTPixModuleGroup()->m_forceRead = false;
 
   bool onlyDcsScanned=true;
   std::map<int, double> modDcsSettings;

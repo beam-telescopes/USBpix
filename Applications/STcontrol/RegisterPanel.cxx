@@ -1,10 +1,11 @@
 #include <PixController/PixScan.h>
+#include <Config/Config.h>
+#include <GeneralDBfunctions.h>
+
 #include "RegisterPanel.h"
 #include "STControlEngine.h"
 #include "STRodCrate.h"
 #include "OptionsPanel.h"
-
-#include <Config/Config.h>
 
 #include <QMessageBox>
 #include <QLabel>

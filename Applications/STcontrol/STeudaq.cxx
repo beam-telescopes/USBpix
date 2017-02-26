@@ -230,10 +230,10 @@ void STEUDAQ::initControler2()
 }
 
 // Reads data from the USBpix boards
-void STEUDAQ::ReadData()
-{
-	m_STControlEngine -> forceRead();
-}
+// void STEUDAQ::ReadData()
+// {
+// 	m_STControlEngine -> forceRead();
+// }
 
 int STEUDAQ::getBoardsConnected()
 {

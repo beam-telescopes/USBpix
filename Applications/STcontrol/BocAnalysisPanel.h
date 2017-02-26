@@ -10,14 +10,12 @@
 #define BOCANALYSISPANEL
 
 #include "ui_BocAnalysisPanel.h"
-#include "STControlEngine.h"
-#include "STPixModuleGroup.h"
-#include "STRodCrate.h"
-#include "PixBoc/PixBoc.h"
-#include "PixController/RodPixController.h"
 #include <string>
 #include <vector>
 #include <stdio.h>
+
+class STControlEngine;
+class STPixModuleGroup;
 
 class BocAnalysisPanel : public QWidget, public Ui::BocAnalysisPanel{
 

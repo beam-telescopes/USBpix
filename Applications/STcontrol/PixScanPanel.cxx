@@ -1,5 +1,6 @@
 #include "PixScanPanel.h"
 #include "STRodCrate.h"
+#include "STControlEngine.h"
 
 #include <PixConfDBInterface/PixConfDBInterface.h>
 #include <GeneralDBfunctions.h>

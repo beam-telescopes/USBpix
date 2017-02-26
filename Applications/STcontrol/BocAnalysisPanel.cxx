@@ -6,11 +6,13 @@
   ***************************************************************************/
 
 #include "BocAnalysisPanel.h"
+#include "STControlEngine.h"
+#include "STRodCrate.h"
+#include "STPixModuleGroup.h"
 
 #include <PixDcs/SleepWrapped.h>
 #include <PixController/RodPixController.h>
-#include <PixConfDBInterface/CfgWizardDB.h>
-#include <PixConfDBInterface/TurboDaqDB.h>
+#include "PixBoc/PixBoc.h"
 #include <Config/Config.h>
 #include <Config/ConfGroup.h>
 #include <Config/ConfObj.h>
@@ -105,7 +107,7 @@ void BocAnalysisPanel::Analyse(string filename ="", string scanlabel=""){
     writeLinks.clear();
     writeSlots.clear();
 
-    int rowcount = 0;
+    //    int rowcount = 0;
     
     string inputfile, scanname, groupname, modulename;
     

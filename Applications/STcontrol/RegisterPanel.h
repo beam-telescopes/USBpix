@@ -2,7 +2,7 @@
 #define REGISTERPANEL
 
 #include "ui_RegisterPanel.h"
-#include "STControlEngine.h"
+#include "STCdefines.h"
 #include <QWidget>
 #include <QLabel>
 #include <vector>

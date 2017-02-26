@@ -36,6 +36,9 @@
 #include "ChipTest.h"
 #include "PrimListItem.h"
 #include "ConfigCreatorHelper.h"
+#ifdef WITHEUDAQ
+#include "STControlProducer.h"
+#endif
 
 #include <TGraph.h>
 
@@ -189,8 +192,8 @@ STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QO
 	eudaq_producer_id="0";
 
   //TB:TODO producer ID?
-  bool isInt=false;
-  int producer_id=eudaq_producer_id.trimmed().toInt(&isInt);
+  //bool isInt=false;
+  //int producer_id=eudaq_producer_id.trimmed().toInt(&isInt);
   //if (isInt) m_STeudaq -> setProducerId(producer_id);
 
   // Checking Command Line for Run Control address
@@ -4502,11 +4505,6 @@ void STControlEngine::copyDcsDb(const char *fname_currDB, const char *fname_cpDB
   }
   delete inDB;
   delete myDB;
-}
-void STControlEngine::forceRead(){
-  for( std::vector<STRodCrate *>::iterator crate = m_sTRodCrates.begin(); crate != m_sTRodCrates.end(); crate++ ) 
-    (*crate)->forceRead();
-  return;
 }
 int STControlEngine::getConsecutiveLvl1TrigA(int superGroup){
   return m_lastPixScanOpts.scanConfig->getConsecutiveLvl1TrigA(superGroup);

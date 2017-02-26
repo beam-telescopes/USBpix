@@ -1317,13 +1317,6 @@ void STRodCrate::abortScan()
     (*group)->abortScan();
   }
 }
-void STRodCrate::forceRead()
-{
-  for( std::vector<STPixModuleGroup *>::iterator group = m_pixModuleGroups.begin();
-       group != m_pixModuleGroups.end(); group++ ) {
-    (*group)->forceRead();
-  }
-}
 int STRodCrate::getGrpNSteps(int iGrp, int i)
 {
   if(iGrp>=0 && iGrp<(int)m_pixModuleGroups.size())

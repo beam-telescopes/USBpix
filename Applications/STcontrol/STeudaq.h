@@ -105,7 +105,7 @@ struct cfgInfo{
 	void customEvent( QEvent * e );
 
 public slots:
-	void ReadData();
+        //void ReadData();
 	void initControler(extScanOptions ScanOptions);
 	void initControler2();
 	void ProducerDisconnected();
