@@ -19,6 +19,7 @@
 #include <PixModuleGroup/PixModuleGroup.h>
 #include <PixModule/PixModule.h>
 #include <PixMcc/PixMcc.h>
+#include <GeneralDBfunctions.h>
 #include <DataContainer/PixDBData.h>
 #include <BocAnalysis/BocScanAnalysis.h>
 
