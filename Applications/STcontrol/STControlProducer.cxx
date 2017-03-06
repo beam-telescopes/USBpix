@@ -254,7 +254,9 @@ QString STControlProducer::CreateMultiBoardConfig(extScanOptions& ScanOptions) {
 
 void STControlProducer::OnStartRun (unsigned param){
 	SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Running?!");
-	emit m_STControlEngine.startCurrentScan(QString("RunXX"), QString(""));
+	QString rawFile =  QDir::toNativeSeparators(QDir::cleanPath(scan_options.rawdata_path) + "/") + 
+	  QString("testbeam_run_") + QString::number(param).rightJustified(6, '0') + ".raw";
+	emit m_STControlEngine.startCurrentScan(QString("Run ")+QString::number(param), rawFile);
 }
 
 void STControlProducer::OnStopRun (){
