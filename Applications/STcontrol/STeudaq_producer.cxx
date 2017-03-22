@@ -52,9 +52,6 @@ void EUDAQProducer::ScanStatus(int boardid, bool SRAMFullSignal, int /*SRAMFilli
 void EUDAQProducer::OnConfigure(const eudaq::Configuration & config) 
 {
 	if(STEP_DEBUG) std::cout << "EUDAQ-Producer OnConfigure thread-ID: " << QThread::currentThreadId() << std::endl;
-     
-	SetStatus(eudaq::Status::LVL_BUSY, "Configuring");
-
 	m_config = config;
 	configuration = 0;
 	tot_mode = 0;
@@ -81,7 +78,7 @@ void EUDAQProducer::OnConfigure(const eudaq::Configuration & config)
 		if(chipsOnBoard.size() == 0)
 		{
 			EUDAQ_ERROR((QString("Invalid module configuration for board  ") + scan_options.boards[i]).toStdString().c_str());
-			SetStatus(eudaq::Status::LVL_ERROR, "Error during initialisation");
+			SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Error during initialisation");
 			return;
 		}
 
@@ -145,8 +142,8 @@ void EUDAQProducer::OnConfigure(const eudaq::Configuration & config)
 	if(scan_options.SkipConfiguration) 
 	{
 		//No configuration requested
-		SetStatus(eudaq::Status::LVL_OK, "Configured (" + m_config.Name() + ")");
-		return;
+	  SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (" + config.Name() + ")");
+	  return;
 	}
 
 	scan_options.SRAM_READOUT_AT = config.Get("SRAM_READOUT_AT", 30);
@@ -207,8 +204,8 @@ void EUDAQProducer::OnConfigure(const eudaq::Configuration & config)
 
 		if(send_error)
 		{
-			SetStatus(eudaq::Status::LVL_ERROR, "Error during initialisation");
-			return;
+		  SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Error during initialisation");
+		  return;
 		}
 	}
 
@@ -238,12 +235,11 @@ void EUDAQProducer::OnConfigure(const eudaq::Configuration & config)
 
 	if( configuration == 1 )
 	{
-		// set the status that will be displayed in the Run Control.
-		SetStatus(eudaq::Status::LVL_OK, "Configured (" + m_config.Name() + ")");
+		SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Configured (" + config.Name() + ")");
 	}
 	else
 	{
-		SetStatus(eudaq::Status::LVL_ERROR, "Error while initializing PixControllers");
+		SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Error while initializing PixControllers");
 	}
 } 
 
@@ -446,7 +442,6 @@ void EUDAQProducer::beganScanning()
 	if(STEP_DEBUG) std::cout << "bore sent" << std::endl;
 
 	// At the end, set the status that will be displayed in the Run Control.
-    	SetStatus(eudaq::Status::LVL_BUSY, "Running");
 
 	if(STEP_DEBUG) std::cout << "Set Status to running" << std::endl;
 }
@@ -467,7 +462,6 @@ void EUDAQProducer::OnStopRun()
 
 	scanning = false;
 
-	SetStatus(eudaq::Status::LVL_BUSY, "Sending Data");
 	m_STeudaq.stopScan();
 
 	// wait for STcontrol to finish the scan
@@ -493,8 +487,7 @@ void EUDAQProducer::OnStopRun()
 	// Send an EORE after all the real events have been sent
 	if(STEP_DEBUG) std::cout << "sending EORE for event type " << EUDAQProducer::EVENT_TYPE << std::endl;
 	SendEvent(eudaq::RawDataEvent::EORE(EUDAQProducer::EVENT_TYPE, m_run, m_ev));
-
-	SetStatus(eudaq::Status::LVL_OK, "Stopped");
+	SetConnectionState(eudaq::ConnectionState::STATE_CONF, "Stopped");
 	if(STEP_DEBUG) std::cout << "Status: stopped!" << std::endl;
 }
 
@@ -503,14 +496,13 @@ void EUDAQProducer::AbortRun()
 	if(STEP_DEBUG) std::cout << "Aborting Run" << std::endl;
 	scanning = false;
 
-	SetStatus(eudaq::Status::LVL_BUSY, "Sending Data");
 	m_STeudaq.stopScan();
 
 	// Send an EORE after all the real events have been sent
 	if(STEP_DEBUG) std::cout << "sending EORE for event type " << EUDAQProducer::EVENT_TYPE << std::endl;
 	SendEvent(eudaq::RawDataEvent::EORE(EUDAQProducer::EVENT_TYPE, m_run, m_ev));
 	
-	SetStatus(eudaq::Status::LVL_ERROR, "Aborted");
+	SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "Aborted");
  }
 
 void EUDAQProducer::scanFinished()
@@ -551,12 +543,11 @@ void EUDAQProducer::OnUnrecognised(const std::string & cmd, const std::string & 
 		}
 	}
 
-	SetStatus(eudaq::Status::LVL_WARN, "Unrecognised command");
 }
 
 void EUDAQProducer::errorReceived( std::string msg )
 {
-	SetStatus(eudaq::Status::LVL_ERROR, "See Log");
+	SetConnectionState(eudaq::ConnectionState::STATE_ERROR, "See Log");
 	EUDAQ_ERROR(msg);
 }
 
