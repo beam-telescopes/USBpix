@@ -8,7 +8,7 @@ TEMPLATE = lib
 SOURCES += PixGPIBDevice.cxx
 SOURCES += PixGPIBError.cxx
 
-INCLUDEPATH += $(DAQ_BASE)/inc
+INCLUDEPATH += $(USB_INCL_DIR)
 
 unix {
 	USE_GPIB_LINUX = $$(USE_GPIB_LINUX)

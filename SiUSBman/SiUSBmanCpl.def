@@ -1,0 +1,10 @@
+
+; SiUSBmanCpl.def : Declares the module parameters for the DLL.
+
+LIBRARY      "SiUSBmanCpl"
+;DESCRIPTION  "SILAB USB Dveice Manager Control Applet"
+
+EXPORTS
+    ; Explicit exports can go here
+
+	CPlApplet

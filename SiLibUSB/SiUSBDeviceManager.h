@@ -15,24 +15,22 @@
 #ifndef USBDeviceManagerH
 #define USBDeviceManagerH
 
-//#ifdef WIN32
-#ifndef _LIBUSB_
-  #include <Windows.h> 
+#ifdef WIN32
+  #include <Windows.h>
   #include <setupapi.h>
-  #include <strsafe.h>
 #endif
 
 #include <sstream>
 #include <stdlib.h>
 #include <vector>
 #include <iostream>
+#include <strsafe.h>
 
 #include "myutils.h"
 #include "SiUSBDevice.h"
 
 const int MAX_USB_DEV_NUMBER = 16;         // number of devices
 
-#ifndef _LIBUSB_
 // SILAB USB device interface class, supported by winusb.sys
 // {CF2531EE-7B75-4b3a-B20D-2F5E2925E729}
 static const GUID GUID_DEVINTERFACE_SILAB_USB_DEVICE = 
@@ -42,7 +40,6 @@ static const GUID GUID_DEVINTERFACE_USB_DEVICE =
 { 0xA5DCBF10, 0x6530, 0x11D2, {0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED} };
 
 BOOL EnumerateDevices(GUID guidDeviceInterface, PHANDLE hDeviceHandle);
-#endif
 //void printdev(libusb_device *dev); //prototype of the list function 
 
 
@@ -70,9 +67,9 @@ public:
 	~TUSBDeviceManager();
 	bool HandleDeviceChange(void);
 	bool WinUsb_HandleDeviceChange(void);
-	bool LibUsb_HandleDeviceChange(void);
 	int  DevToIndex(TUSBDevice *dev);
 	int  DevToId(TUSBDevice *dev);
+	bool IsBusy();
 	int GetNumberofDevices();
 	int GetMaxNumberofDevices();
 	void ForceRefresh();
@@ -93,10 +90,6 @@ private:
 	void * DeviceContext;
 	void (* onDevicePlugged) (TUSBDevice* dev, void *ptr);
 	void (* onDeviceUnplugged) (TUSBDevice* dev, void *ptr);
-#ifdef _LIBUSB_
-	libusb_context *ctx = nullptr;
-#endif
-
 };
 
 #endif

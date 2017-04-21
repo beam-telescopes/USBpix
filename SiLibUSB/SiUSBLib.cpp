@@ -19,16 +19,6 @@ InitUSB()
 	return true;
 }
 
-/*
- * Terminates the USB Subsystem - automatically done by deleting the manager
- */
-void
-TermUSB()
-{
-  delete USBDevMan; 
-  USBDevMan = 0;
-}
-
 TUSBDeviceManager *GetUSBDevMan()
 {
 	return USBDevMan;
@@ -99,6 +89,11 @@ OnDeviceChange(void)
 {
 	return USBDevMan->HandleDeviceChange();
 }
+bool __stdcall 
+OnDeviceChange2()
+{
+	return USBDevMan->HandleDeviceChange();
+}
 #endif
 
 /* Exported Functions */
@@ -113,8 +108,6 @@ const char* SiUSBDevice::GetEndpointInfo(){if (dev == NULL) return ""; return ((
 bool SiUSBDevice::GetUserInformation(void){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->GetUserInformation();};
 int SiUSBDevice::GetVendorId(){if (dev == NULL) return 0; return ((TUSBDevice *)(dev))->GetVendorId();};
 int SiUSBDevice::GetDeviceId(){if (dev == NULL) return 0; return ((TUSBDevice *)(dev))->GetDeviceId();};
-int SiUSBDevice::GetProductId(){if (dev == NULL) return 0; return ((TUSBDevice *)(dev))->GetProductId();};
-int SiUSBDevice::GetBcdUSB(){if (dev == NULL) return 0; return ((TUSBDevice *)(dev))->GetBcdUSB();};
 int SiUSBDevice::GetClass(){if (dev == NULL) return 0; return ((TUSBDevice *)(dev))->GetClass();};
 int SiUSBDevice::GetFWVersion(){if (dev == NULL) return 0; return ((TUSBDevice *)(dev))->GetFWVersion();};
 // access EEPROM programmable device parameters
@@ -144,10 +137,8 @@ bool SiUSBDevice::ReadSerial(unsigned char *Data, unsigned short length){if (dev
 bool SiUSBDevice::WriteExternal(unsigned short address, unsigned char *Data, int length){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->WriteExternal(address, Data, length);};
 bool SiUSBDevice::ReadExternal(unsigned short address, unsigned char *Data, int length){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->ReadExternal(address, Data, length);};
 // access to fast data bus
-bool SiUSBDevice::WriteBlock (unsigned char *Data, int length){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->FastBlockWrite(0, Data, length);};
-bool SiUSBDevice::ReadBlock  (unsigned char *Data, int length){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->FastBlockRead(0, Data, length);};
-bool SiUSBDevice::WriteBlock (int addr, unsigned char *Data, int length){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->FastBlockWrite(addr, Data, length);};
-bool SiUSBDevice::ReadBlock  (int addr, unsigned char *Data, int length){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->FastBlockRead(addr, Data, length);};
+bool SiUSBDevice::WriteBlock (unsigned char *Data, int length){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->FastBlockWrite(Data, length);};
+bool SiUSBDevice::ReadBlock  (unsigned char *Data, int length){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->FastBlockRead(Data, length);};
 // FIFO access (application specific)
 //bool WriteFIFO     (unsigned char *Data, unsigned short Length);
 unsigned short SiUSBDevice::ReadFIFO(unsigned char *Data, int Length){if (dev == NULL) return false; return ((TUSBDevice *)(dev))->ReadFIFO(Data, Length);};

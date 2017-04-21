@@ -2,11 +2,10 @@
 #ifndef XilinxChipH
 #define XilinxChipH
 //---------------------------------------------------------------------------
-#ifndef WIN32
-  #include <unistd.h>
+#ifdef WIN32
+  #include <windows.h>
 #endif
 
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -50,7 +49,7 @@ typedef struct _HEADERSTRING
 class TXilinxChip{
 public:
 	TXilinxChip(int ctrlType);
-	virtual ~TXilinxChip();
+	~TXilinxChip();
 	FILE *bitfile;
 	HEADER_STRING name;
 	HEADER_STRING type;

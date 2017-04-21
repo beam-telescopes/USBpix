@@ -3,7 +3,8 @@ SOURCES = *.cxx
 HEADERS = *.h
 OBJECTS_DIR = objects
 
-INCLUDEPATH += $(DAQ_BASE)/inc
+INCLUDEPATH += $(USB_INCL_DIR) 
+INCLUDEPATH += $(USB_DRIVER_LIB) 
 
 !tests{
   QT -= core gui
@@ -17,6 +18,7 @@ unix {
 
 win32 {
   LIBS += SiLibUSB.lib
+  QMAKE_LFLAGS += -LIBPATH:"$(USB_LIB_DIR)" 
   QMAKE_LFLAGS += -LIBPATH:"$(DAQ_BASE)"/lib
   DEFINES += __VISUALC__ WIN32 PIX_DLL_EXPORT
 }

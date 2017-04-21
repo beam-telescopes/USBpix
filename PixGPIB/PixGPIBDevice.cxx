@@ -186,7 +186,6 @@ int PixGPIBDevice::updateDescription()
     else if (strcmp((description.substr(0,25)).c_str(),"THURLBY THANDAR, PL303QMD") == 0) m_DeviceType = TTI_PL303QMD;
     else if (strcmp((description.substr(0,23)).c_str(),"THURLBY-THANDAR,QL355TP") == 0)   m_DeviceType = TTI_QL355TP;
     else if (strcmp((description.substr(0,24)).c_str(),"THURLBY-THANDAR, QL355TP") == 0)   m_DeviceType = TTI_QL355TP;
-    else if (strcmp((description.substr(0,24)).c_str(),"THURLBY THANDAR, QL355TP") == 0)   m_DeviceType = TTI_QL355TP; // latest model
     else if (strcmp((description.substr(0,37)).c_str(),"KEITHLEY INSTRUMENTS INC.,MODEL 2410,") == 0) m_DeviceType = KEITHLEY_2410;
     else if (strcmp((description.substr(0,37)).c_str(),"KEITHLEY INSTRUMENTS INC.,MODEL 2400,") == 0) m_DeviceType = KEITHLEY_2400;
 	else if (strcmp((description.substr(0,37)).c_str(),"KEITHLEY INSTRUMENTS INC.,MODEL 2700,") == 0) m_DeviceType = KEITHLEY_2700;//ADD 2700

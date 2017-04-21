@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/FPGA" >
+        <file>Resources/usbpixi4_V07.bit</file>
+    </qresource>
+    <qresource prefix="/uC" >
+        <file>Resources/usbpix_FW_13.bix</file>
+        <file>Resources/usbpix_FW_13.hex</file>
+    </qresource>
+    <qresource prefix="/DCS" >
+        <file>Resources/DCSCalDataV1.0.ini</file>
+    </qresource>
+</RCC>

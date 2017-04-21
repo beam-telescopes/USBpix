@@ -1,0 +1,7 @@
+#command
+comm,wrRegister,vthin,17
+comm,rdRegister,tdacvbp
+task,task1
+comm,rdRegister,disvbn
+loop,5,task,task2
+loop,5,comm,wrRegister,vthin,10

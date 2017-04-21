@@ -1,0 +1,25 @@
+#command
+task,mask_errors
+task,clear_all_latches
+task,select_normal_shift_mode
+task,set_pixel_enable
+task,select_double_column_0
+task,set_all_pixel_shift_register_bits,//enable all pixels
+comm,glbpulse,5,//enable all pixels
+task,deselect_all_pixel_strobes
+comm,wrRegister,TrigCnt,15,//trigger multiplicity
+comm,wrRegister,Trig_Lat,200,//trigger latency
+comm,wrRegister,DIGHITIN_SEL,1,//enable digital injection
+comm,wrRegister,CMDcntWidth,8
+comm,wrRegister,CMDcntDelay,0
+comm,wrRegister,CMDcnt13,0
+task,select_normal_shift_mode
+task,set_pixel_shift_register_bit0,//select a single pixel
+comm,runmode,//do some resets
+comm,ECR,//do some resets
+comm,BCR,//do some resets
+comm,clearHitMap
+comm,clearToTMap
+comm,resetRowCnt
+comm,clearSRAM
+loop,1,task,inject_charge_and_goto_next_pixel

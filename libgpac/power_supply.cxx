@@ -24,15 +24,11 @@ channels::power_supply::power_supply(phy &aphy,
   m_id(id),
   m_parent(parent),
   m_enabled(false),
-  m_overcurrent(false)
+  m_overcurrent(false),
+  m_Rs1(10.0e3),
+  m_Rs2(649e1),
+  m_Rs3(10e3)
 {
-  double Rs1 = 10.e3, Rs2 = 6490., Rs3 = 10.e3;
-  // From schematics:
-  //    Vout = 0.8 V * (1 + Rs1/Rs2) + (0.8 V - Vset) * Rs1/Rs3
-  // -> 0.8 V - (Vout - 0.8 V * (1 + Rs1/Rs2)) * Rs3 / Rs1 = Vset
-  m_DACoffset = 0.8 + 0.8 * (1 + Rs1 / Rs2) * Rs3 / Rs1;
-  m_DACgain   = (-1) * Rs3 / Rs1;
-
   m_vdac_id = 1;
   m_voltage_adc.mux_id = devices::adc_channel::mux_refdes::U14;
   m_current_adc.mux_id = devices::adc_channel::mux_refdes::U15;
@@ -73,7 +69,11 @@ channels::power_supply::power_supply(phy &aphy,
 
 uint16_t channels::power_supply::voltage_to_dac_value(double voltage)
 {
-  double Vset = m_DACoffset + m_DACgain * voltage;
+  // From schematics:
+  //    Vout = 0.8 V * (1 + Rs1/Rs2) + (0.8 V - Vset) * Rs1/Rs3
+  // -> 0.8 V - (Vout - 0.8 V * (1 + Rs1/Rs2)) * Rs3 / Rs1 = Vset
+
+  double Vset = 0.8 - (voltage - 0.8 * (1 + m_Rs1 / m_Rs2)) * m_Rs3 / m_Rs1;
 
   return m_phy.core().dac(false).voltage_to_dac_value(Vset);
 }
@@ -130,7 +130,7 @@ void blocks::power_supplies::update_enabled()
 void blocks::power_supplies::update_overcurrent()
 {
   uint8_t mask = m_phy.core().power_enable_oc().read();
-  //mask = ~mask;
+  mask = ~mask;
   mask >>= 4;
 
   for (auto &ch: m_ch)

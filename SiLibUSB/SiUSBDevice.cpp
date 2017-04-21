@@ -6,7 +6,6 @@
  *  USB devices associated to winusb.sys device driver
  *
  *  History:
- *  17.02.16  Full update for libusb, taken from EB's work (JGK)
  *  10.10.12  WinUSB (32/64 bit) support, replacing slbusbXP.sys
  *            clean-up
  *  04.03.02  added generic I2C functions
@@ -15,7 +14,9 @@
  *  31.08.01  added latch and adc access for mqube tracker
  */
 
-#include <string.h>
+#ifdef WIN32
+#include <Windows.h>
+#endif
 #include <sstream>
 
 #include "SURConstants.h"
@@ -23,14 +24,6 @@
 #include "SiI2CDevice.h"
 
 using namespace std;
-
-#ifndef WIN32
-#define min(a, b)  (((a) < (b)) ? (a) : (b))
-#endif
-#ifdef _LIBUSB_
-#define MTRANS 0xffff /* The Maximum Transfer lenght, now 64KiBytes */
-#define MTRANS_FX3 0xf000 /* The Maximum Transfer lenght, now 64KiBytes , leave room for padding...*/
-#endif
 
 const char PIPE_TYPE_STRINGS[4][5] = {
 	"CTRL",
@@ -70,9 +63,6 @@ TUSBDevice::TUSBDevice(int index):TI2CMaster(), TSPIMaster(), TXilinxChip(true)
 {
 	USBDeviceHandle = INVALID_HANDLE_VALUE;        // handle to the driver
 	DeviceDriverIndex = index;
-#ifdef _LIBUSB_
-	dev_handle = NULL;
-#endif
 	started    = false;
 	configured = false;            // firmware active
 
@@ -90,26 +80,19 @@ TUSBDevice::~TUSBDevice()
 bool TUSBDevice::StartDriver()
 {
 #ifdef _LIBUSB_
-  int err=libusb_open(dev_handle, &USBDeviceHandle);
-  if (err<0) {
-    perror(("Error: libusb_open - "+std::string(_libusb_strerror((libusb_error) err))).c_str());
-    
-    return false;
-  }
+	//	if (libusb_open(dev_handle, &USBDeviceHandle)) {
+	if (libusb_open(NULL, &USBDeviceHandle)) {
+		perror("Error: libusb_open");
 
-	/* Claim interface */
-  err = libusb_reset_device(USBDeviceHandle);
-  if (err<0) {
-    perror(("Error: libusb_reset_device - "+std::string(_libusb_strerror((libusb_error) err))).c_str());
-    
-    return false;
-  }
-  err = libusb_claim_interface(USBDeviceHandle, 0);
-  if (err<0) {
-    perror(("Error: libusb_claim - "+std::string(_libusb_strerror((libusb_error) err))).c_str());
-    
-    return false;
-  }
+		return false;
+	}
+
+	/* Claim interface 0 */
+	if (libusb_claim_interface(USBDeviceHandle, 0)) {
+		perror("Error: libusb_claim");
+
+		return false;
+	}
 #else
 	USBDeviceHandle = CreateFile(
 		    DevicePathName.c_str(),
@@ -134,7 +117,7 @@ bool TUSBDevice::StartDriver()
 	}
   
 #endif
-        Init();
+  Init();
 	started = true;
 	return true;
 }
@@ -163,36 +146,7 @@ bool TUSBDevice::StopDriver()
 }
 
 
-#ifdef _LIBUSB_
-bool TUSBDevice::DeviceAvailable(int want, libusb_context *ctx)
-{
-	libusb_device **list;
-	int found_devices = 0;
-	int i;
-	ssize_t cnt;
-
-	/* Get the USB device list */
-	cnt = libusb_get_device_list(ctx, &list);
-
-	for (i = 0; i < cnt; i++) {
-		if (finddev(list[i])) {
-			++found_devices;
-
-			if (found_devices == (want + 1)) {
-				dev_handle = list[i];
-
-				libusb_free_device_list(list, 0); /* free list */
-
-				return true;
-			}
-		}
-	}
-
-	libusb_free_device_list(list, 0); /* free list */
-
-	return false;
-#else
-bool TUSBDevice::DeviceAvailable()
+bool TUSBDevice::DeviceAvailable(void)
 {
 	UCHAR buffer;
 	ULONG nBytes = 1;
@@ -204,8 +158,7 @@ bool TUSBDevice::DeviceAvailable()
 	  return false;
 	}
 	else
-	  return true;
-#endif
+    return true;
 }
 
 void TUSBDevice::Init()
@@ -216,25 +169,8 @@ void TUSBDevice::Init()
 		return;
 	}
 	
-	// If we got a FX3 device
-	if (ProductId == 0x0300) {
-	  // fix me
-		sur_control_pipe  = SUR_CONTROL_PIPE_FX;
-		sur_data_out_pipe = SUR_DATA_OUT_PIPE_FX;
-		sur_data_in_pipe  = SUR_DATA_IN_PIPE_FX;
-		cpu_cs_reg        = CPUCS_REG_FX;
-		eeprom_user_data_offset = EEPROM_USER_DATA_OFFSET_FX;
-		eeprom_mfg_addr  = EEPROM_MFG_ADDR_FX;
-		eeprom_name_addr = EEPROM_NAME_ADDR_FX;
-		eeprom_id_addr   = EEPROM_ID_ADDR_FX;
-		eeprom_liac_addr = EEPROM_LIAC_ADDR_FX;
-		xp_conf_port_cfg = PORTACFG_FX;
-		xp_conf_port_oe  = OEA_FX;
-		xp_conf_port_rd  = IOA_FX;
-		xp_conf_port_wr  = IOA_FX;
-		ControllerType = FX3;
-	} else if ((ProductId & 0x0200) || (ProductId == 0x8613)) {
 	// If we got a FX2LP device
+	if ((ProductId & 0x0200) || (ProductId == 0x8613)) {
 		sur_control_pipe  = SUR_CONTROL_PIPE_FX;
 		sur_data_out_pipe = SUR_DATA_OUT_PIPE_FX;
 		sur_data_in_pipe  = SUR_DATA_IN_PIPE_FX;
@@ -285,34 +221,33 @@ bool TUSBDevice::GetUserInformation()
 	if (!configured) // only avaliable with firmware being active
 		return false;
 
-	if(!ReadIDFromEEPROM()) return false;
-	if(!ReadNameFromEEPROM()) return false;
-	if(!ReadDeviceClassFromEEPROM()) return false;
-	if(!ReadFirmwareVersion()) return false;
+	ReadIDFromEEPROM();
+	ReadNameFromEEPROM();
+	ReadDeviceClassFromEEPROM();
+	ReadFirmwareVersion();
 	return true;
 }
 
 /*
  * Find specified vendor and product ID. It only supports the current Spartan 3 models.
  */
-#ifdef _LIBUSB_
+/*
 bool TUSBDevice::finddev(libusb_device *dev)
 {
-	libusb_device_descriptor dev_desc;
-	
-	int err = libusb_get_device_descriptor(dev, &dev_desc);
-	if (err < 0) {
-	  perror(("Error: libusb_get_device_descriptor - "+std::string(_libusb_strerror((libusb_error) err))).c_str());
-	  return false;
-	}
+        libusb_device_descriptor dev_desc;
 
-	if (dev_desc.idVendor == 0x5312 && (dev_desc.idProduct == 0x200 || dev_desc.idProduct == 0x300)) {
-		return true;
-	}
-	return false;
+				if (libusb_get_device_descriptor(dev, &dev_desc) < 0) {
+                perror("Error: usb_get_device_descriptor");
+                return false;
+        }
+
+        if (dev_desc.idVendor == 0x04b4 && dev_desc.idProduct == 0x8613) {
+                return true;
+        }
+
+        return false;
 }
-#endif
-
+*/
 bool TUSBDevice::ReadIDFromEEPROM()
 {
 	EEPROM_ID_STRUCT idstr;
@@ -348,18 +283,12 @@ bool TUSBDevice::ReadNameFromEEPROM()
 }
 bool TUSBDevice::ReadDeviceClassFromEEPROM()
 {
-        unsigned char myDevCl;
-        if (!ReadEEPROM(eeprom_liac_addr, &myDevCl, EEPROM_LIAC_SIZE)) 
+	if (!ReadEEPROM(eeprom_liac_addr, &DeviceClass, EEPROM_LIAC_SIZE)) 
 	{
 		DeviceClass = 0;
 		DebugOutLastError("TUSBDevice::ReadDeviceClassFromEEPROM");
 		return false;
 	}
-	// dirty hack for MIO3/MMC3
-	if(myDevCl==255 && ProductId==0x300) 
-	  DeviceClass=300;
-	else
-	  DeviceClass=(unsigned int) myDevCl;
 	return true;
 }
 
@@ -438,89 +367,36 @@ bool TUSBDevice::WriteDeviceClassToEEPROM(unsigned char dc)
 
 bool TUSBDevice::GetDeviceInformation()
 {
-#ifdef _LIBUSB_
-	libusb_device_descriptor desc;
-	std::stringstream PipeInfoStringStream;
-	
-	int err = libusb_get_device_descriptor(dev_handle, &desc);
-	if(err<0) {
-	  perror(("Error: libusb_get_device_descriptor - "+std::string(_libusb_strerror((libusb_error) err))).c_str());
-	  return false;
-	}
+	return WinUsb_GetDeviceInformation();
+}
 
-	VendorId = desc.idVendor;
-	ProductId = desc.idProduct;
-	BcdUSB = desc.bcdUSB;
-	PipeInfoStringStream << "VID 0x" << hex << setfill ('0') << setw (4) << VendorId;
-	PipeInfoStringStream << "/PID 0x" << hex << setfill ('0') << setw (4) << ProductId << endl;
+bool TUSBDevice::LibUsb_GetDeviceInformation()
+{
+	/*
+	int result;
 
-	libusb_config_descriptor *config;
-	const libusb_interface *inter;
-	const libusb_interface_descriptor *interdesc;
-	const libusb_endpoint_descriptor *epdesc;
-
-	err = libusb_get_active_config_descriptor(dev_handle, &config);
-	if(err<0) {
-	  perror(("Error: libusb_get_active_config_descriptor - "+std::string(_libusb_strerror((libusb_error) err))).c_str());
-	  return false;
-	}
-
-	if(config->bNumInterfaces == 1) {
-		inter = &config->interface[0];
-	} else {
+	// Get some memory, plus some guardband area 
+	if ((pvDescriptorBuffer = malloc(sizeof (Usb_Device_Descriptor) + 128)) == NULL)
+	{
 		return false;
 	}
 
-	interdesc = &inter->altsetting[0];
-
-	iPipes = interdesc->bNumEndpoints;
-	for(int i=0; i < interdesc->bNumEndpoints; i++) {
-		epdesc = &interdesc->endpoint[i];
-
-		pPipe[i].MaximumPacketSize = epdesc->wMaxPacketSize;
-		pPipe[i].EndpointAddress = epdesc->bEndpointAddress;
-		pPipe[i].Interval = epdesc->bInterval;
-
-		if(i == SUR_CONTROL_PIPE_FX) {
-			pPipe[i].MaximumTransferSize = epdesc->wMaxPacketSize;
-		} else if (ProductId == 0x0300){
-		        pPipe[i].MaximumTransferSize = MTRANS_FX3;
-		} else {
-		        pPipe[i].MaximumTransferSize = MTRANS;
+	if (USBDeviceHandle != NULL) {
+		result = libusb_get_device_descriptor(libusb_get_device(USBDeviceHandle),
+				(struct libusb_device_descriptor *) pvDescriptorBuffer);
+		if (!result) {
+			Desc = (Usb_Device_Descriptor*) pvDescriptorBuffer;
+			return true;
 		}
 
-
-		/* Descriptor Type conversion */
-		if (epdesc->bDescriptorType == 5) {
-			pPipe[i].PipeType = UsbdPipeTypeBulk;
-		} else {
-			pPipe[i].PipeType = UsbdPipeTypeControl;
-		}
-
-		PipeInfoStringStream << "Pipe " << i << ", ";
-		PipeInfoStringStream << "Endpoint " << (int) (0x7f & pPipe[i].EndpointAddress) << ", ";
-		PipeInfoStringStream << PIPE_TYPE_STRINGS[pPipe[i].PipeType] << " ";
-		PipeInfoStringStream << PIPE_DIRECTION[pPipe[i].EndpointAddress >> 7] << ", ";
-		PipeInfoStringStream << "PacketSize " << dec << (int) (pPipe[i].MaximumPacketSize) << " ";
-		PipeInfoStringStream << "TransferSize " << dec << (int) (pPipe[i].MaximumTransferSize) << endl;
+		return false;
 	}
+	*/
+	return false;
 
-	PipeInfoString = PipeInfoStringStream.str();
-
-	libusb_free_config_descriptor(config);
-	return true;
-
-
-#else
-
-
-
-	USB_DEVICE_DESCRIPTOR        DeviceDescriptor; // accessable pointer to descriptor information
-	USB_CONFIGURATION_DESCRIPTOR ConfigurationDescriptor; 
-	USB_INTERFACE_DESCRIPTOR     InterfaceDescriptor;
-	USB_STRING_DESCRIPTOR        StringDescriptor;
-	WINUSB_PIPE_INFORMATION      PipeInformation;
-
+}
+bool TUSBDevice::WinUsb_GetDeviceInformation()
+{
 	BOOL result;
 	std::stringstream PipeInfoStringStream;
 	unsigned long nBytes;
@@ -550,7 +426,6 @@ bool TUSBDevice::GetDeviceInformation()
 
 	VendorId  = DeviceDescriptor.idVendor;
 	ProductId = DeviceDescriptor.idProduct;
-	BcdUSB = DeviceDescriptor.bcdUSB;
 	PipeInfoStringStream << "VID 0x" << hex << setfill ('0') << setw (4) << VendorId;
 	PipeInfoStringStream << "/PID 0x" << hex << setfill ('0') << setw (4) << ProductId << endl;
 
@@ -638,107 +513,62 @@ bool TUSBDevice::GetDeviceInformation()
 	} // configurations
 	PipeInfoString = PipeInfoStringStream.str();
  	return true;
-#endif
 }
 
 
 
 bool TUSBDevice::WriteBulkEndpoint(int nPipe, unsigned char *outData, int outPacketSize)
 {
-#ifdef _LIBUSB_
-	int nBytes;
-	int status = libusb_bulk_transfer(USBDeviceHandle,
-					  pPipe[nPipe].EndpointAddress,
-					  outData,
-					  outPacketSize,
-					  &nBytes,
-					  1000);
-	if (status<0) perror(("TUSBDevice::WriteBulkEndpoint Error: libusb_bulk_transfer - "+std::string(_libusb_strerror((libusb_error) status))).c_str());
-
-	return (status >= 0);
-#else
 	ULONG nBytes;
 
-	if (WinUsb_WritePipe(WinUSBInterfaceHandle,
-			     pPipe[nPipe].EndpointAddress,
-			     outData,
-			     outPacketSize,
-			     &nBytes,
-			     0))
+	if (WinUsb_WritePipe(
+		           WinUSBInterfaceHandle,
+							 pPipe[nPipe].EndpointAddress,
+							 outData,
+	             outPacketSize,
+							 &nBytes,
+							 NULL))
 		return true;
 	else
 	{
 		DebugOutLastError("TUSBDevice::WriteBulkEndpoint");
 		return false;
 	}
-#endif
 }
 
 bool TUSBDevice::ReadBulkEndpoint(int nPipe, unsigned char *inData, int inPacketSize, int *nBytesRead)
 {
-#ifdef _LIBUSB_
-	int status = libusb_bulk_transfer(USBDeviceHandle,
-					  pPipe[nPipe].EndpointAddress,
-					  inData,
-					  inPacketSize,
-					  nBytesRead,
-					  1000);
-	if (status<0) perror(("TUSBDevice::ReadBulkEndpoint Error: libusb_bulk_transfer - "+std::string(_libusb_strerror((libusb_error) status))).c_str());
-    
-	return (status >= 0);
-#else
 	unsigned long nBytes;
 
-	if (WinUsb_ReadPipe(WinUSBInterfaceHandle,
-			    pPipe[nPipe].EndpointAddress,
-			    inData,
-			    inPacketSize,
-			    &nBytes,
-			    0))
+	if (WinUsb_ReadPipe(
+		           WinUSBInterfaceHandle,
+							 pPipe[nPipe].EndpointAddress,
+							 inData,
+	             inPacketSize,
+							 &nBytes,
+							 NULL))
 	{
 	  *nBytesRead = (int) nBytes;
-	  return true;
+		return true;
 	}
 	else
 	{
-	  DebugOutLastError("TUSBDevice::ReadBulkEndpoint");
-	  return false;
+		DebugOutLastError("TUSBDevice::ReadBulkEndpoint");
+		return false;
 	}
-#endif
-}
-
-bool TUSBDevice::ControlTransfer(WINUSB_SETUP_PACKET request, unsigned char *data, unsigned long *transferred) {
-#ifdef _LIBUSB_
-	*transferred = libusb_control_transfer(
-		USBDeviceHandle,
-	        request.RequestType,
-	        request.Request,
-	        request.Value,
-	        request.Index,
-	        data,
-	        request.Length,
-	        0	);
-
-	return (*transferred == request.Length); //FIXME?
-#else
-	return WinUsb_ControlTransfer(
-		WinUSBInterfaceHandle,
-		request,
-		data,
-		request.Length,
-		transferred,
-		0);
-#endif
 }
 
 bool TUSBDevice::VendorRequest(WINUSB_SETUP_PACKET MyRequest, unsigned char *data)
 {
 	ULONG nBytes;
 
-	if (ControlTransfer(
-			    MyRequest,
-			    data,
-			    &nBytes))
+	if (WinUsb_ControlTransfer(
+		           WinUSBInterfaceHandle,
+							 MyRequest,
+							 data,
+	             MyRequest.Length,
+							 &nBytes,
+							 NULL))
 		return true;
 	else
 	{
@@ -789,7 +619,7 @@ bool TUSBDevice::SilabUsbRequest(PSILAB_USB_REQUEST psur, unsigned char* data)
 	buffer[0] = psur->type;
 	buffer[1] = psur->dir;
 
-	if (ControllerType == FX2 || ControllerType == FX3) {
+	if (ControllerType == FX2) {
 		buffer[2] = (unsigned char)(0xff &  psur->addr);
 		buffer[3] = (unsigned char)(0xff & (psur->addr >> 8));
 		buffer[4] = (unsigned char)(0xff & (psur->addr >> 16));
@@ -817,21 +647,21 @@ bool TUSBDevice::SilabUsbRequest(PSILAB_USB_REQUEST psur, unsigned char* data)
 	}
 
  	while (dataleft > 0) 
-	  {
-	    if (psur->dir == SUR_DIR_OUT) 
-	      {
-		blocksize = min(dataleft, pPipe[sur_data_out_pipe].MaximumTransferSize);
-		status &= WriteBulkEndpoint(sur_data_out_pipe, (unsigned char *) (data + ptr), blocksize);
-	      } 
-	    else 
-	      {
-		blocksize = min(dataleft, pPipe[sur_data_in_pipe].MaximumTransferSize);
-		status &= ReadBulkEndpoint(sur_data_in_pipe, (unsigned char *) (data + ptr), blocksize, &nBytes);
-	      }
-	    ptr += blocksize;	
-	    dataleft -= blocksize;  
-	  }
-	
+	{
+		if (psur->dir == SUR_DIR_OUT) 
+		{
+      blocksize = min(dataleft, pPipe[sur_data_out_pipe].MaximumTransferSize);
+			status &= WriteBulkEndpoint(sur_data_out_pipe, (unsigned char *) (data + ptr), blocksize);
+		} 
+		else 
+		{
+      blocksize = min(dataleft, pPipe[sur_data_in_pipe].MaximumTransferSize);
+			status &= ReadBulkEndpoint(sur_data_in_pipe, (unsigned char *) (data + ptr), blocksize, &nBytes);
+		}
+  	ptr += blocksize;	
+		dataleft -= blocksize;  
+	}
+
 	RELEASE_MUTEX;
 	if (status && (dataleft == 0)) 
 	{
@@ -839,8 +669,8 @@ bool TUSBDevice::SilabUsbRequest(PSILAB_USB_REQUEST psur, unsigned char* data)
 	} 
 	else 
 	{
-	  DebugOutLastError("TUSBDevice::SilabUsbRequest(data phase)");
-	  return false;
+		DebugOutLastError("TUSBDevice::SilabUsbRequest(data phase)");
+		return false;
 	}
 
 }
@@ -924,15 +754,11 @@ bool TUSBDevice::FastByteRead(unsigned char *data)
 	}
 }
 
-bool TUSBDevice::FastBlockWrite(int addr, unsigned char *data, int length)
+bool TUSBDevice::FastBlockWrite(unsigned char *data, int length)
 {
-  //int addr = 0;
+	int addr = 0;
 	unsigned char buffer[10];
 	unsigned char buffersize = 10;
-	int minDataSize = 1;
-	// padding workaround for error https://connect.microsoft.com/VisualStudio/feedbackdetail/view/933699
-	if (ControllerType == FX3) minDataSize = 4;
-	unsigned char tmpData[4];
 	int ptr = 0;
 	int blocksize;          /* data size in current transfer */
 	unsigned long dataleft = length;  /* initial requested data size */
@@ -952,58 +778,44 @@ bool TUSBDevice::FastBlockWrite(int addr, unsigned char *data, int length)
 
 	GET_MUTEX;
 	if (!WriteBulkEndpoint(sur_control_pipe, buffer, buffersize))
-        {
+  {
 		DebugOutLastError("TUSBDevice::FastBlockWrite(setup phase)");
 		return false;
 	}
 
 	while (dataleft > 0) 
 	{
-	  blocksize = min(dataleft, pPipe[SUR_DATA_FASTOUT_PIPE].MaximumTransferSize);
-	  if(blocksize<minDataSize){
-	    for(unsigned long i=0; i<(unsigned long)blocksize; i++)
-	      tmpData[i] = *((unsigned char *) (data + ptr + i));
-	    for(unsigned long i=(unsigned long)blocksize; i<(unsigned long)minDataSize; i++)
-	      tmpData[i] = 0;
-	    status &= WriteBulkEndpoint(SUR_DATA_FASTOUT_PIPE, tmpData, minDataSize);
-	  } else {
-	    status &= WriteBulkEndpoint(SUR_DATA_FASTOUT_PIPE, (unsigned char *) (data + ptr), blocksize);
-	  }
-	  ptr      += blocksize; /* increment data pointer for next transfer */
-	  dataleft -= blocksize; /* remaining data fraction */
-	  if (!status) break;
+		blocksize = min(dataleft, pPipe[SUR_DATA_FASTOUT_PIPE].MaximumTransferSize);
+		status &= WriteBulkEndpoint(SUR_DATA_FASTOUT_PIPE, (unsigned char *) (data + ptr), blocksize);
+		ptr      += blocksize; /* increment data pointer for next transfer */
+		dataleft -= blocksize; /* remaining data fraction */
 	}
-        RELEASE_MUTEX;
+  RELEASE_MUTEX;
 
 	if (status && (dataleft == 0)) {
 		return true;
 	} else {
-		DebugOutLastError("TUSBDevice::FastBlockWrite: data is left");
+		DebugOutLastError("TUSBDevice::FastBlockwrite");
 
 		return false;
 	}
 }
 
-bool TUSBDevice::FastBlockRead(int addr, unsigned char *data, int length)
+bool TUSBDevice::FastBlockRead(unsigned char *data, int length)
 {
-  //int addr = 0;
+	int addr = 0;
 	unsigned char buffer[10];
 	unsigned char buffersize = 10;
-	int minDataSize = 1;
-	// padding workaround for error https://connect.microsoft.com/VisualStudio/feedbackdetail/view/933699
-	if (ControllerType == FX3) minDataSize = 4;
-	unsigned char tmpData[4];
 	int ptr = 0;
 	int blocksize;          /* data size in current transfer */
-	unsigned long dataleft = (unsigned long) length;  /* initial requested data size */
+	unsigned long dataleft = length;  /* initial requested data size */
 	int nBytesRead;
 	bool status = true;
 
 	GET_MUTEX;
-	//int statecnt=0;
 	while (dataleft > 0) 
 	{
-	        blocksize = min(dataleft, pPipe[SUR_DATA_FASTIN_PIPE].MaximumTransferSize);
+	  blocksize = min(dataleft, pPipe[SUR_DATA_FASTIN_PIPE].MaximumTransferSize);
 
 		/* send setup data to bulk endpoint 0 to initialize data transfer */
 		buffer[0] = SUR_TYPE_GPIFBLOCK;
@@ -1022,19 +834,14 @@ bool TUSBDevice::FastBlockRead(int addr, unsigned char *data, int length)
 			DebugOutLastError("TUSBDevice::FastBlockRead(setup phase)");
 			return false;
 		}
-		if(blocksize<minDataSize){
-		  status   &= ReadBulkEndpoint(SUR_DATA_FASTIN_PIPE, tmpData, minDataSize, &nBytesRead);
-		  for(unsigned long i=0; i<dataleft; i++)
-		    *((unsigned char *) (data + ptr + i)) = tmpData[i];
-		  if(nBytesRead>(int)dataleft) nBytesRead=(int)dataleft;
-		} else {
-		  status   &= ReadBulkEndpoint(SUR_DATA_FASTIN_PIPE, (unsigned char *) (data + ptr), blocksize, &nBytesRead);
-		}
+
+    status   &= ReadBulkEndpoint(SUR_DATA_FASTIN_PIPE, (unsigned char *) (data + ptr), blocksize, &nBytesRead);
 		ptr      += nBytesRead; /* increment data pointer for next transfer */
 		dataleft -= nBytesRead; /* remaining data fraction */
-		if (!status) break;
+		if (status == false)
+			break;
 	}
-	RELEASE_MUTEX;
+  RELEASE_MUTEX;
 
 	if (status && (dataleft == 0)) 
 	{
@@ -1042,7 +849,7 @@ bool TUSBDevice::FastBlockRead(int addr, unsigned char *data, int length)
 	} 
 	else 
 	{
-		DebugOutLastError("TUSBDevice::FastBlockRead: data is left");
+		DebugOutLastError("TUSBDevice::FastBlockRead");
 		return false;
 	}
 }
@@ -1161,7 +968,7 @@ unsigned short TUSBDevice::ReadFIFO(unsigned char *data, int size)
 	buffer[0] = SUR_TYPE_FIFO;
 	buffer[1] = SUR_DIR_IN;
 
-	if(ControllerType == FX2 || ControllerType == FX3) {
+	if(ControllerType == FX2) {
 		buffer[2] = 0;
 		buffer[3] = 0;
 		buffer[4] = 0;
@@ -1318,7 +1125,7 @@ bool TUSBDevice::I2CAck()
 {
 	unsigned char dummy;
 
-	if (ControllerType == FX2 || ControllerType == FX3) {
+	if (ControllerType == FX2) {
 		Read8051(I2CS_FX, &dummy, 1);
 	} else {
 		Read8051(I2CS, &dummy, 1);
@@ -1575,7 +1382,6 @@ bool TUSBDevice::ReadAdcSPI(unsigned char address, unsigned char *Data)
 	}
 }
 
-#ifndef _LIBUSB_
 bool TUSBDevice::ResetPipe(int pipenum)
 {
 	if (!WinUsb_ResetPipe(WinUSBInterfaceHandle, pipenum))
@@ -1585,9 +1391,7 @@ bool TUSBDevice::ResetPipe(int pipenum)
 	}
 	return true;
 }
-#endif
 
-#ifndef _LIBUSB_
 bool TUSBDevice::FlushPipe(int pipenum)
 {
 	if (!WinUsb_FlushPipe(WinUSBInterfaceHandle, pipenum)) 
@@ -1597,19 +1401,17 @@ bool TUSBDevice::FlushPipe(int pipenum)
 	}
 	return true;
 }
-#endif
 
-#ifndef _LIBUSB_
 bool TUSBDevice::AbortPipe(int pipenum)
 {
 	if (!WinUsb_AbortPipe(WinUSBInterfaceHandle, pipenum)) 
 	{
-		DebugOutLastError("TUSBDevice::AbortPipe");
+		DebugOutLastError("TUSBDevice::ResetPipe");
 		return false;
 	}
 	return true;
+
 }
-#endif
 
 
 void TUSBDevice::Hold8051()
@@ -1705,13 +1507,11 @@ bool TUSBDevice::LoadFirmwareFromFile(std::string FileName)
 {
 //#define MAX_FILE_SIZE (1024*16)  // 16 k for FX2LP devices
 
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	FILE *fpointer;
 	unsigned char *buffer;
 	int numread;
 	unsigned long nBytes, fsize;
-	WINUSB_SETUP_PACKET WinUsb_Setup_Packet;
+  WINUSB_SETUP_PACKET WinUsb_Setup_Packet;
 	
 	fpointer = fopen(FileName.c_str(),"rb");
 
@@ -1723,7 +1523,7 @@ bool TUSBDevice::LoadFirmwareFromFile(std::string FileName)
 	rewind(fpointer);
 	buffer = new unsigned char[fsize];
 	numread = fread(buffer, 1, fsize, fpointer);
-	if (numread != (int)fsize)
+	if (numread != fsize)
 	{
 	  delete[] buffer;
 		return false;
@@ -1748,9 +1548,13 @@ bool TUSBDevice::LoadFirmwareFromFile(std::string FileName)
 		WinUsb_Setup_Packet.Value  = (unsigned short)(0xffff & dataptr); // address
 		WinUsb_Setup_Packet.Length = (unsigned short)(0xffff & datasize);
 
-		if (!ControlTransfer(WinUsb_Setup_Packet,
-				     &buffer[dataptr],
-				     &nBytes))
+		if (!WinUsb_ControlTransfer(
+								 WinUSBInterfaceHandle,
+								 WinUsb_Setup_Packet,
+								 &buffer[dataptr],
+								 datasize,
+								 &nBytes,
+								 NULL))
 		{
 			DebugOutLastError("LoadFirmwareFromFile::VendorRequest");
 			delete[] buffer;
@@ -1767,8 +1571,6 @@ bool TUSBDevice::LoadFirmwareFromFile(std::string FileName)
 }
 
 bool TUSBDevice::LoadHexFileToEeprom(std::string FileName) {
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	struct HEX_RECORDS   *Hex_Records=NULL;
 	struct HEX_RECORDS   *entry, *entry_prev=NULL, *current=NULL;
 	FILE                 *image;
@@ -1902,8 +1704,6 @@ bool TUSBDevice::LoadHexFileToEeprom(std::string FileName) {
 
 bool TUSBDevice::WriteDataRecordToEeprom(INTEL_HEX_RECORD HexRecordStruct, unsigned short Address)
 {
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	unsigned char *buffer;
 
 	buffer = (unsigned char*) malloc (sizeof(INTEL_HEX_RECORD));
@@ -1943,8 +1743,6 @@ bool TUSBDevice::WriteDataRecordToEeprom(INTEL_HEX_RECORD HexRecordStruct, unsig
  */
 bool TUSBDevice::InitXilinxConfPort()
 {
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	unsigned char portreg;
 
 	/* configure bits on portc to I/O mode */
@@ -1995,8 +1793,6 @@ bool TUSBDevice::InitXilinxConfPort()
 
 bool TUSBDevice::SetXilinxConfPin(unsigned char pin, unsigned char data)
 {
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	unsigned char portreg;
 
 	if (!Read8051(xp_conf_port_rd, &portreg, 1)) {
@@ -2018,8 +1814,6 @@ bool TUSBDevice::SetXilinxConfPin(unsigned char pin, unsigned char data)
 
 bool TUSBDevice::GetXilinxConfPin(unsigned char pin)
 {
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	unsigned char portreg;
 
 	if (!Read8051(xp_conf_port_rd, &portreg, 1)) {
@@ -2031,8 +1825,6 @@ bool TUSBDevice::GetXilinxConfPin(unsigned char pin)
 
 bool TUSBDevice::WriteXilinxConfData(unsigned char *data, int size)
 {
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	unsigned char dummy[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 	SwapBytes(data, size);
@@ -2048,8 +1840,6 @@ bool TUSBDevice::WriteXilinxConfData(unsigned char *data, int size)
 
 bool TUSBDevice::SetXilinxConfByte(unsigned char data)
 {
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	if(!Write8051(xp_conf_port_wr, &data, 1)) {
 		return false;
 	}
@@ -2059,8 +1849,6 @@ bool TUSBDevice::SetXilinxConfByte(unsigned char data)
 
 unsigned char TUSBDevice::GetXilinxConfByte(void)
 {
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	unsigned char portreg;
 
 	if (!Read8051(xp_conf_port_rd, &portreg, 1)) {
@@ -2079,8 +1867,6 @@ bool TUSBDevice::XilinxAlreadyLoaded()
 
 bool TUSBDevice::WriteXilinx(unsigned short address, unsigned char *Data, int length)
 {
-  if(ControllerType == FX3) return false; // (probably) not implemented
-
 	SILAB_USB_REQUEST sur;
 	bool status;
 

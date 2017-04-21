@@ -8,51 +8,65 @@ SiUSBDevice.h \
 SiUSBDeviceManager.h \
 SiXilinxChip.h \
 ../inc/SURConstants.h \
-../inc/CDataFile.h
+../inc/winusb.h \
+
+
+
 
 SOURCES += myutils.cpp \
-CDataFile.cpp \
-SiXilinxChip.cpp \
-SiUSBDevice.cpp \
 SiI2CDevice.cpp \
+SiUSBDevice.cpp \
 SiUSBDeviceManager.cpp \
-SiUSBLib.cpp
+SiXilinxChip.cpp \
+SiUSBLib.cpp 
 
-INCLUDEPATH += $(DAQ_BASE)/inc 
-
-libusb{
-  DEFINES += _LIBUSB_
-  HEADERS += usbcompat.h
-}
-
-TEMPLATE = lib
-CONFIG -= qt
-CONFIG += dll
-DESTDIR = $(DAQ_BASE)/lib
+INCLUDEPATH += ../inc 
 
 win32{
- DEFINES += __VISUALC__ \
-	    WIN32 \
-	    _WIN32 \
-	    DLL_EXPORT \
-	    _CRT_SECURE_NO_WARNINGS \
-	    NO_ERROR_MESSAGES
- DEFINES -= UNICODE
- TARGET = SiLibUSB
- LIBS += user32.lib  setupapi.lib
- QMAKE_CXXFLAGS += /MP
- DLLDESTDIR = $(DAQ_BASE)/bin
- libusb{
-    LIBS += /LIBPATH:$(DAQ_BASE)/lib libusb-1.0.lib
- }else{
-    LIBS += /LIBPATH:$(DAQ_BASE)/lib winusb.lib
- }
+DEFINES += __VISUALC__ \
+WIN32 \
+_WIN32 \
+DLL_EXPORT \
+_CRT_SECURE_NO_WARNINGS \
+NO_ERROR_MESSAGES
+DEFINES -= UNICODE
+TARGET = SiLibUSB
+LIBS += user32.lib \
+	../lib/winusb.lib setupapi.lib
+QMAKE_CXXFLAGS += /MP
 }
 
 unix{
- DEFINES += CF__LINUX
- TARGET = siusb
- libusb{
-    LIBS += -lusb-1.0
- }
+DEFINES += CF__LINUX
+TARGET = siusb
+}
+
+
+
+TEMPLATE = lib
+
+CONFIG += dll
+
+
+
+CONFIG(debug, debug|release) {
+    win32{
+    	DLLDESTDIR = $(DAQ_BASE)/bin
+    	DESTDIR = $(DAQ_BASE)/lib
+     }
+    else{
+	DESTDIR = $(DAQ_BASE)/lib
+	LIBS += -L../lib -ldsiusb
+    }
+}
+else {
+    win32{
+    	DLLDESTDIR = ../bin
+    	DESTDIR = $(DAQ_BASE)/lib
+
+   }	
+    else{
+    	DESTDIR = $(DAQ_BASE)/lib
+	LIBS += -L../lib -lsiusb
+   }	
 }

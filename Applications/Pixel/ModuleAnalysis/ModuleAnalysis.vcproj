@@ -1,0 +1,3312 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9.00"
+	Name="ModuleAnalysis"
+	ProjectGUID="{23876D2A-9034-3E11-A895-DCE292540700}"
+	Keyword="Qt4VSv1.0"
+	TargetFrameworkVersion="0"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+	</Platforms>
+	<ToolFiles>
+		<ToolFile
+			RelativePath="..\..\..\custom_rules.rules"
+		/>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="debug\"
+			IntermediateDirectory="debug\"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			ManagedExtensions="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="$(ROOTSYS)/bin/rootcint -f dictLogRoot.cpp -c LogClasses.h LogRoot.h LinkDef.h&#x0D;&#x0A;$(ROOTSYS)/bin/rootcint -f dictPalette.cpp -c MATPalette.h paletteLinkDef.h&#x0D;&#x0A;"
+			/>
+			<Tool
+				Name="QT resource Compile"
+			/>
+			<Tool
+				Name="QT MOC"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="UI"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				WarningLevel="0"
+				DefaultCharType="0"
+				EnableErrorChecks="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-nologo -Zm200 -Zc:wchar_t- /MP -O2 -GR -EHsc -W3 -w34100 -w34189"
+				Optimization="4"
+				AdditionalIncludeDirectories="&quot;$(QTDIR)\include\Qt&quot;;&quot;$(QTDIR)\include\QtCore&quot;;&quot;$(QTDIR)\include\QtGui&quot;;&quot;$(QTDIR)\include\Qt3Support&quot;;&quot;$(QTDIR)\include&quot;;&quot;$(ROOTSYS)\include&quot;;&quot;$(PIX_LIB)\PixConfDBInterface&quot;;&quot;$(PIX_LIB)\Histo&quot;;&quot;$(PIX_LIB)\PixController&quot;;&quot;$(PIX_LIB)&quot;;&quot;$(VME_INTERFACE)&quot;;&quot;$(ROD_DAQ)\CommonWithDsp&quot;;&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot;;&quot;$(ROD_DAQ)\Dsp\Code&quot;;&quot;$(ROD_DAQ)\RodCrate&quot;;&quot;$(PIX_ANA)\DataContainer&quot;;&quot;$(PIX_ANA)\Fitting&quot;;&quot;$(USBPIXDLL)&quot;;.\;&quot;$(QTDIR)\include\ActiveQt&quot;;debug\;&quot;$(QTDIR)\mkspecs\win32-msvc2008&quot;"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;UNICODE;COMPL;HAVE_PLDB;PIXEL_ROD;I_AM_LINUX_HOST;_WINDOWS;WIN32;QT_LARGEFILE_SUPPORT;QT_THREAD_SUPPORT;QT_DLL;QT_QT3SUPPORT_LIB;QT3_SUPPORT;QT_GUI_LIB;QT_CORE_LIB;NOTDAQ"
+				GeneratePreprocessedFile="0"
+				ExceptionHandling="1"
+				RuntimeLibrary="3"
+				BufferSecurityCheck="false"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="true"
+				AssemblerListingLocation="debug\"
+				ObjectFile="debug\"
+				ProgramDataBaseFileName=".\"
+				WarningLevel="3"
+				SuppressStartupBanner="false"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS,,,UNICODE,COMPL,HAVE_PLDB,PIXEL_ROD,I_AM_LINUX_HOST,_CRT_SECURE_NO_WARNINGS,,,UNICODE,COMPL,HAVE_PLDB,PIXEL_ROD,I_AM_LINUX_HOST,_WINDOWS,UNICODE,WIN32,QT_LARGEFILE_SUPPORT,QT_THREAD_SUPPORT,QT_DLL,QT_QT3SUPPORT_LIB,QT3_SUPPORT,QT_GUI_LIB,QT_CORE_LIB,_DEBUG"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				IgnoreImportLibrary="false"
+				LinkLibraryDependencies="false"
+				AdditionalOptions="delayimp.lib"
+				AdditionalDependencies="qtmaind.lib libCored.lib libCint.lib libRIO.lib libNet.lib libHist.lib libGraf.lib libGraf3d.lib libGpad.lib libTree.lib libRint.lib libPostscript.lib libMatrix.lib libPhysics.lib libMathCore.lib libHistPainter.lib libPixAnalysisd.lib libPixLibd.lib libVmeInterfaced.lib SiUSBLibd.lib USBPixI4dlld.lib libPixRS232d.lib Qt3Supportd4.lib QtGuid4.lib QtCored4.lib"
+				OutputFile="$(DAQ_BASE)\bin\$(ProjectName)d.exe"
+				SuppressStartupBanner="false"
+				AdditionalLibraryDirectories="&quot;$(PIX_LIB)&quot;;&quot;$(VME_INTERFACE)&quot;;&quot;$(DBEDT)&quot;;&quot;$(ROOTSYS)\lib&quot;;&quot;$(MODULE_ANALYSIS)&quot;;&quot;$(PIX_ANA)&quot;;&quot;$(DAQ_BASE)\lib&quot;;&quot;$(USB_LIB_DIR)&quot;;&quot;$(QTDIR)\lib&quot;"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames="libc"
+				AssemblyDebug="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="lib /NOLOGO /OUT:libModuleAnalysis.lib debug\*.obj"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="release\"
+			IntermediateDirectory="release\"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			ManagedExtensions="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="QT resource Compile"
+			/>
+			<Tool
+				Name="QT MOC"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="UI"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				WarningLevel="0"
+				DefaultCharType="0"
+				EnableErrorChecks="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-Zm200 -w34100 -w34189 -Zm200 -w34100 -w34189 -w34100 -w34189"
+				Optimization="2"
+				AdditionalIncludeDirectories="&quot;$(QTDIR)\include\Qt&quot;;&quot;$(QTDIR)\include\QtCore&quot;;&quot;$(QTDIR)\include\QtGui&quot;;&quot;$(QTDIR)\include\Qt3Support&quot;;&quot;$(QTDIR)\include&quot;;&quot;$(ROOTSYS)\include&quot;;&quot;$(PIX_LIB)\PixConfDBInterface&quot;;&quot;$(PIX_LIB)\Histo&quot;;&quot;$(PIX_LIB)\PixController&quot;;&quot;$(PIX_LIB)&quot;;&quot;$(VME_INTERFACE)&quot;;&quot;$(ROD_DAQ)\CommonWithDsp&quot;;&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot;;&quot;$(ROD_DAQ)\Dsp\Code&quot;;&quot;$(ROD_DAQ)\RodCrate&quot;;&quot;$(PIX_ANA)\DataContainer&quot;;&quot;$(PIX_ANA)\Fitting&quot;;&quot;$(USBPIXDLL)&quot;;.\;&quot;$(QTDIR)\include\ActiveQt&quot;;release\;&quot;$(QTDIR)\mkspecs\win32-msvc2008&quot;"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;UNICODE;COMPL;HAVE_PLDB;PIXEL_ROD;I_AM_LINUX_HOST;_WINDOWS;WIN32;QT_LARGEFILE_SUPPORT;QT_THREAD_SUPPORT;QT_DLL;QT_QT3SUPPORT_LIB;QT3_SUPPORT;QT_GUI_LIB;QT_CORE_LIB;NOTDAQ"
+				GeneratePreprocessedFile="0"
+				ExceptionHandling="1"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="true"
+				AssemblerListingLocation="release\"
+				ObjectFile="release\"
+				ProgramDataBaseFileName=".\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS,,,UNICODE,COMPL,HAVE_PLDB,PIXEL_ROD,I_AM_LINUX_HOST,_CRT_SECURE_NO_WARNINGS,,,UNICODE,COMPL,HAVE_PLDB,PIXEL_ROD,I_AM_LINUX_HOST,QT_NO_DEBUG,NDEBUG,_WINDOWS,UNICODE,WIN32,QT_LARGEFILE_SUPPORT,QT_THREAD_SUPPORT,QT_DLL,QT_NO_DEBUG,QT_QT3SUPPORT_LIB,QT3_SUPPORT,QT_GUI_LIB,QT_CORE_LIB"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				IgnoreImportLibrary="true"
+				AdditionalOptions="delayimp.lib &quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot; delayimp.lib &quot;/MANIFESTDEPENDENCY:type=&apos;win32&apos; name=&apos;Microsoft.Windows.Common-Controls&apos; version=&apos;6.0.0.0&apos; publicKeyToken=&apos;6595b64144ccf1df&apos; language=&apos;*&apos; processorArchitecture=&apos;*&apos;&quot;"
+				AdditionalDependencies="qtmain.lib libCore.lib libCint.lib libRIO.lib libNet.lib libHist.lib libGraf.lib libGraf3d.lib libGpad.lib libTree.lib libRint.lib libPostscript.lib libMatrix.lib libPhysics.lib libMathCore.lib libHistPainter.lib libPixAnalysis.lib libPixLib.lib libVmeInterface.lib SiUSBLib.lib USBPixI4dll.lib libPixRS232.lib Qt3Support4.lib QtGui4.lib QtCore4.lib"
+				OutputFile="$(DAQ_BASE)\bin\$(ProjectName).exe"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="&quot;$(PIX_LIB)&quot;;&quot;$(VME_INTERFACE)&quot;;&quot;$(DBEDT)&quot;;&quot;$(ROOTSYS)\lib&quot;;&quot;$(MODULE_ANALYSIS)&quot;;&quot;$(PIX_ANA)&quot;;&quot;$(DAQ_BASE)\lib&quot;;&quot;$(USB_LIB_DIR)&quot;;&quot;$(QTDIR)\lib&quot;"
+				GenerateDebugInformation="false"
+				ProgramDatabaseFile=""
+				SubSystem="2"
+				LinkTimeCodeGeneration="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="lib /NOLOGO /OUT:libModuleAnalysis.lib release\*.obj"
+			/>
+		</Configuration>
+		<Configuration
+			Name="app|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="$(ROOTSYS)/bin/rootcint -f dictLogRoot.cpp -c LogClasses.h LogRoot.h LinkDef.h&#x0D;&#x0A;$(ROOTSYS)/bin/rootcint -f dictPalette.cpp -c MATPalette.h paletteLinkDef.h&#x0D;&#x0A;"
+			/>
+			<Tool
+				Name="QT resource Compile"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="UI"
+			/>
+			<Tool
+				Name="QT MOC"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				WarningLevel="0"
+				DefaultCharType="0"
+				EnableErrorChecks="1"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-Zm200 -w34100 -w34189 -Zm200 -w34100 -w34189 -w34100 -w34189"
+				Optimization="4"
+				AdditionalIncludeDirectories="&quot;$(QTDIR)\include\QtCore&quot;,&quot;$(QTDIR)\include\QtCore&quot;,&quot;$(QTDIR)\include\QtGui&quot;,&quot;$(QTDIR)\include\QtGui&quot;,&quot;$(QTDIR)\include\Qt3Support&quot;,&quot;$(QTDIR)\include\Qt3Support&quot;,&quot;$(QTDIR)\include&quot;,&quot;$(ROOTSYS)\include&quot;,&quot;$(PIX_LIB)\PixConfDBInterface&quot;,&quot;$(PIX_LIB)\Histo&quot;,&quot;$(PIX_LIB)\Histo&quot;,&quot;$(PIX_LIB)\PixController&quot;,&quot;$(PIX_LIB)&quot;,&quot;$(VME_INTERFACE)&quot;,&quot;$(ROD_DAQ)\CommonWithDsp&quot;,&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot;,&quot;$(ROD_DAQ)\RodCrate&quot;,&quot;$(PIX_ANA)\DataContainer&quot;,&quot;$(PIX_ANA)\Fitting&quot;,&quot;.&quot;,&quot;$(QTDIR)\include\ActiveQt&quot;,&quot;debug&quot;,&quot;.&quot;,$(QTDIR)\mkspecs\win32-msvc2008"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS,,,UNICODE,COMPL,HAVE_PLDB,PIXEL_ROD,I_AM_LINUX_HOST,_CRT_SECURE_NO_WARNINGS,,,UNICODE,COMPL,HAVE_PLDB,PIXEL_ROD,I_AM_LINUX_HOST,_WINDOWS,UNICODE,WIN32,QT_LARGEFILE_SUPPORT,QT_THREAD_SUPPORT,QT_DLL,QT_QT3SUPPORT_LIB,QT3_SUPPORT,QT_GUI_LIB,QT_CORE_LIB"
+				GeneratePreprocessedFile="0"
+				ExceptionHandling="1"
+				RuntimeLibrary="3"
+				BufferSecurityCheck="false"
+				TreatWChar_tAsBuiltInType="false"
+				RuntimeTypeInfo="true"
+				AssemblerListingLocation="debug\"
+				ObjectFile="debug\"
+				ProgramDataBaseFileName=".\"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS,,,UNICODE,COMPL,HAVE_PLDB,PIXEL_ROD,I_AM_LINUX_HOST,_CRT_SECURE_NO_WARNINGS,,,UNICODE,COMPL,HAVE_PLDB,PIXEL_ROD,I_AM_LINUX_HOST,_WINDOWS,UNICODE,WIN32,QT_LARGEFILE_SUPPORT,QT_THREAD_SUPPORT,QT_DLL,QT_QT3SUPPORT_LIB,QT3_SUPPORT,QT_GUI_LIB,QT_CORE_LIB,_DEBUG"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile=".\$lib(ProjectName).lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath="BadPixel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="CDatabase.cpp"
+				>
+			</File>
+			<File
+				RelativePath="CfgForm.cpp"
+				>
+			</File>
+			<File
+				RelativePath="ConfigViewer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="CorrelSel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="CutPanel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="DataStuff.cpp"
+				>
+			</File>
+			<File
+				RelativePath="DBtoMAData.cxx"
+				>
+			</File>
+			<File
+				RelativePath="dictLogRoot.cpp"
+				>
+			</File>
+			<File
+				RelativePath="dictPalette.cpp"
+				>
+			</File>
+			<File
+				RelativePath="DummyMain.cpp"
+				>
+			</File>
+			<File
+				RelativePath="FileWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="FitWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="LoadStave.cpp"
+				>
+			</File>
+			<File
+				RelativePath="LogClasses.cpp"
+				>
+			</File>
+			<File
+				RelativePath="LogDisp.cpp"
+				>
+			</File>
+			<File
+				RelativePath="LoginPanel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="LogRoot.cpp"
+				>
+			</File>
+			<File
+				RelativePath="MAEngine.cpp"
+				>
+			</File>
+			<File
+				RelativePath="MAFitting.cpp"
+				>
+			</File>
+			<File
+				RelativePath="main.cpp"
+				>
+			</File>
+			<File
+				RelativePath="MaskedSel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MaskMaker.cpp"
+				>
+			</File>
+			<File
+				RelativePath="ModTree.cpp"
+				>
+			</File>
+			<File
+				RelativePath="ModWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="MultiLoad.cpp"
+				>
+			</File>
+			<File
+				RelativePath="MultiLoadRDB.cpp"
+				>
+			</File>
+			<File
+				RelativePath="OptClass.cpp"
+				>
+			</File>
+			<File
+				RelativePath="OptWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="Overviewselect.cpp"
+				>
+			</File>
+			<File
+				RelativePath="ParFitfun.cpp"
+				>
+			</File>
+			<File
+				RelativePath="PDBForm.cpp"
+				>
+			</File>
+			<File
+				RelativePath="PSFitWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="QAReport.cpp"
+				>
+			</File>
+			<File
+				RelativePath="QRootApplication.cpp"
+				>
+			</File>
+			<File
+				RelativePath="RefWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="RegPanel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="RenameWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="RootDataList.cpp"
+				>
+			</File>
+			<File
+				RelativePath="RootStuff.cpp"
+				>
+			</File>
+			<File
+				RelativePath="SelectionPanel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="StdListChoice.cpp"
+				>
+			</File>
+			<File
+				RelativePath="StdTestWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="TopWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath="TotRecal.cpp"
+				>
+			</File>
+			<File
+				RelativePath="Twodsel.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath="BadPixel.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC BadPixel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 BadPixel.h -o debug\moc_BadPixel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="BadPixel.h;$(QTDIR)\bin\moc.exe"
+						Outputs="debug\moc_BadPixel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC BadPixel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 BadPixel.h -o release\moc_BadPixel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="BadPixel.h;$(QTDIR)\bin\moc.exe"
+						Outputs="release\moc_BadPixel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC BadPixel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 BadPixel.h -o debug\moc_BadPixel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="BadPixel.h;$(QTDIR)\bin\moc.exe"
+						Outputs="debug\moc_BadPixel.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="CDatabase.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CDatabase.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CDatabase.h -o debug\moc_CDatabase.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CDatabase.h"
+						Outputs="debug\moc_CDatabase.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CDatabase.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CDatabase.h -o release\moc_CDatabase.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CDatabase.h"
+						Outputs="release\moc_CDatabase.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CDatabase.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CDatabase.h -o debug\moc_CDatabase.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CDatabase.h"
+						Outputs="debug\moc_CDatabase.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="CfgForm.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CfgForm.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CfgForm.h -o debug\moc_CfgForm.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CfgForm.h"
+						Outputs="debug\moc_CfgForm.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CfgForm.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CfgForm.h -o release\moc_CfgForm.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CfgForm.h"
+						Outputs="release\moc_CfgForm.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CfgForm.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CfgForm.h -o debug\moc_CfgForm.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CfgForm.h"
+						Outputs="debug\moc_CfgForm.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="ConfigViewer.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC ConfigViewer.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 ConfigViewer.h -o debug\moc_ConfigViewer.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;ConfigViewer.h"
+						Outputs="debug\moc_ConfigViewer.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC ConfigViewer.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 ConfigViewer.h -o release\moc_ConfigViewer.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;ConfigViewer.h"
+						Outputs="release\moc_ConfigViewer.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC ConfigViewer.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 ConfigViewer.h -o debug\moc_ConfigViewer.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;ConfigViewer.h"
+						Outputs="debug\moc_ConfigViewer.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="CorrelSel.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CorrelSel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CorrelSel.h -o debug\moc_CorrelSel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CorrelSel.h"
+						Outputs="debug\moc_CorrelSel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CorrelSel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CorrelSel.h -o release\moc_CorrelSel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CorrelSel.h"
+						Outputs="release\moc_CorrelSel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CorrelSel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CorrelSel.h -o debug\moc_CorrelSel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CorrelSel.h"
+						Outputs="debug\moc_CorrelSel.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="CutPanel.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CutPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CutPanel.h -o debug\moc_CutPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CutPanel.h"
+						Outputs="debug\moc_CutPanel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CutPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CutPanel.h -o release\moc_CutPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CutPanel.h"
+						Outputs="release\moc_CutPanel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC CutPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 CutPanel.h -o debug\moc_CutPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;CutPanel.h"
+						Outputs="debug\moc_CutPanel.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="DataStuff.h"
+				>
+			</File>
+			<File
+				RelativePath="DBtoMAData.h"
+				>
+			</File>
+			<File
+				RelativePath="DummyMain.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC DummyMain.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 DummyMain.h -o debug\moc_DummyMain.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;DummyMain.h"
+						Outputs="debug\moc_DummyMain.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC DummyMain.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 DummyMain.h -o release\moc_DummyMain.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;DummyMain.h"
+						Outputs="release\moc_DummyMain.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC DummyMain.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 DummyMain.h -o debug\moc_DummyMain.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;DummyMain.h"
+						Outputs="debug\moc_DummyMain.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="FileTypes.h"
+				>
+			</File>
+			<File
+				RelativePath="FileWin.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC FileWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 FileWin.h -o debug\moc_FileWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;FileWin.h"
+						Outputs="debug\moc_FileWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC FileWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 FileWin.h -o release\moc_FileWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;FileWin.h"
+						Outputs="release\moc_FileWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC FileWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 FileWin.h -o debug\moc_FileWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;FileWin.h"
+						Outputs="debug\moc_FileWin.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="FitWin.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC FitWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 FitWin.h -o debug\moc_FitWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;FitWin.h"
+						Outputs="debug\moc_FitWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC FitWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 FitWin.h -o release\moc_FitWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;FitWin.h"
+						Outputs="release\moc_FitWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC FitWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 FitWin.h -o debug\moc_FitWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;FitWin.h"
+						Outputs="debug\moc_FitWin.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="LinkDef.h"
+				>
+			</File>
+			<File
+				RelativePath="LoadStave.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC LoadStave.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 LoadStave.h -o debug\moc_LoadStave.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;LoadStave.h"
+						Outputs="debug\moc_LoadStave.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC LoadStave.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 LoadStave.h -o release\moc_LoadStave.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;LoadStave.h"
+						Outputs="release\moc_LoadStave.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC LoadStave.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 LoadStave.h -o debug\moc_LoadStave.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;LoadStave.h"
+						Outputs="debug\moc_LoadStave.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="LogClasses.h"
+				>
+			</File>
+			<File
+				RelativePath="LogDisp.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC LogDisp.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 LogDisp.h -o debug\moc_LogDisp.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;LogDisp.h"
+						Outputs="debug\moc_LogDisp.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC LogDisp.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 LogDisp.h -o release\moc_LogDisp.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;LogDisp.h"
+						Outputs="release\moc_LogDisp.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC LogDisp.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 LogDisp.h -o debug\moc_LogDisp.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;LogDisp.h"
+						Outputs="debug\moc_LogDisp.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="LoginPanel.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC LoginPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 LoginPanel.h -o debug\moc_LoginPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;LoginPanel.h"
+						Outputs="debug\moc_LoginPanel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC LoginPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 LoginPanel.h -o release\moc_LoginPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;LoginPanel.h"
+						Outputs="release\moc_LoginPanel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC LoginPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 LoginPanel.h -o debug\moc_LoginPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;LoginPanel.h"
+						Outputs="debug\moc_LoginPanel.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="LogRoot.h"
+				>
+			</File>
+			<File
+				RelativePath="MAFitting.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MAFitting.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MAFitting.h -o debug\moc_MAFitting.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MAFitting.h"
+						Outputs="debug\moc_MAFitting.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MAFitting.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MAFitting.h -o release\moc_MAFitting.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MAFitting.h"
+						Outputs="release\moc_MAFitting.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MAFitting.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MAFitting.h -o debug\moc_MAFitting.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MAFitting.h"
+						Outputs="debug\moc_MAFitting.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="MaskedSel.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MaskedSel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MaskedSel.h -o debug\moc_MaskedSel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MaskedSel.h"
+						Outputs="debug\moc_MaskedSel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MaskedSel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MaskedSel.h -o release\moc_MaskedSel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MaskedSel.h"
+						Outputs="release\moc_MaskedSel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MaskedSel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MaskedSel.h -o debug\moc_MaskedSel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MaskedSel.h"
+						Outputs="debug\moc_MaskedSel.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\MaskMaker.h"
+				>
+			</File>
+			<File
+				RelativePath="ModTree.h"
+				>
+			</File>
+			<File
+				RelativePath="ModWin.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC ModWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 ModWin.h -o debug\moc_ModWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;ModWin.h"
+						Outputs="debug\moc_ModWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC ModWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 ModWin.h -o release\moc_ModWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;ModWin.h"
+						Outputs="release\moc_ModWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC ModWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 ModWin.h -o debug\moc_ModWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;ModWin.h"
+						Outputs="debug\moc_ModWin.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="MultiLoad.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MultiLoad.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MultiLoad.h -o debug\moc_MultiLoad.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MultiLoad.h"
+						Outputs="debug\moc_MultiLoad.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MultiLoad.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MultiLoad.h -o release\moc_MultiLoad.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MultiLoad.h"
+						Outputs="release\moc_MultiLoad.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MultiLoad.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MultiLoad.h -o debug\moc_MultiLoad.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MultiLoad.h"
+						Outputs="debug\moc_MultiLoad.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="MultiLoadRDB.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MultiLoadRDB.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MultiLoadRDB.h -o debug\moc_MultiLoadRDB.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MultiLoadRDB.h"
+						Outputs="debug\moc_MultiLoadRDB.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MultiLoadRDB.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MultiLoadRDB.h -o release\moc_MultiLoadRDB.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MultiLoadRDB.h"
+						Outputs="release\moc_MultiLoadRDB.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC MultiLoadRDB.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 MultiLoadRDB.h -o debug\moc_MultiLoadRDB.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;MultiLoadRDB.h"
+						Outputs="debug\moc_MultiLoadRDB.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="OptClass.h"
+				>
+			</File>
+			<File
+				RelativePath="OptWin.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC OptWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 OptWin.h -o debug\moc_OptWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;OptWin.h"
+						Outputs="debug\moc_OptWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC OptWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 OptWin.h -o release\moc_OptWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;OptWin.h"
+						Outputs="release\moc_OptWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC OptWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 OptWin.h -o debug\moc_OptWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;OptWin.h"
+						Outputs="debug\moc_OptWin.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="Overviewselect.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC Overviewselect.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 Overviewselect.h -o debug\moc_Overviewselect.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;Overviewselect.h"
+						Outputs="debug\moc_Overviewselect.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC Overviewselect.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 Overviewselect.h -o release\moc_Overviewselect.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;Overviewselect.h"
+						Outputs="release\moc_Overviewselect.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC Overviewselect.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 Overviewselect.h -o debug\moc_Overviewselect.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;Overviewselect.h"
+						Outputs="debug\moc_Overviewselect.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="ParFitfun.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC ParFitfun.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 ParFitfun.h -o debug\moc_ParFitfun.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;ParFitfun.h"
+						Outputs="debug\moc_ParFitfun.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC ParFitfun.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 ParFitfun.h -o release\moc_ParFitfun.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;ParFitfun.h"
+						Outputs="release\moc_ParFitfun.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC ParFitfun.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 ParFitfun.h -o debug\moc_ParFitfun.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;ParFitfun.h"
+						Outputs="debug\moc_ParFitfun.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="PDBForm.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC PDBForm.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 PDBForm.h -o debug\moc_PDBForm.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;PDBForm.h"
+						Outputs="debug\moc_PDBForm.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC PDBForm.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 PDBForm.h -o release\moc_PDBForm.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;PDBForm.h"
+						Outputs="release\moc_PDBForm.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC PDBForm.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 PDBForm.h -o debug\moc_PDBForm.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;PDBForm.h"
+						Outputs="debug\moc_PDBForm.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="PSFitWin.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC PSFitWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 PSFitWin.h -o debug\moc_PSFitWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;PSFitWin.h"
+						Outputs="debug\moc_PSFitWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC PSFitWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 PSFitWin.h -o release\moc_PSFitWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;PSFitWin.h"
+						Outputs="release\moc_PSFitWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC PSFitWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 PSFitWin.h -o debug\moc_PSFitWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;PSFitWin.h"
+						Outputs="debug\moc_PSFitWin.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="QAReport.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC QAReport.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 QAReport.h -o debug\moc_QAReport.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;QAReport.h"
+						Outputs="debug\moc_QAReport.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC QAReport.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 QAReport.h -o release\moc_QAReport.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;QAReport.h"
+						Outputs="release\moc_QAReport.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC QAReport.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 QAReport.h -o debug\moc_QAReport.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;QAReport.h"
+						Outputs="debug\moc_QAReport.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="QRootApplication.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC QRootApplication.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 QRootApplication.h -o debug\moc_QRootApplication.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;QRootApplication.h"
+						Outputs="debug\moc_QRootApplication.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC QRootApplication.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 QRootApplication.h -o release\moc_QRootApplication.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;QRootApplication.h"
+						Outputs="release\moc_QRootApplication.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC QRootApplication.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 QRootApplication.h -o debug\moc_QRootApplication.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;QRootApplication.h"
+						Outputs="debug\moc_QRootApplication.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="RefWin.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RefWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RefWin.h -o debug\moc_RefWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RefWin.h"
+						Outputs="debug\moc_RefWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RefWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RefWin.h -o release\moc_RefWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RefWin.h"
+						Outputs="release\moc_RefWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RefWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RefWin.h -o debug\moc_RefWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RefWin.h"
+						Outputs="debug\moc_RefWin.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="RegPanel.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RegPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RegPanel.h -o debug\moc_RegPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RegPanel.h"
+						Outputs="debug\moc_RegPanel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RegPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RegPanel.h -o release\moc_RegPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RegPanel.h"
+						Outputs="release\moc_RegPanel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RegPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RegPanel.h -o debug\moc_RegPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RegPanel.h"
+						Outputs="debug\moc_RegPanel.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="RenameWin.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RenameWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RenameWin.h -o debug\moc_RenameWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RenameWin.h"
+						Outputs="debug\moc_RenameWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RenameWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RenameWin.h -o release\moc_RenameWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RenameWin.h"
+						Outputs="release\moc_RenameWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RenameWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RenameWin.h -o debug\moc_RenameWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RenameWin.h"
+						Outputs="debug\moc_RenameWin.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="RootDataList.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RootDataList.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RootDataList.h -o debug\moc_RootDataList.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RootDataList.h"
+						Outputs="debug\moc_RootDataList.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RootDataList.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RootDataList.h -o release\moc_RootDataList.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RootDataList.h"
+						Outputs="release\moc_RootDataList.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC RootDataList.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 RootDataList.h -o debug\moc_RootDataList.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;RootDataList.h"
+						Outputs="debug\moc_RootDataList.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="RootStuff.h"
+				>
+			</File>
+			<File
+				RelativePath="SelectionPanel.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC SelectionPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 SelectionPanel.h -o debug\moc_SelectionPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;SelectionPanel.h"
+						Outputs="debug\moc_SelectionPanel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC SelectionPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 SelectionPanel.h -o release\moc_SelectionPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;SelectionPanel.h"
+						Outputs="release\moc_SelectionPanel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC SelectionPanel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 SelectionPanel.h -o debug\moc_SelectionPanel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;SelectionPanel.h"
+						Outputs="debug\moc_SelectionPanel.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="StdListChoice.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC StdListChoice.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 StdListChoice.h -o debug\moc_StdListChoice.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;StdListChoice.h"
+						Outputs="debug\moc_StdListChoice.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC StdListChoice.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 StdListChoice.h -o release\moc_StdListChoice.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;StdListChoice.h"
+						Outputs="release\moc_StdListChoice.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC StdListChoice.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 StdListChoice.h -o debug\moc_StdListChoice.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;StdListChoice.h"
+						Outputs="debug\moc_StdListChoice.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="StdTestWin.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC StdTestWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 StdTestWin.h -o debug\moc_StdTestWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;StdTestWin.h"
+						Outputs="debug\moc_StdTestWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC StdTestWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 StdTestWin.h -o release\moc_StdTestWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;StdTestWin.h"
+						Outputs="release\moc_StdTestWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC StdTestWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 StdTestWin.h -o debug\moc_StdTestWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;StdTestWin.h"
+						Outputs="debug\moc_StdTestWin.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="TopWin.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC TopWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 TopWin.h -o debug\moc_TopWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;TopWin.h"
+						Outputs="debug\moc_TopWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC TopWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 TopWin.h -o release\moc_TopWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;TopWin.h"
+						Outputs="release\moc_TopWin.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC TopWin.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 TopWin.h -o debug\moc_TopWin.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;TopWin.h"
+						Outputs="debug\moc_TopWin.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="TotRecal.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC TotRecal.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 TotRecal.h -o debug\moc_TotRecal.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;TotRecal.h"
+						Outputs="debug\moc_TotRecal.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC TotRecal.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 TotRecal.h -o release\moc_TotRecal.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;TotRecal.h"
+						Outputs="release\moc_TotRecal.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC TotRecal.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 TotRecal.h -o debug\moc_TotRecal.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;TotRecal.h"
+						Outputs="debug\moc_TotRecal.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="Twodsel.h"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC Twodsel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 Twodsel.h -o debug\moc_Twodsel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;Twodsel.h"
+						Outputs="debug\moc_Twodsel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC Twodsel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 Twodsel.h -o release\moc_Twodsel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;Twodsel.h"
+						Outputs="release\moc_Twodsel.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="MOC Twodsel.h"
+						CommandLine="$(QTDIR)\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtCore&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\QtGui&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include\Qt3Support&quot; -I&quot;$(QTDIR)\include&quot; -I&quot;$(ROOTSYS)\include&quot; -I&quot;$(PIX_LIB)\PixConfDBInterface&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\Histo&quot; -I&quot;$(PIX_LIB)\PixController&quot; -I&quot;$(PIX_LIB)&quot; -I&quot;$(VME_INTERFACE)&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp&quot; -I&quot;$(ROD_DAQ)\CommonWithDsp\Pixel&quot; -I&quot;$(ROD_DAQ)\RodCrate&quot; -I&quot;$(PIX_ANA)\DataContainer&quot; -I&quot;$(PIX_ANA)\Fitting&quot; -I&quot;.&quot; -I&quot;$(QTDIR)\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -I$(QTDIR)\mkspecs\win32-msvc2008 -D_MSC_VER=1500 -DWIN32 Twodsel.h -o debug\moc_Twodsel.cpp&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\moc.exe;Twodsel.h"
+						Outputs="debug\moc_Twodsel.cpp"
+					/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="Generated Files"
+			Filter="cpp;c;cxx;moc;h;def;odl;idl;res;"
+			UniqueIdentifier="{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}"
+			>
+			<File
+				RelativePath=".\debug\moc_BadPixel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_CDatabase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_CfgForm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_ConfigViewer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_CorrelSel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_CutPanel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_DataStuff.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_DBtoMAData.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_DummyMain.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_FileTypes.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_FileWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_FitWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_LinkDef.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_LoadStave.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_LogClasses.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_LogDisp.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_LoginPanel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_LogRoot.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_MAFitting.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_MaskedSel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_MaskMaker.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ModTree.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_ModWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_MultiLoad.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_MultiLoadRDB.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_OptClass.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_OptWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_Overviewselect.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_ParFitfun.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_PDBForm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_PSFitWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_QAReport.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_QRootApplication.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_RefWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_RegPanel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_RenameWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_RootDataList.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_RootStuff.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_SelectionPanel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_StdListChoice.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_StdTestWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_TopWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_TotRecal.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\debug\moc_Twodsel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_BadPixelBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_CfgFormBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_CorrelSelBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_CutPanelBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_DummyMain.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_FileWinBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_FitWinBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_LoadStaveBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_LogDispBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_LoginPanelBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_MaskedSelBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_ModWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_MultiLoadBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_MultiLoadRDBBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_OptWinBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_Overviewselectbase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_ParFitfunBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_PDBFormBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_PSFitWinBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_QAReportBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_RefWinBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_RegPanelBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_RenameWin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_RootDataListBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_SelectionPanelBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_StdTestWinBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_TopWinBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_TotRecalBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\moc_ui_TwodselBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_BadPixelBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_CfgFormBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_CorrelSelBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_CutPanelBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_DummyMain.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_FileWinBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_FitWinBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_LoadStaveBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_LogDispBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_LoginPanelBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_MaskedSelBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_MaskMaker.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_ModWin.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_MultiLoadBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_MultiLoadRDBBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_OptWinBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_Overviewselectbase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_ParFitfunBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_PDBFormBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_PSFitWinBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_QAReportBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_RefWinBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_RegPanelBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_RenameWin.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_RootDataListBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_SelectionPanelBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_StdTestWinBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_TopWinBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_TotRecalBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ui_TwodselBase.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Form Files"
+			Filter="ui"
+			UniqueIdentifier="{99349809-55BA-4b9d-BF79-8FDBB0286EB3}"
+			ParseFiles="false"
+			>
+			<File
+				RelativePath="BadPixelBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC BadPixelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe BadPixelBase.ui -o ui_BadPixelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="BadPixelBase.ui;$(QTDIR)\bin\uic.exe;q3table.h"
+						Outputs="ui_BadPixelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC BadPixelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe BadPixelBase.ui -o ui_BadPixelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="BadPixelBase.ui;$(QTDIR)\bin\uic.exe;q3table.h"
+						Outputs="ui_BadPixelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC BadPixelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe BadPixelBase.ui -o ui_BadPixelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="BadPixelBase.ui;$(QTDIR)\bin\uic.exe;q3table.h"
+						Outputs="ui_BadPixelBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="CfgFormBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC CfgFormBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe CfgFormBase.ui -o ui_CfgFormBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;CfgFormBase.ui"
+						Outputs="ui_CfgFormBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC CfgFormBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe CfgFormBase.ui -o ui_CfgFormBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;CfgFormBase.ui"
+						Outputs="ui_CfgFormBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC CfgFormBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe CfgFormBase.ui -o ui_CfgFormBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;CfgFormBase.ui"
+						Outputs="ui_CfgFormBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="CorrelSelBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC CorrelSelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe CorrelSelBase.ui -o ui_CorrelSelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;CorrelSelBase.ui"
+						Outputs="ui_CorrelSelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC CorrelSelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe CorrelSelBase.ui -o ui_CorrelSelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;CorrelSelBase.ui"
+						Outputs="ui_CorrelSelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC CorrelSelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe CorrelSelBase.ui -o ui_CorrelSelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;CorrelSelBase.ui"
+						Outputs="ui_CorrelSelBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="CutPanelBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC CutPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe CutPanelBase.ui -o ui_CutPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;CutPanelBase.ui;q3listview.h"
+						Outputs="ui_CutPanelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC CutPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe CutPanelBase.ui -o ui_CutPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;CutPanelBase.ui;q3listview.h"
+						Outputs="ui_CutPanelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC CutPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe CutPanelBase.ui -o ui_CutPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;CutPanelBase.ui;q3listview.h"
+						Outputs="ui_CutPanelBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="DummyMain.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC DummyMain.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe DummyMain.ui -o ui_DummyMain.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;DummyMain.ui"
+						Outputs="ui_DummyMain.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC DummyMain.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe DummyMain.ui -o ui_DummyMain.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;DummyMain.ui"
+						Outputs="ui_DummyMain.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC DummyMain.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe DummyMain.ui -o ui_DummyMain.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;DummyMain.ui"
+						Outputs="ui_DummyMain.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="FileWinBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC FileWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe FileWinBase.ui -o ui_FileWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;FileWinBase.ui"
+						Outputs="ui_FileWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC FileWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe FileWinBase.ui -o ui_FileWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;FileWinBase.ui"
+						Outputs="ui_FileWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC FileWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe FileWinBase.ui -o ui_FileWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;FileWinBase.ui"
+						Outputs="ui_FileWinBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="FitWinBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC FitWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe FitWinBase.ui -o ui_FitWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;FitWinBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_FitWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC FitWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe FitWinBase.ui -o ui_FitWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;FitWinBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_FitWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC FitWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe FitWinBase.ui -o ui_FitWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;FitWinBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_FitWinBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="LoadStaveBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC LoadStaveBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe LoadStaveBase.ui -o ui_LoadStaveBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;LoadStaveBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_LoadStaveBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC LoadStaveBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe LoadStaveBase.ui -o ui_LoadStaveBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;LoadStaveBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_LoadStaveBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC LoadStaveBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe LoadStaveBase.ui -o ui_LoadStaveBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;LoadStaveBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_LoadStaveBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="LogDispBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC LogDispBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe LogDispBase.ui -o ui_LogDispBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;LogDispBase.ui;Qt3Support\Q3GroupBox;q3listbox.h;q3multilineedit.h;q3table.h"
+						Outputs="ui_LogDispBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC LogDispBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe LogDispBase.ui -o ui_LogDispBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;LogDispBase.ui;Qt3Support\Q3GroupBox;q3listbox.h;q3multilineedit.h;q3table.h"
+						Outputs="ui_LogDispBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC LogDispBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe LogDispBase.ui -o ui_LogDispBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;LogDispBase.ui;Qt3Support\Q3GroupBox;q3listbox.h;q3multilineedit.h;q3table.h"
+						Outputs="ui_LogDispBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="LoginPanelBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC LoginPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe LoginPanelBase.ui -o ui_LoginPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;LoginPanelBase.ui"
+						Outputs="ui_LoginPanelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC LoginPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe LoginPanelBase.ui -o ui_LoginPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;LoginPanelBase.ui"
+						Outputs="ui_LoginPanelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC LoginPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe LoginPanelBase.ui -o ui_LoginPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;LoginPanelBase.ui"
+						Outputs="ui_LoginPanelBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="MaskedSelBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC MaskedSelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe MaskedSelBase.ui -o ui_MaskedSelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;MaskedSelBase.ui"
+						Outputs="ui_MaskedSelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC MaskedSelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe MaskedSelBase.ui -o ui_MaskedSelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;MaskedSelBase.ui"
+						Outputs="ui_MaskedSelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC MaskedSelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe MaskedSelBase.ui -o ui_MaskedSelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;MaskedSelBase.ui"
+						Outputs="ui_MaskedSelBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\MaskMaker.ui"
+				>
+			</File>
+			<File
+				RelativePath="ModWin.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC ModWin.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe ModWin.ui -o ui_ModWin.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;ModWin.ui"
+						Outputs="ui_ModWin.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC ModWin.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe ModWin.ui -o ui_ModWin.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;ModWin.ui"
+						Outputs="ui_ModWin.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC ModWin.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe ModWin.ui -o ui_ModWin.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;ModWin.ui"
+						Outputs="ui_ModWin.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="MultiLoadBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC MultiLoadBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe MultiLoadBase.ui -o ui_MultiLoadBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;MultiLoadBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_MultiLoadBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC MultiLoadBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe MultiLoadBase.ui -o ui_MultiLoadBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;MultiLoadBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_MultiLoadBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC MultiLoadBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe MultiLoadBase.ui -o ui_MultiLoadBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;MultiLoadBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_MultiLoadBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="MultiLoadRDBBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC MultiLoadRDBBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe MultiLoadRDBBase.ui -o ui_MultiLoadRDBBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;MultiLoadRDBBase.ui"
+						Outputs="ui_MultiLoadRDBBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC MultiLoadRDBBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe MultiLoadRDBBase.ui -o ui_MultiLoadRDBBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;MultiLoadRDBBase.ui"
+						Outputs="ui_MultiLoadRDBBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC MultiLoadRDBBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe MultiLoadRDBBase.ui -o ui_MultiLoadRDBBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;MultiLoadRDBBase.ui"
+						Outputs="ui_MultiLoadRDBBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="OptWinBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC OptWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe OptWinBase.ui -o ui_OptWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;OptWinBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_OptWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC OptWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe OptWinBase.ui -o ui_OptWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;OptWinBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_OptWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC OptWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe OptWinBase.ui -o ui_OptWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;OptWinBase.ui;Qt3Support\Q3GroupBox;q3table.h"
+						Outputs="ui_OptWinBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="Overviewselectbase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC Overviewselectbase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe Overviewselectbase.ui -o ui_Overviewselectbase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Overviewselectbase.ui;Qt3Support\Q3GroupBox"
+						Outputs="ui_Overviewselectbase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC Overviewselectbase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe Overviewselectbase.ui -o ui_Overviewselectbase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Overviewselectbase.ui;Qt3Support\Q3GroupBox"
+						Outputs="ui_Overviewselectbase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC Overviewselectbase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe Overviewselectbase.ui -o ui_Overviewselectbase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Overviewselectbase.ui;Qt3Support\Q3GroupBox"
+						Outputs="ui_Overviewselectbase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="ParFitfunBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC ParFitfunBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe ParFitfunBase.ui -o ui_ParFitfunBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;ParFitfunBase.ui"
+						Outputs="ui_ParFitfunBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC ParFitfunBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe ParFitfunBase.ui -o ui_ParFitfunBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;ParFitfunBase.ui"
+						Outputs="ui_ParFitfunBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC ParFitfunBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe ParFitfunBase.ui -o ui_ParFitfunBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;ParFitfunBase.ui"
+						Outputs="ui_ParFitfunBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="PDBFormBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC PDBFormBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe PDBFormBase.ui -o ui_PDBFormBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;PDBFormBase.ui;Qt3Support\Q3GroupBox;Qt3Support\Q3TextBrowser;q3multilineedit.h"
+						Outputs="ui_PDBFormBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC PDBFormBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe PDBFormBase.ui -o ui_PDBFormBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;PDBFormBase.ui;Qt3Support\Q3GroupBox;Qt3Support\Q3TextBrowser;q3multilineedit.h"
+						Outputs="ui_PDBFormBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC PDBFormBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe PDBFormBase.ui -o ui_PDBFormBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;PDBFormBase.ui;Qt3Support\Q3GroupBox;Qt3Support\Q3TextBrowser;q3multilineedit.h"
+						Outputs="ui_PDBFormBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="PSFitWinBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC PSFitWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe PSFitWinBase.ui -o ui_PSFitWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;PSFitWinBase.ui;Qt3Support\Q3GroupBox"
+						Outputs="ui_PSFitWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC PSFitWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe PSFitWinBase.ui -o ui_PSFitWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;PSFitWinBase.ui;Qt3Support\Q3GroupBox"
+						Outputs="ui_PSFitWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC PSFitWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe PSFitWinBase.ui -o ui_PSFitWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;PSFitWinBase.ui;Qt3Support\Q3GroupBox"
+						Outputs="ui_PSFitWinBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="QAReportBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC QAReportBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe QAReportBase.ui -o ui_QAReportBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;QAReportBase.ui;Qt3Support\Q3GroupBox;Qt3Support\Q3TextBrowser;q3table.h"
+						Outputs="ui_QAReportBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC QAReportBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe QAReportBase.ui -o ui_QAReportBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;QAReportBase.ui;Qt3Support\Q3GroupBox;Qt3Support\Q3TextBrowser;q3table.h"
+						Outputs="ui_QAReportBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC QAReportBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe QAReportBase.ui -o ui_QAReportBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;QAReportBase.ui;Qt3Support\Q3GroupBox;Qt3Support\Q3TextBrowser;q3table.h"
+						Outputs="ui_QAReportBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="RefWinBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RefWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RefWinBase.ui -o ui_RefWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;RefWinBase.ui"
+						Outputs="ui_RefWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RefWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RefWinBase.ui -o ui_RefWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;RefWinBase.ui"
+						Outputs="ui_RefWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RefWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RefWinBase.ui -o ui_RefWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;RefWinBase.ui"
+						Outputs="ui_RefWinBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="RegPanelBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RegPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RegPanelBase.ui -o ui_RegPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Qt3Support\Q3GroupBox;RegPanelBase.ui"
+						Outputs="ui_RegPanelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RegPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RegPanelBase.ui -o ui_RegPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Qt3Support\Q3GroupBox;RegPanelBase.ui"
+						Outputs="ui_RegPanelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RegPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RegPanelBase.ui -o ui_RegPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Qt3Support\Q3GroupBox;RegPanelBase.ui"
+						Outputs="ui_RegPanelBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="RenameWin.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RenameWin.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RenameWin.ui -o ui_RenameWin.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;RenameWin.ui"
+						Outputs="ui_RenameWin.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RenameWin.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RenameWin.ui -o ui_RenameWin.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;RenameWin.ui"
+						Outputs="ui_RenameWin.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RenameWin.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RenameWin.ui -o ui_RenameWin.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;RenameWin.ui"
+						Outputs="ui_RenameWin.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="RootDataListBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RootDataListBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RootDataListBase.ui -o ui_RootDataListBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;RootDataListBase.ui;q3listview.h;q3multilineedit.h"
+						Outputs="ui_RootDataListBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RootDataListBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RootDataListBase.ui -o ui_RootDataListBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;RootDataListBase.ui;q3listview.h;q3multilineedit.h"
+						Outputs="ui_RootDataListBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC RootDataListBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe RootDataListBase.ui -o ui_RootDataListBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;RootDataListBase.ui;q3listview.h;q3multilineedit.h"
+						Outputs="ui_RootDataListBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="SelectionPanelBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC SelectionPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe SelectionPanelBase.ui -o ui_SelectionPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Qt3Support\Q3GroupBox;SelectionPanelBase.ui"
+						Outputs="ui_SelectionPanelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC SelectionPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe SelectionPanelBase.ui -o ui_SelectionPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Qt3Support\Q3GroupBox;SelectionPanelBase.ui"
+						Outputs="ui_SelectionPanelBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC SelectionPanelBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe SelectionPanelBase.ui -o ui_SelectionPanelBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Qt3Support\Q3GroupBox;SelectionPanelBase.ui"
+						Outputs="ui_SelectionPanelBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="StdTestWinBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC StdTestWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe StdTestWinBase.ui -o ui_StdTestWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;StdTestWinBase.ui"
+						Outputs="ui_StdTestWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC StdTestWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe StdTestWinBase.ui -o ui_StdTestWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;StdTestWinBase.ui"
+						Outputs="ui_StdTestWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC StdTestWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe StdTestWinBase.ui -o ui_StdTestWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;StdTestWinBase.ui"
+						Outputs="ui_StdTestWinBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="TopWinBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC TopWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe TopWinBase.ui -o ui_TopWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;TopWinBase.ui;q3listview.h"
+						Outputs="ui_TopWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC TopWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe TopWinBase.ui -o ui_TopWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;TopWinBase.ui;q3listview.h"
+						Outputs="ui_TopWinBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC TopWinBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe TopWinBase.ui -o ui_TopWinBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;TopWinBase.ui;q3listview.h"
+						Outputs="ui_TopWinBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="TotRecalBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC TotRecalBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe TotRecalBase.ui -o ui_TotRecalBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;TotRecalBase.ui;q3table.h"
+						Outputs="ui_TotRecalBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC TotRecalBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe TotRecalBase.ui -o ui_TotRecalBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;TotRecalBase.ui;q3table.h"
+						Outputs="ui_TotRecalBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC TotRecalBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe TotRecalBase.ui -o ui_TotRecalBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;TotRecalBase.ui;q3table.h"
+						Outputs="ui_TotRecalBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="TwodselBase.ui"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC TwodselBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe TwodselBase.ui -o ui_TwodselBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Qt3Support\Q3GroupBox;TwodselBase.ui;q3table.h;q3textedit.h"
+						Outputs="ui_TwodselBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC TwodselBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe TwodselBase.ui -o ui_TwodselBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Qt3Support\Q3GroupBox;TwodselBase.ui;q3table.h;q3textedit.h"
+						Outputs="ui_TwodselBase.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="app|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="UIC TwodselBase.ui"
+						CommandLine="$(QTDIR)\bin\uic.exe TwodselBase.ui -o ui_TwodselBase.h&#x0D;&#x0A;"
+						AdditionalDependencies="$(QTDIR)\bin\uic.exe;Qt3Support\Q3GroupBox;TwodselBase.ui;q3table.h;q3textedit.h"
+						Outputs="ui_TwodselBase.h"
+					/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

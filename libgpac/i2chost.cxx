@@ -4,7 +4,7 @@
 
 using namespace gpac;
 
-const bool GPAC_DEBUG_I2C = false;
+const bool GPAC_DEBUG_I2C = true;
 
 uint8_t dummy_i2chost::read8(uint8_t addr)
 {

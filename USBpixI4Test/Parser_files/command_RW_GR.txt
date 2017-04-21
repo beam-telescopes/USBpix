@@ -1,0 +1,6 @@
+#command
+comm,confmode
+comm,resetErrorCnt
+comm,resetGRIdx
+loop,36,task,test_rw_gr
+comm,showErrorCnt

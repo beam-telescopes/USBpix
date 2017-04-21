@@ -22,36 +22,31 @@
 
 \centerline{\bf\LARGE USBpix and STcontrol with EUDAQ}\ \\[5mm]
 
-This document describes the usage of USBpix and STcontrol during testbeam data taking based
-on EUDAQ. It targets the common FE-I3 and FE-I4 version, however some explanations in this document 
-only concern FE-I4. Most of them are marked,
+Some explanations in this document only concern FE-I4. Most of them are marked,
 but as the development is ongoing, there might be some inaccuracies.
 
 This document describes only specialities of the STcontrol EUDAQ integration. 
 General information on STcontrol and USBpix can be found at \\
 {\tt http://icwiki.physik.uni-bonn.de/twiki/bin/view/Systems/UsbPix}.\\
-Instructions are based on USBpixI4 release 6.0 (supporting also FE-I3) and EUDAQ release 1.3.1. 
-Releases of USBpixI4 older than 5.5 will support FE-I4 only; links to 
+Instructions are based on USBpixI4 release 5.1 and EUDAQ release 1.3.1. Links to 
 the USBpix FE-I3 code are still available, but since this has not been used
 with latest EUDAQ and compilers, instructions may not work.
 
 \section{Building STcontrol with EUDAQ integration}
 
-The STcontrol versions with integrated EUDAQ producer for both FE-I4 and FE-I3
-can be found in the FE-I4 svn repository at the following location:\\
-{\tt http://icwiki.physik.uni-bonn.de/svn/USBpixI4/host/}\\
-The {\tt trunk} is fully functional. For FE-I4, as of releases~4.3
- ({\tt tags/release-4.3}) EUDAQ functionality was included in the 
-tagged versions -- see the release notes for more details. Re-integration
-of FE-I3 functionality, including EUDAQ, was completed with release~5.5
-({\tt tags/release-5.5}).
-Development branches are out of date and should no longer be used, and the
-other repository \\{\tt http://icwiki.physik.uni-bonn.de/svn/USBPix/host/}\\
-is for FE-I3 only and also out of date.
+The STcontrol versions with integrated EUDAQ producer can be found in 
+svn repositories at the following locations:\\
+{\bf FE-I4:} {\tt http://icwiki.physik.uni-bonn.de/svn/USBpixI4/host/}\\
+{\bf FE-I3:} {\tt http://icwiki.physik.uni-bonn.de/svn/USBPix/host/}\\
+In either case, the {\tt trunk} is fully functional. For FE-I4, as of releases~4.3
+ ({\tt tags/release-4.3}) EUDAQ functionality is also included in the 
+tagged versions -- see the
+release notes for more details. Development branches are out of date 
+and should no longer be used.
 
 \subsection{Building EUDAQ}
 
-\subsubsection{Windows with Visual C++}
+\subsubsection{Windows with Visual C++ 11.0}
 
 For convenience, USBpix code comes with pre-compiled EUDAQ lib,dll and 
 its header files. If a newer version is desired, check out the EUDAQ
@@ -102,7 +97,7 @@ all prerequisites as described in the ``insane mode'' of\\
 {\tt http://icwiki.physik.uni-bonn.de/twiki/bin/view/Systems/UsbPix\#Installation}
 must be followed.
 
-\subsubsection{Windows with Visual C++}
+\subsubsection{Windows with Visual C++ 11.0}
 
 Open a command prompt and change location to the main installation
 directory of USBpix. Then execute the following commands:
@@ -115,17 +110,9 @@ directory of USBpix. Then execute the following commands:
 Afterwards you will find an executable called STcontrol\textunderscore eudaq.exe in the bin
 directory of the USBpix main directory.
 
-\textbf{Warning:} You must start with fresh code, i.e. either checked out from svn from scratch or in case the code was built 
-with setup options other than those listed above, execute
-\begin{itemize}
-\item {\tt nmake clean}
-\end{itemize}
-prior to building with {\tt nmake}. Mixing setup options without cleaning may result in some EUDAQ features missing in STcontrol.
-
 \subsubsection{Linux with gcc/g++}
 
-Linux is fully supported for CCentos7 with gcc 4.8 or higher and likely to build on newer distributions such as 
-Fedora 20 and higher, and may possibly still build on SLC6 provided gcc 4.8 or higher is installed. 
+Linux is fully supported for SLC6 and likely to build on newer distributions such as Fedora 18 and higher. 
 Note that libusb-1.0 must be installed, see \\
 {\tt http://icwiki.physik.uni-bonn.de/twiki/bin/view/Systems/UsbPix\#Using\textunderscore libusb}.
 
@@ -140,13 +127,6 @@ execute:
 Afterwards you will find an executable called STcontrol\textunderscore eudaq in the bin
 directory of the USBpix main directory.
 
-\textbf{Warning:} You must start with fresh code, i.e. either checked out from svn from scratch or in case the code was built 
-with setup options other than those listed above, execute
-\begin{itemize}
-\item {\tt make clean}
-\end{itemize}
-prior to building with {\tt make}. Mixing setup options without cleaning may result in some EUDAQ features missing in STcontrol.
-
 \section{Starting STcontrol with EUDAQ}
 
 Before starting STcontrol make sure that the EUDAQ Run Control is running and all
@@ -157,13 +137,13 @@ offers the following command line parameters:
 \begin{itemize}
 \item[\bf -r] Run Control IP Connects to a EUDAQ Run Control at the given IP or hostname
 directly after start up.
-\item[\bf -pid] ProducerID. Sets the id of the producer. 
+\item[\bf -pid] ProducerID (so far FE-I4 only!). Sets the id of the producer. 
 If ProducerID is 0 (default)
-the producer will be named {\tt USBpix}, otherwise it will be named 
-{\tt USBpix-\it ProducerID}. This option is only needed to distinguish between multiple USBpix
+the producer will be named {\tt USBpixI4}, otherwise it will be named 
+{\tt USBpixI4-\it ProducerID}. This option is only needed to distinguish between multiple USBpix
 producers connected to one EUDAQ Run Control. The according configuration
 section in the EUDAQ configuration file has to be named like the producer 
-({\tt [Producer.USBpix]} or {\tt [Producer.USBpix-\it ProducerID\tt ]}). 
+({\tt [Producer.USBpixI4]} or {\tt [Producer.USBpixI4-\it ProducerID\tt ]}). 
 To distinguish between the sensors connected to the different producers, the parameter 
 {\tt first\textunderscore sensor\textunderscore id} in the
 EUDAQ configuration file should be used.
@@ -212,7 +192,7 @@ priority than config\textunderscore file[boardid]. If config\textunderscore file
 is automatically set to ``Yes''.\\
 {\bf UseSingleBoardConfigs} & If set to ``Yes'' the config\textunderscore file parameter will be neglected and
 a multi board configuration will be created from the specified single board configuration
-files. {\bf not yet implemented for FE-I3}\\
+files.\\
 {\bf config\textunderscore file[boardid]} & Specifies the config file to be loaded for USBpix board with ID
 boardid. The ID has to be activated in the boards parameter. Only available if
 UseSingleBoardConfigs is set to ``Yes''.\\
@@ -259,7 +239,7 @@ on standard 16 pin connectors or by using a standard cable and cur 12 of the 16 
 Two connected boards are shown in figure~\ref{fig:trgrep}.
 
 If the board connected to TLU has the ID 1 and the other one has the ID 2 the following
-lines have to be added to {\tt [Producer.USBpix]} section in the EUDAQ configuration file:\\
+lines have to be added to {\tt [Producer.USBpixI4]} section in the EUDAQ configuration file:\\
 {\tt trigger\textunderscore replication[1]=Master} \\
 {\tt trigger\textunderscore replication[2]=Slave}
 
@@ -287,8 +267,9 @@ can only be done by trial and error.
 
 The following EUDAQ configuration file serves for a test with two USBpix boards with
 fake triggers generated by the TLU.
-The configuration for the USBpix producer is done in the section 
-{\tt [Producer.USBpix]}. When calling {\it Config} from EUDAQ
+The configuration for the USBpix producer for FE-I4 is done in the section 
+{\tt [Producer.USBpixI4]}. For operation with FE-I3 all available parameters are the same, but a
+section called {\tt [Producer.USBpix]} has to be used. When calling {\it Config} from EUDAQ
 Run Control USBpix producer will create a new multi board configuration for USBpix
 boards with the IDs 38 and 127 from the specified single board configuration files. No raw
 data will be stored by STcontrol as {\tt rawdata\textunderscore path} is set empty. 
@@ -323,13 +304,13 @@ EnableDUTVeto = 3
 DutMask = 3
 BitFile = ../tlu/TLU2_Toplevel−65_40MHz.bit
 
-[Producer.USBpix]
+[Producer.USBpixI4]
 SkipConfiguration=no
 UseSingleBoardConfig=Yes
 boards=38,127
 config_file[38]= config\std_with_DCS.cfg.root
 config_file[127]= config\std_with_DCS.cfg.root
-fpga_firmware=C:\icwiki_svn\USBPixI4\host\tags\rerlease-5.5\config\usbpixi4.bit
+fpga_firmware=C:\icwiki_svn\USBPixI4\host\tags\rerlease-4.3\config\usbpixi4.bit
 rawdata_path=
 SRAM_READOUT_AT=30
 trigger_replication[38] = Master

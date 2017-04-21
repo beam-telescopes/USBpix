@@ -1,0 +1,60 @@
+##########################################################################
+# Target Board: TRENZ TE0300 Micro FPGA Rev 01                          ##
+# Family: spartan3e                                                     ##
+# Device: XC3S1600e                                                     ##
+# Package: FG320                                                        ##
+# Speed Grade: -4                                                       ##
+##########################################################################
+#
+#Net RST_pin     LOC=V16 | IOSTANDARD = LVCMOS33 | PULLDOWN
+#Net LED_pin     LOC=R10 | IOSTANDARD = LVCMOS33
+#================================================
+# EZ-USB FX2 Interface
+#================================================
+#Net USB_IFCLK_pin TNM_Net = USB_IFCLK_pin
+#TIMESPEC TS_USB_IFCLK_pin = PERIOD USB_IFCLK_pin 20833 ps
+#Net USB_*_pin*  IOSTANDARD = LVCMOS33
+#Net USB_CLK_pin 			LOC=N9  | IOSTANDARD = LVCMOS33
+#I2C connections
+#Net USB_SCL_pin        		LOC = L4
+#Net USB_SDA_pin        		LOC = K3
+#Net  USB_INT0_pin        LOC = H6
+#Net  USB_IFCLK_pin        LOC = K4
+#Net  USB_SLRD_pin         LOC = M4
+#Net  USB_SLWR_pin         LOC = L3
+#Net  USB_FLAGA_pin        LOC = K2
+#Net  USB_FLAGB_pin        LOC = J1
+#Net  USB_FLAGC_pin        LOC = J2
+#Net  USB_FLAGD_pin        LOC = F2
+#Net  USB_SLOE_pin       	LOC = H2
+#Net  USB_PKTEND_pin        LOC = F1
+#Net  USB_FIFOADR_pin<0>        LOC = G3
+#Net  USB_FIFOADR_pin<1>        LOC = G4
+#Net  USB_INT1_pin        LOC = H1
+#Net  USB_WU2_PA3_pin        LOC = H3
+#Net  USB_FD_pin<0>        LOC = L1
+#Net  USB_FD_pin<1>        LOC = L2
+#Net  USB_FD_pin<2>        LOC = K5
+#Net  USB_FD_pin<3>        LOC = K6
+#Net  USB_FD_pin<4>        LOC = J4
+#Net  USB_FD_pin<5>        LOC = J5
+#Net  USB_FD_pin<6>        LOC = H4
+#Net  USB_FD_pin<7>        LOC = H5
+#================================================
+# MY PINs
+#================================================
+Net	IO_DataOUT1_N_pin			LOC = B4 | IOSTANDARD = LVDS_25;
+Net	IO_DataOUT1_P_pin			LOC = A4 | IOSTANDARD = LVDS_25;
+#Net	IO_DataOUT2_N_pin			LOC = A6 | IOSTANDARD = LVDS_25
+#Net	IO_DataOUT2_P_pin			LOC = B6 | IOSTANDARD = LVDS_25
+#Net	CLOCK_N_pin					LOC = A10
+#Net	CLOCK_P_pin					LOC = B10
+#Net	IO_DataIN_CLK_N_pin		LOC = F9
+#Net	IO_DataIN_CLK_P_pin		LOC = E9
+Net	IO_DataIN_N_pin			LOC = F11 | IOSTANDARD = LVDS_25;
+Net	IO_DataIN_P_pin			LOC = E11 | IOSTANDARD = LVDS_25;
+
+NET "IO_DataIN_N_pin" TNM_NET = "IO_DataIN_N_pin";
+TIMESPEC "TS_IO_DataIN_N_pin" = PERIOD "IO_DataIN_N_pin" 25 ns HIGH 50 %;
+NET "IO_DataIN_P_pin" TNM_NET = "IO_DataIN_P_pin";
+TIMESPEC "TS_IO_DataIN_P_pin" = PERIOD "IO_DataIN_P_pin" 25 ns HIGH 50 %;

@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SiUSBLib", "..\SiUSB_DLL\VC\SiUSBLib.vcproj", "{ED2A9E76-8EA1-4535-B9AA-468A56ECE48F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SiUSBman", "SiUSBman.vcproj", "{47B74C63-5262-49A5-B52C-28465D7DBCE0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "USB_QT_Example", "..\Examples\USB_QT\USB_QT_Example.vcproj", "{358805F7-F5BC-3A08-BC8F-B8C0F4CA6CB7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		static-release|Win32 = static-release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ED2A9E76-8EA1-4535-B9AA-468A56ECE48F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ED2A9E76-8EA1-4535-B9AA-468A56ECE48F}.Debug|Win32.Build.0 = Debug|Win32
+		{ED2A9E76-8EA1-4535-B9AA-468A56ECE48F}.Release|Win32.ActiveCfg = Release|Win32
+		{ED2A9E76-8EA1-4535-B9AA-468A56ECE48F}.Release|Win32.Build.0 = Release|Win32
+		{ED2A9E76-8EA1-4535-B9AA-468A56ECE48F}.static-release|Win32.ActiveCfg = static-release|Win32
+		{ED2A9E76-8EA1-4535-B9AA-468A56ECE48F}.static-release|Win32.Build.0 = static-release|Win32
+		{47B74C63-5262-49A5-B52C-28465D7DBCE0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{47B74C63-5262-49A5-B52C-28465D7DBCE0}.Debug|Win32.Build.0 = Debug|Win32
+		{47B74C63-5262-49A5-B52C-28465D7DBCE0}.Release|Win32.ActiveCfg = Release|Win32
+		{47B74C63-5262-49A5-B52C-28465D7DBCE0}.Release|Win32.Build.0 = Release|Win32
+		{47B74C63-5262-49A5-B52C-28465D7DBCE0}.static-release|Win32.ActiveCfg = static-release|Win32
+		{47B74C63-5262-49A5-B52C-28465D7DBCE0}.static-release|Win32.Build.0 = static-release|Win32
+		{358805F7-F5BC-3A08-BC8F-B8C0F4CA6CB7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{358805F7-F5BC-3A08-BC8F-B8C0F4CA6CB7}.Debug|Win32.Build.0 = Debug|Win32
+		{358805F7-F5BC-3A08-BC8F-B8C0F4CA6CB7}.Release|Win32.ActiveCfg = Release|Win32
+		{358805F7-F5BC-3A08-BC8F-B8C0F4CA6CB7}.Release|Win32.Build.0 = Release|Win32
+		{358805F7-F5BC-3A08-BC8F-B8C0F4CA6CB7}.static-release|Win32.ActiveCfg = Release|Win32
+		{358805F7-F5BC-3A08-BC8F-B8C0F4CA6CB7}.static-release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

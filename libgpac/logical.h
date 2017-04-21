@@ -33,8 +33,6 @@ namespace gpac
       channels::injection injection;
 
       void updateDev(SiUSBDevice *dev) {m_phy.updateDev(dev);};
-
-      unsigned int getId(){return m_phy.core().getId();};
   };
 }
 

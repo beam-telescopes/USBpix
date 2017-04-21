@@ -1,0 +1,65 @@
+README for STcontrol
+====================
+
+
+= Introduction =
+
+STcontrol is a graphical user interface for the ATLAS pixel system test. It is
+based on PixLib and its underlying libraries and uses QT as toolkit.
+
+Stcontrol is qmake based, so its makefile is dynamically generated from its
+project file (STcontrol.pro). This can be forced with
+
+  qmake -o Makefile STcontrol.pro
+
+For instructions to build in a different (sub-)directory see below.
+
+
+= Building =
+
+STcontrol needs several libraries to build: The Pixel DAQ libraries as well as
+QT 3 (tested with QT 3.3.4) and ROOT (tested with ROOT 5.08.00, but used to work
+with older versions). To find the former, it assumes a directory layout
+similar to the layout in CVS, and needs environment variables to be set which
+are evaluated in the makefile (also see Paolo Morettini's daq.csh or daq.sh). In
+particular, the following variables are used:
+ROD_DAQ, MODULE_ANALYSIS, PIX_LIB, PIX_ANA, DBEDT, VME_INTERFACE, DAQ_INCL_DIR, 
+DAQ_LIB_DIR
+
+Depending on where an how you set up QT, you may want to set the following using
+the correct QTDIR:
+
+QTDIR=/opt/rccenv001/qt-3.3.4
+PATH=$QTDIR/bin:$PATH
+MANPATH=$QTDIR/doc/man:$MANPATH
+LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH:$PIX_LIB:$MODULE_ANALYSIS:$PIX_ANA
+
+NB: since the Makefile now links to shared libraries of PixLib, PixAnalysis, 
+DBeditor, and ModuleAnalysis, you have to add all of them to your LD_LIBRARY_PATH 
+variable.
+
+
+For one set of configurtion options for qt that work see
+
+http://atlas-pixel-daq.web.cern.ch/atlas-pixel-daq/RODsw/SLC3.html
+
+With the correct environment set,
+
+  qmake STcontrol.pro
+  make
+
+should build the STcontrol binary.
+To build STcontrol in a directory different from the source a working Makefile
+can be generated with qmake. E.g.:
+
+  cd STcontrol
+  mkdir \=build
+  cd \=build
+  qmake ../STcontrol.pro
+  make
+
+
+= Short Usage Overview =
+
+This is now fully available on the Wiki pages:
+https://uimon.cern.ch/twiki/bin/view/Atlas/STcontrol

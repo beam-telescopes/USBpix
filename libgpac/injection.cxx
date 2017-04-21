@@ -1,6 +1,5 @@
 #include "injection.h"
 #include "phy.h"
-#include <iostream>
 
 using namespace gpac;
 

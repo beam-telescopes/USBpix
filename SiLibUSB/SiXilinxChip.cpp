@@ -1,7 +1,5 @@
-#include <string.h>
 #include "SiXilinxChip.h"
 #include "SiUSBDevice.h"
-#include <upsleep.h>
 
 TXilinxChip::TXilinxChip(int cType)
 {
@@ -341,7 +339,11 @@ TXilinxChip::DownloadXilinx(std::string filename)
 			return false;
 		}
 
-		UPGenint::upsleep(10); 
+#ifdef WIN32
+		Sleep(10); 
+#else
+		usleep(10000);  // checkit !!
+#endif
 
 		/* cs_b = 1 */
 		conf_reg |=  xp_cs1;   // cs_b = 1
@@ -363,7 +365,11 @@ TXilinxChip::DownloadXilinx(std::string filename)
 		SetXilinxConfPin(xp_prog, 0);
 		SetXilinxConfPin(xp_prog, 1);
 
-		UPGenint::upsleep(100);
+#ifdef WIN32
+		Sleep(100);
+#else
+		usleep(100000);
+#endif
 
 		/* check if device is ready to accept data */
 		if(GetXilinxConfPin(xp_init) != 1) 

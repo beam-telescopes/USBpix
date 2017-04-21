@@ -5,9 +5,10 @@ CONFIG -= qt
 TEMPLATE = lib
 
 SOURCES=\
-  PixRs232Device.cxx
+  PixRs232Device.cxx \
+  PixRs232Test.cxx \
 
-INCLUDEPATH += $(DAQ_BASE)/inc
+INCLUDEPATH += $(USB_INCL_DIR)
 
 win32 {
   SOURCES += ComTools.cxx
@@ -21,3 +22,9 @@ unix {
 }
 
 DESTDIR = $(DAQ_BASE)/lib
+
+PixRs232Test.target = PixRs232Test
+PixRs232Test.depends = $(UICDECLS) $(OBJECTS) $(OBJMOC) 
+PixRs232Test.commands = $(QMAKE_CXX) $(QMAKE_CXX_FLAGS) -o PixRs232Test $(OBJECTS)
+
+QMAKE_EXTRA_TARGETS += PixRs232Test

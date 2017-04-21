@@ -1,0 +1,4 @@
+#command
+task,copy_inverse_pixel_latches
+comm,wrFE,1100
+task,clear_pixel_shift_register

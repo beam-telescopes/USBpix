@@ -6,7 +6,6 @@
 //  USB devices associated to slbusb.sys device driver
 //
 //  History:
-//  17.02.16  Full update for libusb, taken from EB's work (JGK)
 //  03.10.01	modifiedadded init functions (StartDriver, StopDriver)
 //				for TUSBDeviceManager
 //  31.08.01	added latch and adc access for mqube tracker
@@ -19,14 +18,7 @@
 #ifndef USBDeviceH
 #define USBDeviceH 1
 
-#ifndef WIN32
-  #include <mutex>
-#endif
-
-#ifdef _LIBUSB_
-  #include <libusb.h>
-  #include "usbcompat.h"
-#else
+#ifdef WIN32
   #include <windows.h>
   #include "winusb.h"
 #endif
@@ -41,18 +33,13 @@
 	#define FREE_MUTEX     DeleteCriticalSection(&CriticalSection)
 	#define GET_MUTEX      EnterCriticalSection(&CriticalSection)
 	#define RELEASE_MUTEX  LeaveCriticalSection(&CriticalSection)
-#else
-	#define INIT_MUTEX
-	#define FREE_MUTEX
-        #define GET_MUTEX      m_mutex.lock()
-        #define RELEASE_MUTEX  m_mutex.unlock()
+#elif LINUX
 #endif
 
 #define MSB(word) (unsigned char)(((unsigned short)word >> 8) & 0xff)
 #define LSB(word) (unsigned char)((unsigned short)word & 0xff)
 
-//typedef enum {FX, FX2, FX3};
-enum {FX, FX2, FX3};
+typedef enum {FX, FX2, FX3};
 
 #define MAX_PIPES                  32
 #define MAX_CONTROL_PACKET_SIZE    64
@@ -142,7 +129,6 @@ class TI2CMaster
 {
 public:
 	TI2CMaster(){};
-	virtual ~TI2CMaster(){};
 	virtual bool I2CAck() = 0;
 	virtual bool ReadI2C(unsigned char SlaveAdd, unsigned char *Data, unsigned short Length) = 0;
 	virtual bool WriteI2C(unsigned char SlaveAdd, unsigned char *Data, unsigned short Length) = 0;
@@ -158,7 +144,6 @@ class TSPIMaster  // generic SPI controller
 {
 public:
 	TSPIMaster(){};
-	virtual ~TSPIMaster(){};
 	virtual void InitSPI() = 0;
 	virtual bool WriteSPI(int add, unsigned char *Data, unsigned short length) = 0;
 	virtual bool ReadSPI(int add, unsigned char *Data, unsigned short length) = 0;
@@ -179,11 +164,7 @@ public:
 
 	bool StartDriver();                               // open device driver
 	bool StopDriver();                               // close device driver
-#ifdef _LIBUSB_
-	bool DeviceAvailable(int want, libusb_context *ctx);  // check if device is available (connected)
-#else
-	bool DeviceAvailable();  // check if device is available (connected)
-#endif
+	bool DeviceAvailable(void);  // check if device is available (connected)
 
 	// identification values
 	int GetId(){return Id;};
@@ -193,8 +174,6 @@ public:
 	int GetFWVersion(){return FwVer;};
 	int GetVendorId(){ return (int)VendorId;};
 	int GetDeviceId(){ return (int)DeviceId;};
-	int GetBcdUSB(){return (int)BcdUSB;};
-	int GetProductId() { return (int)ProductId;};
 	const char* GetEndpointInfo(){return PipeInfoString.c_str();};
 	bool GetUserInformation();
 
@@ -202,7 +181,6 @@ public:
 	unsigned short VendorId;
 	unsigned short ProductId;
 	unsigned short DeviceId;
-	unsigned short BcdUSB;
 
 	int ControllerType;
 
@@ -245,8 +223,8 @@ public:
 	bool ReadExternal(unsigned short address, unsigned char *Data, int length);
 
 	// access to fast data bus
-	bool FastBlockWrite(int addr, unsigned char *data, int length);
-	bool FastBlockRead(int addr, unsigned char *data, int length);  
+	bool FastBlockWrite(unsigned char *data, int length);
+	bool FastBlockRead(unsigned char *data, int length);  
 
 	// FIFO access (application specific)
 	//bool WriteFIFO(unsigned char *Data, unsigned short Length);
@@ -283,12 +261,10 @@ public:
 	bool LoadHexFileToEeprom(std::string FileName);
 	// bool ReadFirmwareVersion(unsigned char *Data);
 
-#ifndef _LIBUSB_
 	// driver low level functions
 	bool FlushPipe(int nEndPoint); // dicards pipe data
 	bool ResetPipe(int nEndPoint); // resets specific pipe
 	bool AbortPipe(int nEndPoint); // quit pending pipe transfers
-#endif
 
 private:
 	bool WriteDataRecordToEeprom(INTEL_HEX_RECORD HexRecordStruct, unsigned short Address);
@@ -306,24 +282,25 @@ private:
 	bool SilabUsbRequest(PSILAB_USB_REQUEST pslb, unsigned char* data);
 	bool SilabUsbRequest(PSILAB_USB_REQUEST pslb, unsigned char* data, int len);
 	bool VendorRequest(WINUSB_SETUP_PACKET MyRequest, unsigned char *data);
-	bool ControlTransfer(WINUSB_SETUP_PACKET request, unsigned char *data, unsigned long *transferred);
 	bool GetDeviceInformation(); // get device, configuration and endpoint information
+	bool WinUsb_GetDeviceInformation(); // get some information
+	bool LibUsb_GetDeviceInformation(); // get some information
 
 	HANDLE USBDeviceHandle; // 'Treibergriff'
-#ifdef _LIBUSB_
-	bool finddev(libusb_device *dev);
-	libusb_device *dev_handle;
-#else
 	WINUSB_INTERFACE_HANDLE  WinUSBInterfaceHandle; 
-#endif
 
 	int  Id;
 	int  FwVer;
 	std::string   Name; //!< name specifying the type of device (i.e. service)
-	//	unsigned char DeviceClass;
-	unsigned int DeviceClass;
+	unsigned char DeviceClass;
 	bool started; // driver started
 	bool configured; // firmware active
+
+	USB_DEVICE_DESCRIPTOR        DeviceDescriptor; // accessable pointer to descriptor information
+	USB_CONFIGURATION_DESCRIPTOR ConfigurationDescriptor; 
+	USB_INTERFACE_DESCRIPTOR     InterfaceDescriptor;
+	USB_STRING_DESCRIPTOR        StringDescriptor;
+	WINUSB_PIPE_INFORMATION      PipeInformation;
 
 	int iPipes;
 	USBD_PIPE_INFORMATION pPipe[MAX_PIPES]; // pipe information structure
@@ -346,11 +323,6 @@ private:
 	unsigned short xp_conf_port_rd;
 	unsigned short xp_conf_port_wr;
 	unsigned short cpu_cs_reg;
-
-#ifndef WIN32
-	std::mutex m_mutex;
-#endif
-
 };
 #endif
 

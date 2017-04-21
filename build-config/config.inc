@@ -111,6 +111,5 @@ equals(BUILDTYPE, "debug-symbols") {
 # RPATH
 
 equals(TEMPLATE, "app") {
-  QMAKE_RPATHDIR += $$ROOTSYS/lib
   QMAKE_RPATHDIR += $$DAQ_BASE/lib
 }

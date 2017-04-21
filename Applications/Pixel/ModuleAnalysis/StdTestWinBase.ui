@@ -1,0 +1,2148 @@
+<ui version="4.0" >
+ <class>StdTestWinBase</class>
+ <widget class="QDialog" name="StdTestWinBase" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>661</width>
+    <height>764</height>
+   </rect>
+  </property>
+  <property name="focusPolicy" >
+   <enum>Qt::NoFocus</enum>
+  </property>
+  <property name="windowTitle" >
+   <string>Standard Test File Loading</string>
+  </property>
+  <property name="sizeGripEnabled" >
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <property name="margin" >
+    <number>11</number>
+   </property>
+   <item>
+    <layout class="QVBoxLayout" >
+     <item>
+      <layout class="QHBoxLayout" >
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="Heading" >
+         <property name="text" >
+          <string>Load data for </string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="wordWrap" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="ModuleName" >
+         <property name="text" >
+          <string>unknown module</string>
+         </property>
+         <property name="wordWrap" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="TextLabel1" >
+         <property name="text" >
+          <string>general path:</string>
+         </property>
+         <property name="wordWrap" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="GeneralPath" />
+       </item>
+       <item>
+        <widget class="QPushButton" name="DirButt" >
+         <property name="text" >
+          <string>Browse</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="IndexLabel" >
+         <property name="text" >
+          <string>Index:            </string>
+         </property>
+         <property name="wordWrap" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="Index" >
+         <property name="minimum" >
+          <number>1</number>
+         </property>
+         <property name="value" >
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="TestTypeSel" >
+         <property name="currentIndex" >
+          <number>0</number>
+         </property>
+         <item>
+          <property name="text" >
+           <string>user-def. names</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>Bare Module</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>Assembled Module (pre-burn-in)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>Burned-in Module (warm)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>Burned-in Module (cold)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>Reception</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>Pre-Stave-Assy</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>Stave test</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>Stave reception</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="addSN" >
+         <property name="text" >
+          <string>add SN</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="GenerButt" >
+         <property name="text" >
+          <string>Generate</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="ClearButt" >
+         <property name="text" >
+          <string>Clear all</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QTabWidget" name="SubtestTab" >
+       <widget class="QWidget" name="initab" >
+        <attribute name="title" >
+         <string>Initial tests</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <item>
+          <layout class="QVBoxLayout" >
+           <item>
+            <layout class="QVBoxLayout" >
+             <item>
+              <widget class="QLabel" name="CurrLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Chip current measurement</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="CurrName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="CurrButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="AmbushLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Ambush logfiles</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="AmbushName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="AmbushButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="RegtestLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Register tests</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="RegtestName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="RegtestButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="DigLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Digital Injection SRAM mode</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="DigName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="DigButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="DigFifoLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Digital Injection DFIFO mode</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="DigFifoName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="DigFifoButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="DigEocLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Digital Injection (5step + col pair scan)</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="DigEocName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="DigEocButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="IVLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Sensor IV-curve</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="IVName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="IVButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="MlLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>MonLeak measurement (150V)</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="MlName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="MlButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="MlmaxLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>MonLeak measurement (max. bias)</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="MlmaxName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="MlmaxButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="Spacer2" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType" >
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tunetab" >
+        <attribute name="title" >
+         <string>Threshold</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <property name="margin" >
+          <number>11</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" >
+           <property name="spacing" >
+            <number>6</number>
+           </property>
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QVBoxLayout" >
+             <property name="spacing" >
+              <number>6</number>
+             </property>
+             <property name="margin" >
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="NohvLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>VCAL scan without sensor bias</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="NohvName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="NohvButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="HVonLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>VCAL scan with sensor bias</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="HVonName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="HVonButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="Spacer3_2" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType" >
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" >
+             <property name="spacing" >
+              <number>6</number>
+             </property>
+             <property name="margin" >
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="TdacLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>TDAC tuning</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="TdacName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="TdacButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="IntLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>VCAL scan internal</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="IntName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="IntButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="ExtLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>VCAL scan external</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="ExtName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="ExtButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="XtLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Cross-talk scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="XtName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="XtButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="Spacer3" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType" >
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab1" >
+        <attribute name="title" >
+         <string>Timewalk</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <property name="margin" >
+          <number>11</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" >
+           <property name="spacing" >
+            <number>6</number>
+           </property>
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QVBoxLayout" >
+             <property name="spacing" >
+              <number>6</number>
+             </property>
+             <property name="margin" >
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="TwalkLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Time-walk scan - Clow</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="TwalkName" >
+                 <property name="enabled" >
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="TwalkButt" >
+                 <property name="enabled" >
+                  <bool>true</bool>
+                 </property>
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="TwalkLabelHi" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Time-walk scan - Chigh</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="TwalkNameHi" >
+                 <property name="enabled" >
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="TwalkButtHi" >
+                 <property name="enabled" >
+                  <bool>true</bool>
+                 </property>
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="TwalkLabelVCAL" >
+                 <property name="font" >
+                  <font/>
+                 </property>
+                 <property name="text" >
+                  <string>Time-walk scan - VCAL scan</string>
+                 </property>
+                 <property name="alignment" >
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 </property>
+                 <property name="wordWrap" >
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="TWVCAL_Label" >
+                 <property name="text" >
+                  <string>optional, std. VCAL scan is used if left empty</string>
+                 </property>
+                 <property name="wordWrap" >
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="TwalkNameVCAL" >
+                 <property name="enabled" >
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="TwalkButtVCAL" >
+                 <property name="enabled" >
+                  <bool>true</bool>
+                 </property>
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="TwalkAnaLabel" >
+               <property name="enabled" >
+                <bool>true</bool>
+               </property>
+               <property name="text" >
+                <string>Time walk analysis (generated)</string>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="TwalkAnaName" >
+                 <property name="enabled" >
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="TwalkAnaButt" >
+                 <property name="enabled" >
+                  <bool>false</bool>
+                 </property>
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="ITThrLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>In-time threshold scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="ITThrName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="ITThrButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="DT0Label" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Digital T0 scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="DT0Name" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="DT0Butt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="AT0Label" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Analogue T0 scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="AT0Name" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="AT0Butt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="Spacer4" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType" >
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="srctab" >
+        <attribute name="title" >
+         <string>ToT+Source</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <property name="margin" >
+          <number>11</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" >
+           <property name="spacing" >
+            <number>6</number>
+           </property>
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QVBoxLayout" >
+             <property name="spacing" >
+              <number>6</number>
+             </property>
+             <property name="margin" >
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="FdacLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>FDAC tuning verification</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="FdacName" >
+                 <property name="enabled" >
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="FdacButt" >
+                 <property name="enabled" >
+                  <bool>true</bool>
+                 </property>
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="TotLabel" >
+                 <property name="font" >
+                  <font/>
+                 </property>
+                 <property name="text" >
+                  <string>ToT calibration - Clow</string>
+                 </property>
+                 <property name="alignment" >
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 </property>
+                 <property name="wordWrap" >
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="ToTLo_raw" >
+                 <property name="text" >
+                  <string>also load raw data</string>
+                 </property>
+                 <property name="checked" >
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="TotName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="TotButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="TotHiLabel" >
+                 <property name="font" >
+                  <font/>
+                 </property>
+                 <property name="text" >
+                  <string>ToT calibration - Chigh</string>
+                 </property>
+                 <property name="alignment" >
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 </property>
+                 <property name="wordWrap" >
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="ToTHi_raw" >
+                 <property name="text" >
+                  <string>also load raw data</string>
+                 </property>
+                 <property name="checked" >
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="TotHiName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="TotHiButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="TotCombLabel" >
+                 <property name="enabled" >
+                  <bool>true</bool>
+                 </property>
+                 <property name="font" >
+                  <font/>
+                 </property>
+                 <property name="text" >
+                  <string>ToT calibration - combined (generated)</string>
+                 </property>
+                 <property name="alignment" >
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 </property>
+                 <property name="wordWrap" >
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="doToTComb" >
+                 <property name="text" >
+                  <string>automatically fit combined</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="TotCombName" >
+                 <property name="enabled" >
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="TotCombButt" >
+                 <property name="enabled" >
+                  <bool>false</bool>
+                 </property>
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="SpixLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Stuck pixel scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="SpixName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="SpixButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="HpixLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Hot pixel scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="HpixName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="HpixButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="SrcLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Source scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="SrcName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="SrcButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="Spacer6" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType" >
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab2" >
+        <attribute name="title" >
+         <string>Digital Range</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <property name="margin" >
+          <number>11</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" >
+           <property name="spacing" >
+            <number>6</number>
+           </property>
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QVBoxLayout" >
+             <property name="spacing" >
+              <number>6</number>
+             </property>
+             <property name="margin" >
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="Vdd_td242_do40_ceu20_Label" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Digital-vs-VDD scan: normal trigger delay (242), sngl 40Mb/s, CEU=20MHz</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="Vdd_td242_do40_ceu20_Name" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="Vdd_td242_do40_ceu20_Butt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="Vdd_td242_do80_ceu20_Label" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Digital-vs-VDD scan: normal trigger delay (242), sngl 80Mb/s, CEU=20MHz</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="Vdd_td242_do80_ceu20_Name" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="Vdd_td242_do80_ceu20_Butt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="Vdd_td242_do160_ceu20_Label" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Digital-vs-VDD scan: normal trigger delay (242), dual 80Mb/s, CEU=20MHz</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="Vdd_td242_do160_ceu20_Name" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="Vdd_td242_do160_ceu20_Butt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="Vdd_td235_do160_ceu20_Label" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Digital-vs-VDD scan: low trigger delay (235), dual 80Mb/s, CEU=20MHz</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="Vdd_td235_do160_ceu20_Name" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="Vdd_td235_do160_ceu20_Butt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="Vdd_td235_do160_ceu40_Label" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Digital-vs-VDD scan: low trigger delay (235), dual 80Mb/s, CEU=40MHz</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="Vdd_td235_do160_ceu40_Name" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="Vdd_td235_do160_ceu40_Butt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="Xck45Label" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>XCK=45MHz digital scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="Xck45Name" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="Xck45Butt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="Xck50Label" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>XCK=50MHz digital scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="Xck50Name" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="Xck50Butt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="Spacer7" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType" >
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab3" >
+        <attribute name="title" >
+         <string>Analogue Range</string>
+        </attribute>
+        <layout class="QVBoxLayout" >
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <property name="margin" >
+          <number>11</number>
+         </property>
+         <item>
+          <layout class="QVBoxLayout" >
+           <property name="spacing" >
+            <number>6</number>
+           </property>
+           <property name="margin" >
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QVBoxLayout" >
+             <property name="spacing" >
+              <number>6</number>
+             </property>
+             <property name="margin" >
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="VddaminLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Vdda min threshold scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="VddaminName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="VddaminButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="VddamaxLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Vdda max threshold scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="VddamaxName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="VddamaxButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="VddaminITLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Vdda min in-time threshold scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="VddaminITName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="VddaminITButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="VddamaxITLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>Vdda max in-time threshold scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="VddamaxITName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="VddamaxITButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="GDACLabel" >
+               <property name="font" >
+                <font/>
+               </property>
+               <property name="text" >
+                <string>GDAC scan</string>
+               </property>
+               <property name="alignment" >
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="wordWrap" >
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" >
+               <property name="spacing" >
+                <number>6</number>
+               </property>
+               <property name="margin" >
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="GDACName" />
+               </item>
+               <item>
+                <widget class="QPushButton" name="GDACButt" >
+                 <property name="text" >
+                  <string>Browse</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="Spacer8" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType" >
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" >
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="OKButt" >
+         <property name="text" >
+          <string>OK</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="Spacer1" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="CancButt" >
+         <property name="text" >
+          <string>Cancel</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <pixmapfunction>qPixmapFromMimeSource</pixmapfunction>
+ <resources/>
+ <connections/>
+</ui>

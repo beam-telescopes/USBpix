@@ -36,13 +36,9 @@ usbpix_print_help()
   echo "                 'linux-g++' with gcc."
   echo
   echo "  -buildtype:"
-  echo "  * release:     Remove all debugging symbols, use many optimization options."
-  echo "    debug:       Use the standard qmake debug settings."
+  echo "    release:     Remove all debugging symbols, use many optimization options."
+  echo "  * debug:       Use the standard qmake debug settings."
   echo "    debug-full:  Use the standard qmake debug settings and some additional ones."
-  echo
-  echo "  -qtfixdia:"
-  echo "  * no:          Use native file dialog."
-  echo "    yes:         Disablenative file dialog, QT version is used."
   echo
   echo "  -nq:"
   echo "  <no options>   Do not run qmake after running setup.sh. Thus, updates to .pro"
@@ -64,8 +60,7 @@ eudaq=auto
 tdaq=no
 gpib=auto
 spec=default
-buildtype=release
-qtfixdia=no
+buildtype=debug
 siusbman=auto
 run_qmake=1
 in_restore=0
@@ -93,7 +88,7 @@ while echo $1 | grep '^-' > /dev/null; do
             usbpix_print_help
             return
         ;;
-        "-eudaq"|"-tdaq"|"-siusbman"|"-gpib"|"-spec"|"-buildtype"|"-qtfixdia")
+        "-eudaq"|"-tdaq"|"-siusbman"|"-gpib"|"-spec"|"-buildtype")
             eval $( echo $1 | sed 's/-//g' | tr -d '\012')=$2
             echo "Setting $1 := $2"
             shift
@@ -114,80 +109,85 @@ fi
 
 echo "Using: setup.sh -tdaq $tdaq -eudaq $eudaq -gpib $gpib -spec $spec -buildtype $buildtype"
 #
+export USBCMN=${DAQ_BASE}
 qtdtmp=${QT5DIR}
 rstmp=${ROOTSYS}
 export SCTPIXEL_DAQ_ROOT=${DAQ_BASE}/RodDaq
 export VME_INTERFACE=${DAQ_BASE}/VmeInterface
 export ROD_DAQ=${DAQ_BASE}/RodDaq
+export PIX_TB_IOM=${DAQ_BASE}/Applications/Pixel/pixTbIOM
+export PIX_LIB=${DAQ_BASE}/Applications/Pixel/PixLib
 export ROD_TYPE=PIXEL_ROD
 export PIXEL_ROD=true
-export PIX_LIB=${DAQ_BASE}/Applications/PixLib
-export PIX_ANA=${DAQ_BASE}/Applications/PixAnalysis
-export DBEDT=${DAQ_BASE}/Applications/DBeditor
-export DATA_VIEWER=${DAQ_BASE}/Applications/DataViewer
-export STC=${DAQ_BASE}/Applications/STcontrol
+export CAN_CALIB_META=${DAQ_BASE}/Applications/Pixel/PixCalibDbCoral
+export CAN=${DAQ_BASE}/Applications/Pixel/CalibrationAnalysis
+export CALIB_CONSOLE=${DAQ_BASE}/Applications/Pixel/CalibrationConsole
+export MODULE_ANALYSIS=${DAQ_BASE}/Applications/Pixel/ModuleAnalysis
+export STC=${DAQ_BASE}/Applications/Pixel/STcontrol
+export PIX_ANA=${DAQ_BASE}/Applications/Pixel/PixAnalysis
+export DBEDT=${DAQ_BASE}/Applications/Pixel/DBeditor
+export DATA_VIEWER=${DAQ_BASE}/Applications/Pixel/DataViewer
 
 export PIX_RS232="${DAQ_BASE}/PixRS232"
 export PIX_SMTP="${DAQ_BASE}/SmtpClient-for-Qt"
-export USBPIX2I3="${DAQ_BASE}/USBpix2I3"
-export USBPIX2I4="${DAQ_BASE}/USBpix2I4"
-export USBPIX3I4="${DAQ_BASE}/USBpix3I4"
+export USB_INCL_DIR="${USBCMN}/inc"
+export USB_LIB_DIR="${USBCMN}/lib"
+export USB_DRIVER_LIB="${USBCMN}/libsiusb"
+export USBPIXI3DLL="${DAQ_BASE}/USBpixI3dll"
+export USBPIXI4DLL="${DAQ_BASE}/USBpixI4dll"
 
 # libusb is now always used
 export LIBUSB_FLAG=USE_LIBUSB
 
 # TDAQ related settings
-export GENCCFLAG=
-#"-mcmodel=large"
+export DAQ_LIB_DIR=.
+export DAQ_INCL_DIR=.
+export DAQ_SW_DIR=.
+export BOOSTINC=.
+export BOOSTLIB=.
+export TDAQ_FLAG=-DNOTDAQ
+export GENCCFLAG="-mcmodel=large"
 if [ "$tdaq" = "yes" ]; then
-  if [ "$TDAQ_INST_PATH" = "" ]; then
-      export TDAQ_INST=/daq/slc6
-      if [ ! -d "${TDAQ_INST}" -a -d /afs/cern.ch/atlas/project/tdaq/inst ]; then 
-          # use the following instead of /daq/slc6 if no local TDAQ installation present; 
-	  echo "no local TDAQ found, will use afs; beware, compiling will be slow!"
-	  export TDAQ_INST=/afs/cern.ch/atlas/project/tdaq/inst
-      fi
-      # if TDAQ was found, proceed
-      if [ -d "${TDAQ_INST}" ]; then 
-	  if [ "`uname -p`" = "x86_64" ] ; then
-	      export GCCCONFIG="x86_64"
-	      export CMTCONFIG=x86_64-slc6-gcc48-opt
-	  else
-	      export GCCCONFIG="i686"
-	      export CMTCONFIG=i686-slc6-gcc48-opt
-	  fi
-	  export GENCCFLAG=
-#"-mcmodel=large"
-	  export ARCH=${CMTCONFIG}
-	  if [ -d "${TDAQ_INST}"/tdaq/tdaq-05-05-00/installed/"${CMTCONFIG}" ]; then 
-	      export LCG_INST=${TDAQ_INST}/sw/lcg
-	      source ${LCG_INST}/contrib/gcc/4.8.1/${GCCCONFIG}-slc6-gcc48-opt/setup.sh
-	      export CMTROOT=${TDAQ_INST}/CMT/v1r25/
-	      export CMTPATH=${TDAQ_INST}/tdaq/tdaq-05-05-00:${TDAQ_INST}/tdaq-common/tdaq-common-01-31-00:${TDAQ_INST}/dqm-common/dqm-common-00-37-00:${TDAQ_INST}/LCGCMT/LCGCMT_71
-	      source ${CMTROOT}/mgr/setup.sh
-	      source ${TDAQ_INST}/tdaq/tdaq-05-05-00/installed/setup.sh
-	      export TDAQ_BOOST=${LCG_INST}/releases/LCG_71/Boost/1.55.0_python2.7
-	      export BOOSTVER=1_55
-	      export BOOST=${TDAQ_BOOST}/${ARCH}
-	      export BOOSTINC=${BOOST}/include/boost-${BOOSTVER}
-	      export BOOSTLIB=${BOOST}/lib
-	      export CMTPATH=${CMTPATH}:${DAQ_BASE}/Applications/Pixel
-	      export TDAQ_FLAG=""
-	  else
-	      echo "TDAQ was requested, but installation wasn't found in "${TDAQ_INST}/tdaq/tdaq-05-05-00/installed/${CMTCONFIG}
-	  fi
-      else
-	  echo "TDAQ was requested, but neither local TDAQ under /daq/slc6 nor afs-version could be accesssed"
-      fi
-  else
-      # TDAQ is already initialised, do not touch
-      export TDAQ_FLAG=""
-      echo "Using TDAQ installed at "${TDAQ_INST_PATH}
+  export TDAQ_INST=/daq/slc6
+  if [ ! -d "${TDAQ_INST}" -a -d /afs/cern.ch/atlas/project/tdaq/inst ]; then 
+  # use the following instead of /daq/slc6 if no local TDAQ installation present; 
+    echo "no local TDAQ found, will use afs; beware, compiling will be slow!"
+    export TDAQ_INST=/afs/cern.ch/atlas/project/tdaq/inst
   fi
-else
-    export BOOSTINC=.
-    export BOOSTLIB=.
-    export TDAQ_FLAG=-DNOTDAQ
+  # if TDAQ was found, proceed
+  if [ -d "${TDAQ_INST}" ]; then 
+    if [ "`uname -p`" = "x86_64" ] ; then
+      export GCCCONFIG="x86_64"
+      export CMTCONFIG=x86_64-slc6-gcc47-opt
+    else
+      export GCCCONFIG="i686"
+      export CMTCONFIG=i686-slc6-gcc47-opt
+    fi
+    export GENCCFLAG="-mcmodel=large"
+    export ARCH=${CMTCONFIG}
+    if [ -d "${TDAQ_INST}"/tdaq/tdaq-05-04-00/installed/"${CMTCONFIG}" ]; then 
+	export LCG_INST=${TDAQ_INST}/sw/lcg
+	source ${LCG_INST}/contrib/gcc/4.7.2/${GCCCONFIG}-slc6-gcc47-opt/setup.sh
+	export CMTROOT=${TDAQ_INST}/CMT/v1r25/
+	export CMTPATH=${TDAQ_INST}/tdaq/tdaq-05-04-00:${TDAQ_INST}/tdaq-common/tdaq-common-01-28-00:${TDAQ_INST}/dqm-common/dqm-common-00-26-02:${TDAQ_INST}/LCGCMT/LCGCMT_67b
+	source ${CMTROOT}/mgr/setup.sh
+	source ${TDAQ_INST}/tdaq/tdaq-05-04-00/installed/setup.sh
+	export TDAQ_BOOST=${LCG_INST}/external/Boost/1.53.0_python2.7
+	export BOOSTVER=1_53
+	export BOOST=${TDAQ_BOOST}/${ARCH}
+	export BOOSTINC=${BOOST}/include/boost-${BOOSTVER}
+	export BOOSTLIB=${BOOST}/lib
+	export CMTPATH=${CMTPATH}:${DAQ_BASE}/Applications/Pixel
+	export DAQ_LIB_DIR=${TDAQ_INST_PATH}/${CMTCONFIG}/lib
+	export DAQ_INCL_DIR=${TDAQ_INST_PATH}/include
+	export DAQ_SW_DIR=${TDAQ_INST_PATH}
+	export TDAQ_FLAG=""
+    else
+	echo "TDAQ was requested, but installation wasn't found in "${TDAQ_INST}/tdaq/tdaq-05-04-00/installed/${CMTCONFIG}
+    fi
+  else
+    echo "TDAQ was requested, but neither local TDAQ under /daq/slc6 nor afs-version could be accesssed"
+  fi
 fi # "$tdaq"=="yes"
 
 # restore QT and ROOT since TDAQ scripts overwrite these
@@ -230,12 +230,6 @@ else
     export PIX_GPIB=""
     echo "GPIB is disabled"
   fi
-fi
-
-buildflags=
-if [ "$qtfixdia" = "yes" ]
-then 
-  buildflags=QT5_FIX_QDIALOG
 fi
 
 if [[ "$ROOTSYS" != "" ]]
@@ -302,7 +296,7 @@ else
       ;;
     5)
       QT_COMPAT=yes
-      if [[ "$QT_VERSION_MINOR" -gt 5 ]]
+      if [[ "$QT_VERSION_MINOR" -gt 2 ]]
       then
         QT_COMPAT=unknown
       fi
@@ -337,19 +331,18 @@ fi
 
 echo "ROOTSYS      = ${ROOTSYS}"
 echo "QT5DIR       = ${QT5DIR}"
-echo "USBPIX2I3    = ${USBPIX2I3}"
-echo "USBPIX2I4    = ${USBPIX2I4}"
-echo "USBPIX3I4    = ${USBPIX3I4}"
+echo "USB_INCL_DIR = ${USB_INCL_DIR}"
+echo "USB_LIB_DIR  = ${USB_LIB_DIR}"
+echo "USBPIXI3DLL  = ${USBPIXI3DLL}"
+echo "USBPIXI4DLL  = ${USBPIXI4DLL}"
 
 (
   echo "# Created by $0 on `date`. Modify using $0 if possible."
   echo "DAQ_BASE       = \"${DAQ_BASE}\"" 
-  echo "ROOTSYS        = \"${ROOTSYS}\"" 
   echo "EUDAQ_FLAG     = ${EUDAQ_FLAG}"
   echo "GPIB_FLAG      = ${GPIB_FLAG}"
   echo "USE_GPIB_LINUX = ${USE_GPIB_LINUX}"
   echo "BUILDTYPE      = ${buildtype}"
-  echo "BUILDFLAGS     = ${buildflags}"
   echo "SIUSBMAN       = ${siusbman}"
   echo "LIBUSB_FLAG    = ${LIBUSB_FLAG}"
 ) > "${BUILD_CONFIG_DIR}/setup.inc"

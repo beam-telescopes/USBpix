@@ -1,0 +1,7 @@
+#command
+comm,confmode
+task,wr_dob_loopback_refclk
+task,wr_dob_loopback_320M
+task,wr_dob_loopback_160M
+task,wr_dob_loopback_80M
+task,wr_dob_loopback_40M

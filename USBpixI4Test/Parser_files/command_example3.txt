@@ -1,0 +1,12 @@
+#command
+comm,confmode
+comm,rdRegister,trigcnt
+comm,wrRegister,trigcnt,1
+comm,rdRegister,trigcnt
+comm,runmode
+comm,LV1
+comm,confmode
+comm,wrRegister,trigcnt,2
+comm,rdRegister,trigcnt
+comm,runmode
+comm,LV1

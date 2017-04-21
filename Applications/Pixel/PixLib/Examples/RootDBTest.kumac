@@ -1,0 +1,7 @@
+{
+gSystem->Load("$PIX_LIB/PixConfDBInterface/libRoot.so");
+gSystem->Load("$PIX_LIB/PixDbInterface/libRootDb.so");
+//gSystem->Load("libroot.dll");
+//TFile f2("BaseConf.cfg.root","UPDATE"); 
+TBrowser b;
+}

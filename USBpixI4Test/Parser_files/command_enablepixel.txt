@@ -1,0 +1,6 @@
+#command
+comm,confmode
+task,clear_chip
+comm,wrRegister,Colpr_Mode,3
+comm,wrRegister,Colpr_addr,0
+task,enable_pixel

@@ -1,0 +1,34 @@
+README for ModuleAnalysis
+=========================
+
+
+= Building =
+
+ModuleAnalysis needs several libraries to build: The Pixel DAQ libraries as well as
+QT 3 (tested with several QT 3 versions on linux and windows) and ROOT (tested
+with 3.10/02). To find the former, it assumes a directory layout similar to the layout 
+in CVS, and needs environment variables to be set which are evaluated in the makefile 
+(also see Paolo Morettini's daq.csh or daq.sh). In particular, the following variables 
+are used: MODULE_ANALYSIS, PIX_LIB, VME_INTERFACE, PIX_ANA
+(the latter is new and should point to Applications/Pixel/PixAnalysis)
+
+Depending on where an how you set up QT, you may want to set the following using
+the correct QTDIR:
+
+QTDIR=/opt/rccenv001/qt-3.3.0
+PATH=$QTDIR/bin:$PATH
+MANPATH=$QTDIR/doc/man:$MANPATH
+LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+
+export QTDIR PATH MANPATH LD_LIBRARY_PATH
+
+***IMPORTANT CHANGE****
+ModuleAnalysis now uses the QT project file to generate Makefiles for linux. Proceed as follows
+
+* 'qmake -makefile'
+* 'make'   to build an application
+* 'make libModuleAnalysis.a' to build the library needed for STcontrol
+
+= Instructions for use = 
+
+The "Help->Online user manual" menu should open a browser with the online instructions.

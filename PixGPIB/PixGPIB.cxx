@@ -19,10 +19,7 @@
 
 #ifdef WIN32
 #include <windows.h>
-#else
-#include <unistd.h>
 #endif
-#include <upsleep.h>
 
 #if defined(USE_LINUX_GPIB)
 #include "gpib/ib.h"
@@ -84,9 +81,7 @@ int PixGPIB::openBoard(unsigned int board)
     if (iberr == EDVR) {
       if (DEBUG) cout << "WARNING : No driver found for interface GPIB" << board << endl;
     } else {
-      char msg[100];
-      UPG_sprintf(msg, "* SendIFC error");
-      printGPIBError(msg);
+      printGPIBError("* SendIFC error");
     }
     return 1;
   }
@@ -100,9 +95,7 @@ int PixGPIB::closeBoard(unsigned int board)
 {
   ibonl(board,0);  // take board offline
   if (ibsta & ERR) {
-    char msg[100];
-    UPG_sprintf(msg, "* ibonl Error");
-    printGPIBError(msg);
+    printGPIBError("* ibonl Error");
     return 1;
   }
   return 0;
@@ -134,20 +127,17 @@ int PixGPIB::scanBoard(unsigned int board)
     if (iberr == 0) {
       cout << "WARNING : No driver found for interface GPIB" << board << endl;
     } else {
-      char msg[100];
-      UPG_sprintf(msg, "* FindLstn error:");
-      printGPIBError(msg);
+      printGPIBError("* FindLstn error:");
     }
     return 1;
   }
   instruments[numbInstruments] = NOADDR;
 
-  // why should board be offline??? won't work with linux-gpib - instrument loop still OK though!
-//   ibonl(board,0);  // take board offline
-//   if (ibsta & ERR) {
-//     printGPIBError("* ibonl Error");
-//     return 1;
-//   }
+  ibonl(board,0);  // take board offline
+  if (ibsta & ERR) {
+    printGPIBError("* ibonl Error");
+    return 1;
+  }
 
   // loop over instruments array
   for (int i = 0; i < numbInstruments; i++) {
@@ -232,8 +222,6 @@ int PixGPIB::printDevices()
 
       cout << "GPIB" << m_Devices[i]->getBoard() << "\t" << m_Devices[i]->getPAD() << "\t" << m_Devices[i]->getSAD() << "\t" << deviceTypeDescription << "\t" << deviceFunctionDescription
            << "\t" << deviceStatus;
-      m_Devices[i]->measureVoltages(0., false, -1);
-      m_Devices[i]->measureCurrents(0., false, -1);
       if (m_Devices[i]->getDeviceNumberChannels() > 0)
     	  cout << "\t" << m_Devices[i]->getVoltage(0) << "\t" << m_Devices[i]->getCurrent(0);
       if (m_Devices[i]->getDeviceNumberChannels() > 1)

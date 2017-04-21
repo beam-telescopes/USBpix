@@ -11,11 +11,10 @@ tdaq {
 	SOURCES += RCCVmeInterface.cxx
 	SOURCES += DummyVmeInterface.cxx
 	SOURCES += VmeModule.cxx
-        INCLUDEPATH += $(TDAQ_INST_PATH)/include
-        INCLUDEPATH += $(BOOSTINC)
+	INCLUDEPATH += $(DAQ_INCL_DIR) $(BOOSTINC)
 }
 
-INCLUDEPATH += $(DAQ_BASE)/inc
+INCLUDEPATH += $(USB_INCL_DIR)
 
 unix {
 	DEFINES += TSTAMP
@@ -23,6 +22,7 @@ unix {
 	QMAKE_CXXFLAGS += $(GENCCFLAG)
 	INCLUDEPATH += .
 	!isEmpty($(BOOSTINC)): INCLUDEPATH += $(BOOSTINC)
+	INCLUDEPATH += $(USB_INCL_DIR)
 	!isEmpty($(DAQ_INCL_DIR)): INCLUDEPATH += $(DAQ_INCL_DIR)
 }
 

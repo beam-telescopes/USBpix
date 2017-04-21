@@ -1,0 +1,210 @@
+#ifndef FILETYPES
+#define FILETYPES
+
+#define VERSION "6.4.1.1"
+
+#define STVITEM -100
+#define MODITEM  -10
+#define SAVE      -3
+#define REM       -2
+#define NONE      -1
+#define LOAD       0
+
+// simple plot types
+
+#define RAW        1
+#define MEAN       2
+#define SIG        3
+#define CHI        4
+#define REFD       5
+#define FIT        6
+#define TOTRAW     7
+#define T20K       8
+#define EMTYSLOT   9
+#define PARA      10
+#define PARB      11
+#define PARC      12
+#define PARD      13
+#define PARE      14
+#define MAMASK    15
+#define DEAD_CHAN 16
+#define TDACP     17
+#define LEAK_PLOT 18
+#define MLPLOT    19
+#define IVPLOT    20
+#define MAKEMASK  21
+#define HOTPLOT   22
+#define CLTSIMP   23
+#define SAVEMASK  24
+#define INVMASK   25
+#define COMBMASK  26
+#define LOGFILE   27
+#define TIME      28
+#define TIMEREF   29
+#define TWLK_TIME20NS_2D    30
+#define TWLK_Q20NS_2D       31
+#define TWLK_OVERDRV_2D     32
+#define TWLK_NORMAL_OVPROF  33
+#define TWLK_LONG_OVPROF    34
+#define TWLK_GANGED_OVPROF  35
+#define TWLK_LGANGED_OVPROF 36
+#define TWLK_ALL_OVPROF	    37
+#define TWODMEAN  38
+#define TWODSIG   39
+#define TWODCHI   40
+#define TWODOPT   41
+#define TDACW     42
+#define FDACP     43
+#define RMASKP    44
+#define HMASKP    45
+#define SMASKP    46
+#define PMASKP    47
+#define TWLKGR    48
+#define DOSRC     49
+#define GETLOG    50
+#define GETFDAC   51
+#define THSUMM    52
+#define MAKESCHI  53
+#define PARCOMB   54
+#define ITHSCAN   55
+#define ITH       56
+#define ITHSUMM   57
+#define TDACLOG   58
+#define FDACLOG   59
+#define AVTOT     60
+#define TOT_HIT   61
+#define TWODRAW   62
+#define SIGTOT    63
+#define OUTPAR    64
+#define TOT_DIST  65
+#define TOT_SUMM  66
+#define COMBCAL   67
+#define APPLYMASK 68
+#define MASKTAB   69
+#define DEADTAB   70
+#define PLTCCAL   71
+#define PLTCCPR   72
+#define TOTCAL    73
+#define TOT_FAST  74
+#define TOT_FDIS  75
+#define CAL_FAST  76
+#define CAL_SUMM  77
+#define CAL_DIST  78
+#define CAL_FDIS  79
+#define TOT_MAX   80
+#define CTOT_MAX  81
+#define IVCORR    83
+#define DIGEMP    84
+#define DIGEMN    85
+#define DIGEMPR   86
+#define RECALFIT  87
+#define CAL_TAB   88
+#define WRITECFG  89
+#define BADSEL    90
+#define RAWSLC    91
+#define REFIT     92
+#define TOT_RATE  93
+#define TOTSD     94
+#define TWODRAWS  95
+#define TWODRAWC  96
+#define TWODMINT  97
+#define TOGMASK   98
+#define GETMASK   99
+#define APPLMASK  100
+#define TWODMINTN 101
+#define TWODMINTC 102
+#define REGPANEL  103
+#define PARF      104
+#define PARG      105
+#define PARH      106
+#define PARI      107
+#define PARJ      108
+#define DIGSUMM   109
+#define TDACCOR   110
+#define LVL1DIST  111
+#define LVL12DPLT 112
+#define PSCONFIG  113
+#define PMCONFIG  114
+#define PBCONFIG  115
+#define INJCAPH   116
+#define INJCAPL   117
+#define ILEAK     118
+
+// combined plot types
+
+#define OPTS      585
+#define TRAT      586
+#define NRAT      587
+#define XTFR      588
+#define TIMEDIF   589
+#define NDIF	  590
+#define TDIF	  591
+#define LOOSE	  592
+#define SHORT     593
+#define CLTOT     594
+#define FITTOTC   595
+#define RECALTOT  596
+#define DELCAL    597
+#define TDTRAT    598
+#define TDNRAT    599
+#define TDNDIF	  600
+#define TDTDIF	  601
+#define NSQDIF    602
+#define XTFRNN    603
+#define XTNOISE   604
+#define TCALDIF   605
+#define MINTDIF   606
+#define MINTRAT   607
+#define GDIF      608
+#define GRAT      609
+#define GSQDIF    610
+#define BI_VIT_VS_TIME_PLOT  666
+#define BI_I_VS_T_PLOT       667
+#define BI_SCANS_PLOT        668
+
+// data types
+
+#define DSET     1000
+#define DIG      1001
+#define TOTR     1002
+#define ONEDSCAN 1003
+#define TOTF     1004
+#define TWLK     1005
+#define ROOTF    1006
+#define CONFIG   1007
+#define TFDAC    1008
+#define LEAK     1009
+#define IVSCAN   1010
+#define MASKDAT  1012
+#define TWODSCAN 1014
+#define TWODFIT  1015
+#define TOTFR    1016
+#define ONEDFIT  1017
+#define TOTCF    1018
+#define TOTCOMB  1019
+#define SENSORIV 1020
+#define CHIPCURR 1021
+#define MULTIF   1022
+#define BI_VIT_DATA  1023
+#define REGTEST  1024
+#define BRIEFSUM 1025
+#define BRIEFDIG 1026
+#define LVL1SHOT 1027
+#define LVL1SCAN 1028
+
+#define PIXDBF   1050
+
+// not really used anymore:
+#define HOTPIX   1011
+#define SOURCE   1013
+
+// didn't know where to do this:
+#define ALL		1100
+#define NORMAL		1101
+#define GANGED		1102
+#define INTERGANGED	1103
+#define LONG		1104
+
+#define PIXDBTYPES      5000
+
+#endif

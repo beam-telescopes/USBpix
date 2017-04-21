@@ -5,53 +5,53 @@ test_gpib()
 
 CONFIG += ordered
 
-# basic controller interfaces
-SUBDIRS += SiLibUSB
-SUBDIRS += libgpac
+libusb{
+  SUBDIRS += libsiusb
+} else {
+  SUBDIRS += SiLibUSB
+}
+
 SUBDIRS += VmeInterface 
-SUBDIRS += USBpix2I3
-SUBDIRS += USBpix2I4
-SUBDIRS += USBpix3I4
+SUBDIRS += USBpixI3dll 
+SUBDIRS += USBpixI4dll 
+SUBDIRS += libSuess
+
+gpib {
+  SUBDIRS += PixGPIB
+} else {
+  message("Skipping PixGPIB")
+}
+
 tdaq {
   SUBDIRS += RodDaq/RodCrate
 } else {
   message("Skipping RodDaq/RodCrate")
 }
 
-# misc. peripheral interfaces
-gpib {
-  SUBDIRS += PixGPIB
-  SUBDIRS += PixGPIB/PixGPIBTest.pro
-} else {
-  message("Skipping PixGPIB")
-}
 SUBDIRS += PixRS232
-SUBDIRS += PixRS232/PixRS232Test.pro
-SUBDIRS += libSuess
 SUBDIRS += SmtpClient-for-Qt/SMTPEmail.pro
+SUBDIRS += libgpac
 
-# higher-level libraries and applications
-SUBDIRS += Applications/PixLib
-SUBDIRS += Applications/PixAnalysis
-SUBDIRS += Applications/DBeditor/DBeditor-lib.pro
-SUBDIRS += Applications/DBeditor
-SUBDIRS += Applications/DataViewer/DataViewer-lib.pro
-SUBDIRS += Applications/DataViewer
-SUBDIRS += Applications/WaferAnalysis
-SUBDIRS += Applications/STcontrol
+SUBDIRS += Applications/Pixel/PixLib
+SUBDIRS += Applications/Pixel/PixAnalysis
+SUBDIRS += Applications/Pixel/DBeditor
+SUBDIRS += Applications/Pixel/DBeditor/DBeditor-lib.pro
+SUBDIRS += Applications/Pixel/DataViewer
+SUBDIRS += Applications/Pixel/DataViewer/DataViewer-lib.pro
+SUBDIRS += Applications/Pixel/WaferAnalysis
+SUBDIRS += Applications/Pixel/STcontrol
+
 siusbman {
-  SUBDIRS += Applications/SiUSBman
+  SUBDIRS += SiUSBman
+#  USBpixI4Test needs revision -> keep out of regular building list for now
+#  SUBDIRS += USBpixI4Test
 } else {
   message("Skipping QWT-based applications")
 }
-SUBDIRS += Applications/SourceMonitor
 
-# some extra cleaning needed for ROOT-generated files
-QMAKE_CLEAN += ./Applications/PixLib/PixConfDBInterface/RootDBDict.o          
-QMAKE_CLEAN += ./Applications/PixLib/PixConfDBInterface/RootDBDict.h
-QMAKE_CLEAN += ./Applications/PixLib/PixConfDBInterface/RootDBDict.cxx
-QMAKE_CLEAN += ./Applications/PixLib/PixConfDBInterface/RootDBDict_rdict.pcm
-QMAKE_CLEAN += ./Applications/PixLib/PixDbInterface/RootDbDict.o
-QMAKE_CLEAN += ./Applications/PixLib/PixDbInterface/RootDbDict.cxx
-QMAKE_CLEAN += ./Applications/PixLib/PixDbInterface/RootDbDict.h
-QMAKE_CLEAN += ./Applications/PixLib/PixDbInterface/RootDbDict_rdict.pcm
+QMAKE_CLEAN += ./Applications/Pixel/PixLib/PixConfDBInterface/RootDBDict.o          
+QMAKE_CLEAN += ./Applications/Pixel/PixLib/PixConfDBInterface/RootDBDict.h
+QMAKE_CLEAN += ./Applications/Pixel/PixLib/PixConfDBInterface/RootDBDict.cxx
+QMAKE_CLEAN += ./Applications/Pixel/PixLib/PixDbInterface/RootDbDict.o
+QMAKE_CLEAN += ./Applications/Pixel/PixLib/PixDbInterface/RootDbDict.cxx
+QMAKE_CLEAN += ./Applications/Pixel/PixLib/PixDbInterface/RootDbDict.h

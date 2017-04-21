@@ -116,7 +116,7 @@ class DECLDIR TL_base
 {
 public:
 	TL_base(void);
-	virtual ~TL_base(void);
+	~TL_base(void);
 
 	// API of the transport layer, commonly used operations already implemented in the base class
 	int  ListDevices(int *devAddList);

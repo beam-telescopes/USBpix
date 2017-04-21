@@ -1,0 +1,7 @@
+#command
+comm,confmode
+comm,resetErrorCnt
+comm,resetSRIdx
+task,select_normal_shift_mode
+loop,40,task,test_rw_shiftregister
+comm,showErrorCnt

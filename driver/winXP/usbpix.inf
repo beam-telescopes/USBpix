@@ -1,0 +1,100 @@
+[Version]
+Signature="$Windows NT$"
+Provider=%SILAB%
+
+ClassGuid={77445F55-ED81-4db3-AD7C-9A1250B5D91A}
+Class=SILAB
+
+;CatalogFile=usbpix.cat
+DriverVer=05/06/2009,1.11
+
+;------------------------------------------------------------------------------
+; Driver information
+;------------------------------------------------------------------------------
+
+[Manufacturer]
+%SILAB%   = DeviceList
+
+[DeviceList]
+%SILAB.DeviceDesc0% = slbusbxp, USB\VID_0547&PID_2131
+%SILAB.DeviceDesc1% = slbusbxp, USB\VID_0547&PID_0080
+%SILAB.DeviceDesc2% = slbusbxp, USB\VID_5312&PID_0200
+%SILAB.DeviceDesc3% = slbusbxp, USB\VID_5312&PID_0300
+%SILAB.DeviceDesc4% = slbusbxp, USB\VID_5312&PID_0201
+%SILAB.DeviceDesc5% = slbusbxp, USB\VID_04b4&PID_8613
+
+;------------------------------------------------------------------------------
+;  SILAB class definition 
+;------------------------------------------------------------------------------
+
+[ClassInstall32]
+AddReg=ClassInstall32AddReg
+CopyFiles=ClassInstall32CopyFiles
+
+[ClassInstall32AddReg]
+HKR,,,,"SILAB Devices"
+HKR,,Installer32,,"silabclass.dll,SilabClassInstaller"
+HKR,,EnumPropPages32,,silabclass.dll
+HKR,,Icon,,109
+
+[ClassInstall32CopyFiles]
+silabclass.dll
+;silab_devman.cpl
+
+[slbusbHwAddReg]
+;HKR,,FriendlyName,,"SILAB USB Controller"
+HKR,,SampleInfo,,"http:\\siliconlab.physik.uni-bonn.de"
+
+
+;------------------------------------------------------------------------------
+;  Files section
+;------------------------------------------------------------------------------
+
+[SourceDisksNames]
+1=%INSTDISK%,,,
+
+[DestinationDirs]
+DriverCopyFiles = 10,System32\Drivers
+ClassInstall32CopyFiles=11
+
+[SourceDisksFiles]
+slbusbxp.sys = 1,,
+silabclass.dll=1,,
+
+[slbusbxp]
+CopyFiles=DriverCopyFiles
+
+[DriverCopyFiles]
+slbusbxp.sys
+
+;------------------------------------------------------------------------------
+; Service Installation
+;------------------------------------------------------------------------------
+
+[slbusbxp.Services]
+AddService = slbusbxp, 0x00000002 , slbusbxpService
+
+
+[slbusbxp.hw]
+AddReg=slbusbHwAddReg
+
+[slbusbxpService]
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_IGNORE
+LoadOrderGroup = Base
+ServiceBinary  = %12%\slbusbxp.sys
+
+;
+; Localizable Strings
+;
+[STRINGS]
+
+SILAB.DeviceDesc0 = "EZ-USB Controller"
+SILAB.DeviceDesc1 = "EZ-USB Development Board"
+SILAB.DeviceDesc2 = "SILAB USB Device"
+SILAB.DeviceDesc3 = "SILAB USB Device - USBPix"
+SILAB.DeviceDesc4 = "SILAB USB Device (debug mode)"
+SILAB.DeviceDesc5 = "Generic FX2 USB 2.0 Controller"
+INSTDISK = "SILAB Driver Installation Source"
+SILAB = "Silizium Labor Bonn"

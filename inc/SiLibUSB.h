@@ -68,10 +68,6 @@ functions can be accessed.
 @return true if successful else false
 */
 bool DECLDIR InitUSB(void);
-/*!
-Terminates the USB Subsystem, to be called when USB access is no longer needed
-*/
-void DECLDIR TermUSB();
 
 
 /*!
@@ -199,8 +195,6 @@ public:
 	//! Read device ID
 	//! @return device ID
 	int GetDeviceId(void);
-	int GetProductId(void);
-	int GetBcdUSB(void);
 	//@}
 
 	//@{
@@ -268,7 +262,6 @@ public:
 	//! @param length number of bytes to transfer
 	//! @return true if succeeded otherwise false
 	bool WriteBlock(unsigned char * Data, int length);
-	bool WriteBlock(int addr, unsigned char * Data, int length);
 
 	//! Fast read access to the FPGA to transfer large blocks of data. This access mode is using the 8 bit fast data bus of the
 	//! USB µC (high speed interface) without an address bus. The base address of the memory location must be writen
@@ -278,7 +271,6 @@ public:
 	//! @param length number of bytes to transfer
 	//! @return true if succeeded otherwise false
 	bool ReadBlock(unsigned char * Data, int length);
-	bool ReadBlock(int addr, unsigned char * Data, int length);
 
 	//! Write to a dedicated endpoint which will trigger an interrupt in the USB µC. Useful to control the execution of
 	//! loops (i.e. execute stop command) within dedicated µC firmware code

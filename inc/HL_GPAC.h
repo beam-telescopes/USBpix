@@ -1,6 +1,5 @@
 #pragma once
 
-#include "caldata.h"
 #include "TL_base.h"
 #include "HL_base.h"
 #include "CDataFile.h"
@@ -42,6 +41,14 @@
 #define CALMUX_GPIO_SEL   0x20
 #define CALMUX_GPIO_INHB  0x40
 
+
+// EEPROM (calibration data storage)
+#define EEPROM_ADD (0xA8)    //slave address
+#define CAL_DATA_HEADER_V1 ((unsigned short)(0xa101))
+#define CAL_DATA_HEADER_V2 ((unsigned short)(0xa102))
+#define CAL_EEPROM_PAGE_SIZE 32
+#define MAX_CHANNEL_NAME_SIZE 64
+enum {CAL_DATA_V1, CAL_DATA_V2, CAL_DATA_FILE};
 
 // DAC (DAC7578)
 #define DAC7578_1_ADD (0x90)  // slave addresses
@@ -112,7 +119,7 @@ const unsigned char ISRCAddressLUT[12][3] =
 
 #pragma pack(push)  
 #pragma pack(1)  // avoid byte packing
-typedef struct calConstStructV3_
+typedef struct calConstStruct_
 {
 	char   name[MAX_CHANNEL_NAME_SIZE];
 	double DACOffset;
@@ -126,13 +133,13 @@ typedef struct calConstStructV3_
 	double MaxValue;
   double Limit;
 	double VREF;
-} calConstStructV3;
+} calConstStruct;
 
 typedef struct eepromDataStruct_
 { 
 	unsigned short header;
   unsigned short Id;
-  calConstStructV3 chCalData[MAX_CH];
+  calConstStruct chCalData[MAX_CH];
 } eepromDataStruct;
 #pragma pack(pop)
 
@@ -200,7 +207,7 @@ public:
 	bool   CalibrateDAC(double x1, double y1, double x2, double y2);
 	bool   CalibrateVADC(double x1, double y1, double x2, double y2);
 	bool   CalibrateIADC(double x1, double y1, double x2, double y2);
-	calConstStructV3 CalData;
+	calConstStruct CalData;
 	const char* GetName(void);
 
 protected:
@@ -268,7 +275,7 @@ class PIXDECLDIR HL_GPAC: public HL_base
 {
 public:
 	HL_GPAC(TL_base &TL);
-	virtual ~HL_GPAC(void);
+	~HL_GPAC(void);
 	void Init(TL_base &TL);
 	bool Write(HL_addr &hAdd, unsigned char *data, int nBytes);
 	bool Read(HL_addr &hAdd, unsigned char *data, int nBytes);

@@ -2,16 +2,8 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
-#include <string.h>
 
 using namespace gpac;
-
-void convCont(unsigned char *newVar, std::vector<uint8_t> dataBuf, unsigned int offset, unsigned int length){
-  unsigned char *dataArr = new unsigned char[length];
-  for(unsigned int j=0;j<length;j++) dataArr[j] = dataBuf.at(offset+j);
-  memcpy(newVar, dataArr, length);
-  delete[] dataArr;
-}
 
 phy::phy(SiUSBDevice *dev):
   m_dev(dev),
@@ -216,7 +208,7 @@ double devices::MAX11644::capture()
     case VDD_:
       reference_voltage = m_vdd;
       break;
-   case external:
+    case external:
     case external_:
       reference_voltage = m_ext_voltage;
       break;
@@ -267,85 +259,17 @@ devices::core::core(i2chost *i2c):
   m_power_enable_oc(i2c, 0x01),
   m_i2c_mux(i2c),
   m_dac(i2c),
-  m_adc(i2c),
-  m_i2c(i2c)
+  m_adc(i2c)
 {
   init();
 }
 
 void devices::core::init()
 {
-  calib();
-
   power_enable_oc().write(0x00);
   power_enable_oc().configure(0xf0);
   adc().init();
   i2c_mux().disable();
-}
-void devices::core::calib()
-{
-  m_i2c_mux.select(0);
-
-  const uint8_t calEepromAdd = 0xA8;
-  const unsigned int calEepromPageSize = 32;
-  // read calib. constants from EEPROM
-// // #define MAX_PWR    4
-// // #define MAX_VSRC   4  
-// // #define MAX_VINJ   2  
-// // #define MAX_ISRC  12
-  const unsigned int nChan = 22, nNameLen=64, nDblLen=8, nDblVar=10;
-  unsigned int size = nChan*(nDblLen*nDblVar+nNameLen)+4;
-  unsigned int nPages, nBytes;
-  nPages = size / calEepromPageSize;
-  nBytes = size % calEepromPageSize;
-  std::vector<uint8_t> addBuf(2,0);
-  std::vector<uint8_t> dataBuf;
-  
-  m_i2c->write(calEepromAdd, addBuf);
-  for (unsigned int i = 0; i < nPages; i++){ // 64 byte page write
-    std::unique_ptr<std::vector<uint8_t>> data = m_i2c->read((calEepromAdd | 0x01), calEepromPageSize);
-    dataBuf.insert(dataBuf.end(), data->begin(), data->end());
-  }
-  if (nBytes > 0){
-    std::unique_ptr<std::vector<uint8_t>> data = m_i2c->read((calEepromAdd | 0x01), nBytes);
-    dataBuf.insert(dataBuf.end(), data->begin(), data->end());
-  }
-  //unsigned int header = (((unsigned int)dataBuf.at(0)) << 8) + (unsigned int)dataBuf.at(1);
-  m_ID = (((unsigned int)dataBuf.at(2)) << 8) + (unsigned int)dataBuf.at(3);
-  //std::cout << "EEPROM header: " << header << ", ID = " << m_ID << std::endl;
-
-  unsigned int vec_offs = 4;
-  for (unsigned int i = 0; i < nChan; i++) {
-    char cal_name[nNameLen];
-    calData tmpCalData;
-    convCont((unsigned char*)cal_name, dataBuf, vec_offs, nNameLen);
-    tmpCalData.name = cal_name;
-    vec_offs += nNameLen;
-    // default
-    vec_offs += nDblLen;
-    // minimum
-    vec_offs += nDblLen;
-    // maximum
-    vec_offs += nDblLen;
-    convCont((unsigned char*)(&tmpCalData.IADCGain), dataBuf, vec_offs, nDblLen);
-    vec_offs += nDblLen;
-    convCont((unsigned char*)(&tmpCalData.IADCOffs), dataBuf, vec_offs, nDblLen);
-    vec_offs += nDblLen;
-    convCont((unsigned char*)(&tmpCalData.VADCGain), dataBuf, vec_offs, nDblLen);
-    vec_offs += nDblLen;
-    convCont((unsigned char*)(&tmpCalData.VADCOffs), dataBuf, vec_offs, nDblLen);
-    vec_offs += nDblLen;
-    convCont((unsigned char*)(&tmpCalData.DACGain), dataBuf, vec_offs, nDblLen);
-    vec_offs += nDblLen;
-    convCont((unsigned char*)(&tmpCalData.DACOffs), dataBuf, vec_offs, nDblLen);
-    vec_offs += nDblLen;
-    //convCont((unsigned char*)(&calVal), dataBuf, vec_offs, nDblLen);
-    vec_offs += nDblLen;
-    // limit
-
-    // add constants to map for later retrieval
-    m_calData.push_back(tmpCalData);
-  }
 }
         
 devices::core::~core()

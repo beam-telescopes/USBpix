@@ -16,7 +16,6 @@
 #endif
 
 #include <exception>
-#include <map>
 
 #ifdef WIN32
   #define STDE_NOEXCEPT
@@ -28,17 +27,6 @@ class SiUSBDevice;
 
 namespace gpac
 {
-
-  typedef struct _calData{
-    std::string name;
-    double IADCGain;
-    double IADCOffs;
-    double VADCGain;
-    double VADCOffs;
-    double DACGain;
-    double DACOffs;
-  } calData;
-
   namespace devices
   {
     class DllExport PCA9554 
@@ -207,17 +195,11 @@ namespace gpac
         PCA9540B m_i2c_mux;
         dac_block m_dac;
         adc_block m_adc;
-	i2chost *m_i2c;
-	unsigned int m_ID;
-	std::vector<calData> m_calData;
-	void calib();
 
       public:
         core(i2chost *i2c);
         ~core();
         void init();
-	unsigned int getId(){return m_ID;};
-	std::vector<calData> getCalib(){return m_calData;};
 
         PCA9554 &power_enable_oc(bool select = true) 
         {

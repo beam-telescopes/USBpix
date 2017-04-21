@@ -13,25 +13,25 @@ set useeudaq=no
 set siusbman=auto
 set buildtype=release
 set stcontrol_console=no
-set libusb=yes
+set libusb=no
 set buildflags=QT5_FIX_QDIALOG
 
 rem automatically set Windows 8 to default of libusbs=yes until Silab driver works
-rem systeminfo | find "OS Name" > %TEMP%\osname.txt
-rem FOR /F "usebackq delims=: tokens=2" %%i IN (%TEMP%\osname.txt) DO set vers=%%i
-rem echo %vers% | find "Windows 7" > nul
-rem if %ERRORLEVEL% == 0 goto ver_7
-rem echo %vers% | find "Windows 8" > nul
-rem if %ERRORLEVEL% == 0 goto ver_8
-rem goto ver_end
-rem :ver_7
-rem set WINVER=win7
-rem set libusb=no
-rem goto ver_end
-rem :ver_8
-rem set WINVER=win8
-rem set libusb=yes
-rem :ver_end
+systeminfo | find "OS Name" > %TEMP%\osname.txt
+FOR /F "usebackq delims=: tokens=2" %%i IN (%TEMP%\osname.txt) DO set vers=%%i
+echo %vers% | find "Windows 7" > nul
+if %ERRORLEVEL% == 0 goto ver_7
+echo %vers% | find "Windows 8" > nul
+if %ERRORLEVEL% == 0 goto ver_8
+goto ver_end
+:ver_7
+set WINVER=win7
+set libusb=no
+goto ver_end
+:ver_8
+set WINVER=win8
+set libusb=yes
+:ver_end
 
 rem Loop through all arguments, detect known switches and set the corresponding
 rem variables:
@@ -79,23 +79,30 @@ echo Using: setup.bat -useeudaq %useeudaq% -buildtype %buildtype% -siusbman %siu
 echo Using flags: %buildflags%
 
 set DAQ_BASE=%cd%
+set USBCMN=%DAQ_BASE%
 set SCTPIXEL_DAQ_ROOT=%DAQ_BASE%\RodDaq
 set VME_INTERFACE=%DAQ_BASE%\VmeInterface
 set ROD_DAQ=%DAQ_BASE%\RodDaq
-set PIX_LIB=%DAQ_BASE%\Applications\PixLib
+set PIX_TB_IOM=%DAQ_BASE%\Applications\Pixel\pixTbIOM
+set PIX_LIB=%DAQ_BASE%\Applications\Pixel\PixLib
 set ROD_TYPE=PIXEL_ROD
 set PIXEL_ROD=true
-set STC=%DAQ_BASE%\Applications\STcontrol
-set PIX_ANA=%DAQ_BASE%\Applications\PixAnalysis
-set DBEDT=%DAQ_BASE%\Applications\DBeditor
-set DATA_VIEWER=%DAQ_BASE%\Applications\DataViewer
+set CAN_CALIB_META=%DAQ_BASE%\Applications\Pixel\PixCalibDbCoral
+set CAN=%DAQ_BASE%\Applications\Pixel\CalibrationAnalysis
+set CALIB_CONSOLE=%DAQ_BASE%\Applications\Pixel\CalibrationConsole
+set MODULE_ANALYSIS=%DAQ_BASE%\Applications\Pixel\ModuleAnalysis
+set STC=%DAQ_BASE%\Applications\Pixel\STcontrol
+set PIX_ANA=%DAQ_BASE%\Applications\Pixel\PixAnalysis
+set DBEDT=%DAQ_BASE%\Applications\Pixel\DBeditor
+set DATA_VIEWER=%DAQ_BASE%\Applications\Pixel\DataViewer
 rem the following are just dummies to keep the Makefiles happy
 set DAQ_INCL_DIR=.
 set DAQ_LIB_DIR=.
 set TDAQ_FLAG=-DNOTDAQ
-set USBPIX2I3=%DAQ_BASE%\USBpix2I3
-set USBPIX2I4=%DAQ_BASE%\USBpix2I4
-set USBPIX3I4=%DAQ_BASE%\USBpix3I4
+set USB_INCL_DIR=%USBCMN%\inc
+set USB_LIB_DIR=%USBCMN%\lib
+set USBPIXI3DLL=%DAQ_BASE%\USBPixI3dll
+set USBPIXI4DLL=%DAQ_BASE%\USBPixI4dll
 set PIX_GPIB=%DAQ_BASE%\PixGPIB
 set GPIBDIR=%PIX_GPIB%
 set GPIB_FLAG=-DHAVE_GPIB
@@ -122,9 +129,8 @@ echo ROOTSYS=%ROOTSYS%
 echo QT5DIR=%QT5DIR%
 echo QTDIR=%QTDIR%  (not used)
 echo VCDIR=%VCDIR%
-echo USBPIX2I3=%USBPIX2I3%
-echo USBPIX2I4=%USBPIX2I4%
-echo USBPIX3I4=%USBPIX3I4%
+echo USBPIXI3DLL=%USBPIXI3DLL%
+echo USBPIXI4DLL=%USBPIXI4DLL%
 echo PATH=%PATH%
 
 call "%VCDIR%\vcvarsall.bat" x86

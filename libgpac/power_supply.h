@@ -47,8 +47,9 @@ namespace gpac
         bool m_overcurrent;
 
       private:
-	double m_DACoffset;
-	double m_DACgain;
+        double m_Rs1;
+        double m_Rs2;
+        double m_Rs3;
 
         uint16_t voltage_to_dac_value(double voltage);
 
@@ -64,7 +65,6 @@ namespace gpac
         bool overcurrent(bool update = true);
         double capture_voltage();
         double capture_current();
-	void setDACCalib(double offset, double gain){m_DACoffset=offset; m_DACgain=gain;};
     };
   }
 

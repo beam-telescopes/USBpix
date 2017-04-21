@@ -1,0 +1,13 @@
+Packages needed to install:
+ VmeInterface, RodDaq, PixLib
+ ROOT: tested with 3.10.02
+ QT: needs version 3.3
+ ModuleAnalysis: 
+   check out from Applications/Pixel/ModuleAnalysis
+   ln -s Makefile_linux Makefile
+   compile with make lib.
+
+Environment variables 
+ as per PixLib, plus QTDIR (the latter should have been set 
+ during resp. installation) and MODULE_ANALYSIS (= the directory
+ where you keep the lib and header files).

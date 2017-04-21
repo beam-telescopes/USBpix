@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SiUSBLib", "..\SiUSB_DLL\VC\SiUSBLib.vcproj", "{592637F5-06E6-4835-BDD8-8DB6FFA3B874}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SiUSBmanCpl", "SiUSBmanCpl.vcproj", "{4AD69D67-BC7B-33E8-B08C-E25C961812C2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{592637F5-06E6-4835-BDD8-8DB6FFA3B874} = {592637F5-06E6-4835-BDD8-8DB6FFA3B874}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		static-debug|Win32 = static-debug|Win32
+		static-release|Win32 = static-release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{592637F5-06E6-4835-BDD8-8DB6FFA3B874}.Debug|Win32.ActiveCfg = Debug|Win32
+		{592637F5-06E6-4835-BDD8-8DB6FFA3B874}.Debug|Win32.Build.0 = Debug|Win32
+		{592637F5-06E6-4835-BDD8-8DB6FFA3B874}.Release|Win32.ActiveCfg = Release|Win32
+		{592637F5-06E6-4835-BDD8-8DB6FFA3B874}.Release|Win32.Build.0 = Release|Win32
+		{592637F5-06E6-4835-BDD8-8DB6FFA3B874}.static-debug|Win32.ActiveCfg = static-debug|Win32
+		{592637F5-06E6-4835-BDD8-8DB6FFA3B874}.static-debug|Win32.Build.0 = static-debug|Win32
+		{592637F5-06E6-4835-BDD8-8DB6FFA3B874}.static-release|Win32.ActiveCfg = static-release|Win32
+		{592637F5-06E6-4835-BDD8-8DB6FFA3B874}.static-release|Win32.Build.0 = static-release|Win32
+		{4AD69D67-BC7B-33E8-B08C-E25C961812C2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4AD69D67-BC7B-33E8-B08C-E25C961812C2}.Debug|Win32.Build.0 = Debug|Win32
+		{4AD69D67-BC7B-33E8-B08C-E25C961812C2}.Release|Win32.ActiveCfg = Release|Win32
+		{4AD69D67-BC7B-33E8-B08C-E25C961812C2}.Release|Win32.Build.0 = Release|Win32
+		{4AD69D67-BC7B-33E8-B08C-E25C961812C2}.static-debug|Win32.ActiveCfg = static-debug|Win32
+		{4AD69D67-BC7B-33E8-B08C-E25C961812C2}.static-debug|Win32.Build.0 = static-debug|Win32
+		{4AD69D67-BC7B-33E8-B08C-E25C961812C2}.static-release|Win32.ActiveCfg = static-release|Win32
+		{4AD69D67-BC7B-33E8-B08C-E25C961812C2}.static-release|Win32.Build.0 = static-release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

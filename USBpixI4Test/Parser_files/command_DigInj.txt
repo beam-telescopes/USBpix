@@ -1,0 +1,17 @@
+#command
+comm,confmode
+task,clear_chip
+comm,wrRegister,Colpr_Mode,3
+comm,wrRegister,Colpr_addr,0
+task,enable_pixel
+comm,wrRegister,TrigCnt,15
+comm,wrRegister,ErrMask0,65535
+comm,wrRegister,ErrMask1,65535
+comm,wrRegister,DIGHITIN_SEL,1
+comm,wrRegister,Trig_Lat,200
+comm,wrRegister,CMDcntWidth,8
+comm,wrRegister,CMDcntDelay,0
+comm,wrRegister,CMDcnt13,0
+comm,clearSRAM
+sleep,500
+comm,runmode

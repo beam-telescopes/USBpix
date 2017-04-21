@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<dpInst>
+    <language code="0x0409">
+        <dpinstTitle>S3 Multi IO System Driver Installation</dpinstTitle>
+        <welcomeTitle>Welcome to the S3 Multi IO System Driver Installation!</welcomeTitle>
+        <welcomeIntro>This wizard will walk you through installing/updating the drivers for the S3 Multi IO System.</welcomeIntro>
+    </language>
+    <language code="0x0407">
+        <dpinstTitle>S3 Multi IO System Driver Installation</dpinstTitle>
+        <welcomeTitle>Welcome to the S3 Multi IO System Driver Installation!</welcomeTitle>
+        <welcomeIntro>This wizard will walk you through installing/updating the drivers for the S3 Multi IO System.</welcomeIntro>
+    </language>
+    <icon>silab.ico</icon>
+    <legacyMode>ON</legacyMode>
+</dpInst>
+

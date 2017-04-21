@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{18623421-0C0B-4706-B67A-A48784023C21}</ProjectGuid>
+    <RootNamespace>USBpixI4dll</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.60610.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental />
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(DAQ_BASE)\inc;$(QT5DIR)\include\;$(QT5DIR)\include\QtGui;$(QT5DIR)\include\QtCore;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;__VISUALC__;_CRT_SECURE_NO_WARNINGS;PIX_DLL_EXPORT;QT_DLL;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalOptions>-w44251 -w44800 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(DAQ_BASE)\lib\SiLibUSBd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName)d.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetFileName) $(DAQ_BASE)\bin
+copy $(OutDir)$(ProjectName)d.dll $(windir)\system32\
+copy $(OutDir)$(ProjectName)d.lib  $(DAQ_BASE)\lib
+
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(DAQ_BASE)\inc;$(QTDIR)\include\QtGui;$(QTDIR)\include\;$(QTDIR)\include\QtCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;USBPIXI4DLL_EXPORTS;__VISUALC__;_CRT_SECURE_NO_WARNINGS;PIX_DLL_EXPORT;QT_DLL;QT_GUI_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalOptions>-w44251 -w44800 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(DAQ_BASE)\lib\SiLibUSB.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetFileName) $(DAQ_BASE)\bin
+copy $(OutDir)$(ProjectName).lib  $(DAQ_BASE)\lib
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="CDataFile.cpp" />
+    <ClCompile Include="Clusterizer.cpp" />
+    <ClCompile Include="ConfDataArray.cpp" />
+    <ClCompile Include="ConfigFEMemory.cpp" />
+    <ClCompile Include="ConfigRegister.cpp" />
+    <ClCompile Include="MemoryArbiterStatusRegister.cpp" />
+    <ClCompile Include="RawDataHistogrammer.cpp" />
+    <ClCompile Include="RawFileWriter.cpp" />
+    <ClCompile Include="ReadoutStatusRegister.cpp" />
+    <ClCompile Include="Records.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="USBpix.cpp" />
+    <ClCompile Include="USBPixI4DCS.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="CDataFile.h" />
+    <CustomBuild Include="Clusterizer.h" />
+    <CustomBuild Include="ConfDataArray.h" />
+    <CustomBuild Include="ConfigFEMemory.h" />
+    <CustomBuild Include="ConfigRegister.h" />
+    <CustomBuild Include="DataStruct.h" />
+    <CustomBuild Include="DataStructDefines.h" />
+    <CustomBuild Include="debug.h" />
+    <CustomBuild Include="defines.h" />
+    <CustomBuild Include="..\inc\HL_GPAC.h" />
+    <CustomBuild Include="MemoryArbiterStatusRegister.h">
+      <FileType>Document</FileType>
+    </CustomBuild>
+    <CustomBuild Include="ReadoutStatusRegister.h">
+      <FileType>Document</FileType>
+    </CustomBuild>
+    <CustomBuild Include="..\inc\SiLibUSB.h" />
+    <CustomBuild Include="stdafx.h" />
+    <CustomBuild Include="USBpix.h" />
+    <CustomBuild Include="USBPixI4DCS.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SiLibUSB\SiLibUSB.vcxproj">
+      <Project>{ed2a9e76-8ea1-4535-b9aa-468a56ece48f}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="RawDataHistogrammer.h">
+      <FileType>Document</FileType>
+    </CustomBuild>
+    <CustomBuild Include="RawFileWriter.h">
+      <FileType>Document</FileType>
+    </CustomBuild>
+    <CustomBuild Include="Records.h">
+      <FileType>Document</FileType>
+    </CustomBuild>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
