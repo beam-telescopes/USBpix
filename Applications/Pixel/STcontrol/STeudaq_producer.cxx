@@ -1,4 +1,3 @@
-#include <eudaq/Timer.hh>
 #include <eudaq/RawDataEvent.hh>
 #include <eudaq/Logger.hh>
 
@@ -14,6 +13,10 @@
 #include <QThread>
 
 #include <iterator>
+
+#include <ratio>
+#include <chrono>
+
 
 using eudaq::to_string;
 
@@ -53,11 +56,13 @@ void EUDAQProducer::ScanStatus(int boardid, bool SRAMFullSignal, int /*SRAMFilli
 }
 
 //This gets called whenever the DAQ is configured
-void EUDAQProducer::OnConfigure(const eudaq::Configuration & config) 
+void EUDAQProducer::DoConfigure() 
 {
-	if(STEP_DEBUG) std::cout << "EUDAQ-Producer OnConfigure thread-ID: " << QThread::currentThreadId() << std::endl;
+  auto conf = GetConfiguration();
+  const eudaq::Configuration & config = *(conf.get());
+  if(STEP_DEBUG) std::cout << "EUDAQ-Producer OnConfigure thread-ID: " << QThread::currentThreadId() << std::endl;
      
-	SetStatus(eudaq::Status::LVL_BUSY, "Configuring");
+	// SetStatus(eudaq::Status::LVL_BUSY, "Configuring");
 
 	m_config = config;
 	configuration = 0;
@@ -85,7 +90,7 @@ void EUDAQProducer::OnConfigure(const eudaq::Configuration & config)
 		if(chipsOnBoard.size() == 0)
 		{
 			EUDAQ_ERROR((QString("Invalid module configuration for board  ") + scan_options.boards[i]).toStdString().c_str());
-			SetStatus(eudaq::Status::LVL_ERROR, "Error during initialisation");
+			// SetStatus(eudaq::Status::LVL_ERROR, "Error during initialisation");
 			return;
 		}
 
@@ -149,7 +154,7 @@ void EUDAQProducer::OnConfigure(const eudaq::Configuration & config)
 	if(scan_options.SkipConfiguration) 
 	{
 		//No configuration requested
-		SetStatus(eudaq::Status::LVL_OK, "Configured (" + m_config.Name() + ")");
+		// SetStatus(eudaq::Status::LVL_OK, "Configured (" + m_config.Name() + ")");
 		return;
 	}
 
@@ -211,8 +216,9 @@ void EUDAQProducer::OnConfigure(const eudaq::Configuration & config)
 
 		if(send_error)
 		{
-			SetStatus(eudaq::Status::LVL_ERROR, "Error during initialisation");
-			return;
+			// SetStatus(eudaq::Status::LVL_ERROR, "Error during initialisation");
+		  EUDAQ_ERROR("Error during initialisation");
+		  return;
 		}
 	}
 
@@ -243,11 +249,13 @@ void EUDAQProducer::OnConfigure(const eudaq::Configuration & config)
 	if( configuration == 1 )
 	{
 		// set the status that will be displayed in the Run Control.
-		SetStatus(eudaq::Status::LVL_OK, "Configured (" + m_config.Name() + ")");
+		// SetStatus(eudaq::Status::LVL_OK, "Configured (" + m_config.Name() + ")");
+	  ;
 	}
 	else
 	{
-		SetStatus(eudaq::Status::LVL_ERROR, "Error while initializing PixControllers");
+		// SetStatus(eudaq::Status::LVL_ERROR, "Error while initializing PixControllers");
+	  EUDAQ_ERROR("Error while initializing PixControllers");
 	}
 } 
 
@@ -343,10 +351,15 @@ void EUDAQProducer::configured(bool success, QVector<int> p_board_ids, QVector<i
 }
   
 //This gets called whenever a new run is started, it receives the new run number as a parameter
-void EUDAQProducer::OnStartRun(unsigned param)
+void EUDAQProducer::DoStartRun()
 {
-	//OnPrepareRun(param);
-
+  uint32_t param = GetRunNumber();
+  
+  //on preparing ?
+  m_STeudaq.prepareRun( param);
+  eudaq::mSleep(4000);
+  //
+	
 	if(STEP_DEBUG)  std::cout << "EUDAQ-Producer OnStartRun - Thread-ID: " << QThread::currentThreadId() << std::endl;
 	
 	abort_run = false;
@@ -417,9 +430,12 @@ void EUDAQProducer::beganScanning()
 
 	//It must send a BORE to the Data Collector
 	if(STEP_DEBUG) std::cout << "sending BORE for event type " << EUDAQProducer::EVENT_TYPE << std::endl;
-	
-	eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE(EUDAQProducer::EVENT_TYPE, m_run));
 
+	// eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE(EUDAQProducer::EVENT_TYPE, m_run));
+	auto ev = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
+	ev->SetBORE();
+	auto &bore = *(ev.get());
+	
 	//send boards
 	bore.SetTag("boards", eudaq::to_string(board_count)); //);
 
@@ -450,18 +466,18 @@ void EUDAQProducer::beganScanning()
 	bore.SetTag("first_sensor_id", scan_options.first_sensor_id);
 	bore.SetTag("tot_mode", tot_mode);
 
-	SendEvent(bore);
+	SendEvent(std::move(ev));
 	
 	if(STEP_DEBUG) std::cout << "bore sent" << std::endl;
 
 	// At the end, set the status that will be displayed in the Run Control.
-    	SetStatus(eudaq::Status::LVL_BUSY, "Running");
+    	// SetStatus(eudaq::Status::LVL_BUSY, "Running");
 
 	if(STEP_DEBUG) std::cout << "Set Status to running" << std::endl;
 }
 
 //This gets called whenever a run is stopped
-void EUDAQProducer::OnStopRun()
+void EUDAQProducer::DoStopRun()
 {
 	if(STEP_DEBUG) std::cout << "Stopping Run" << std::endl;
 
@@ -476,16 +492,21 @@ void EUDAQProducer::OnStopRun()
 
 	scanning = false;
 
-	SetStatus(eudaq::Status::LVL_BUSY, "Sending Data");
+	// SetStatus(eudaq::Status::LVL_BUSY, "Sending Data");
 	m_STeudaq.stopScan();
 
 	// wait for STcontrol to finish the scan
 	// has to be done in a waiting loop, because after exiting this function
 	// eudaq will not update the status any more
 	run_finished = false;
-	eudaq::Timer t;
-	while ((!run_finished || data_pending_running || !all_events_recieved) && t.Seconds()<120) 
+	// eudaq::Timer t;
+	auto tp_start = std::chrono::steady_clock::now();
+	while ((!run_finished || data_pending_running || !all_events_recieved)) 
 	{
+	  auto tp = std::chrono::steady_clock::now();
+	  std::chrono::nanoseconds milsec(tp - tp_start);
+	  if(milsec.count()>120000000000)
+	    break;
 	  // we're running this in a separate thread, so shouldn't be necessary
 	  //		m_app->processEvents();
 	}
@@ -501,9 +522,13 @@ void EUDAQProducer::OnStopRun()
 
 	// Send an EORE after all the real events have been sent
 	if(STEP_DEBUG) std::cout << "sending EORE for event type " << EUDAQProducer::EVENT_TYPE << std::endl;
-	SendEvent(eudaq::RawDataEvent::EORE(EUDAQProducer::EVENT_TYPE, m_run, m_ev));
 
-	SetStatus(eudaq::Status::LVL_OK, "Stopped");
+	auto ev = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
+	ev->SetEORE();
+	SendEvent(std::move(ev));
+	// SendEvent(eudaq::RawDataEvent::EORE(EUDAQProducer::EVENT_TYPE, m_run, m_ev));
+
+	// SetStatus(eudaq::Status::LVL_OK, "Stopped");
 	if(STEP_DEBUG) std::cout << "Status: stopped!" << std::endl;
 }
 
@@ -512,14 +537,18 @@ void EUDAQProducer::AbortRun()
 	if(STEP_DEBUG) std::cout << "Aborting Run" << std::endl;
 	scanning = false;
 
-	SetStatus(eudaq::Status::LVL_BUSY, "Sending Data");
+	// SetStatus(eudaq::Status::LVL_BUSY, "Sending Data");
 	m_STeudaq.stopScan();
 
 	// Send an EORE after all the real events have been sent
 	if(STEP_DEBUG) std::cout << "sending EORE for event type " << EUDAQProducer::EVENT_TYPE << std::endl;
-	SendEvent(eudaq::RawDataEvent::EORE(EUDAQProducer::EVENT_TYPE, m_run, m_ev));
+
+	auto ev = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
+	ev->SetEORE();
+	SendEvent(std::move(ev));
+	// SendEvent(eudaq::RawDataEvent::EORE(EUDAQProducer::EVENT_TYPE, m_run, m_ev));
 	
-	SetStatus(eudaq::Status::LVL_ERROR, "Aborted");
+	// SetStatus(eudaq::Status::LVL_ERROR, "Aborted");
  }
 
 void EUDAQProducer::scanFinished()
@@ -530,7 +559,7 @@ void EUDAQProducer::scanFinished()
 }
 
 // This gets called when the Run Control is terminating, we should also exit.
-void EUDAQProducer::OnTerminate()
+void EUDAQProducer::DoTerminate()
 {
 	scanning = false;
 	
@@ -539,33 +568,9 @@ void EUDAQProducer::OnTerminate()
 	m_STeudaq.ProducerDisconnected();
 }
 
-void EUDAQProducer::OnPrepareRun(unsigned runnumber) 
-{
-	if(STEP_DEBUG) std::cout << "Preparing Run " << runnumber << std::endl;
-
-	// Set ScanType to TESTBEAM_EUDAQ
-	m_STeudaq.prepareRun( runnumber );
-	eudaq::mSleep(4000);
-}
-
-void EUDAQProducer::OnUnrecognised(const std::string & cmd, const std::string & param) 
-{
-	if(STEP_DEBUG)
-	{
-		 std::cout << "Unrecognised: (" << cmd.length() << ") " << cmd;
-
-		if(param.length()) 
-		{
-			std::cout << " (" << param << ")" << std::endl;
-		}
-	}
-
-	SetStatus(eudaq::Status::LVL_WARN, "Unrecognised command");
-}
-
 void EUDAQProducer::errorReceived( std::string msg )
 {
-	SetStatus(eudaq::Status::LVL_ERROR, "See Log");
+	// SetStatus(eudaq::Status::LVL_ERROR, "See Log");
 	EUDAQ_ERROR(msg);
 }
 
@@ -818,8 +823,10 @@ void EUDAQProducer::sendEvents(bool endrun)
 		if(STEP_DEBUG && triggerNumber%1000 == 0 ) std::cout << "Sending Event " << triggerNumber << std::endl;
 
 		//Create a RawDataEvent to contain the event data to be sent
-		eudaq::RawDataEvent ev (EUDAQProducer::EVENT_TYPE, m_run, m_ev);
-
+		// eudaq::RawDataEvent ev (EUDAQProducer::EVENT_TYPE, m_run, m_ev);
+		auto evpt = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
+		auto &ev = *(evpt.get());
+		
 		//Now search all chips for events with this trigger number
 		for (size_t chip = 0; chip < boardChips.size(); chip++) 
 		{
@@ -937,7 +944,7 @@ void EUDAQProducer::sendEvents(bool endrun)
 		
 		try 
 		{
-			SendEvent(ev);
+		  SendEvent(std::move(evpt));
 		} 
 		catch (...)
 		{
