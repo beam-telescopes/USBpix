@@ -146,7 +146,6 @@ export DAQ_SW_DIR=.
 export BOOSTINC=.
 export BOOSTLIB=.
 export TDAQ_FLAG=-DNOTDAQ
-export GENCCFLAG="-mcmodel=large"
 if [ "$tdaq" = "yes" ]; then
   export TDAQ_INST=/daq/slc6
   if [ ! -d "${TDAQ_INST}" -a -d /afs/cern.ch/atlas/project/tdaq/inst ]; then 
