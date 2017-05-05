@@ -195,29 +195,45 @@ class DllExport PixelRegisterDecoder : public Histogrammer {
 		uint16_t address = 0xFFFF;
 };
 
+/* class DllExport RawFileWriter : public Histogrammer { */
+/* 	public: */
+/* 		RawFileWriter(const std::vector<int> &_channels, const std::string &_file) : channels(_channels), o(_file) { } */
+/* 		~RawFileWriter(void) { flush(); } */
+
+/* 		void dataHeader(int bcid, int lv1id, int flag); */
+/* 		void addressRecord(int type, int address); */
+/* 		void valueRecord(int value); */
+/* 		void serviceRecord(int code, int count); */
+/* 		void dataRecord(unsigned column, unsigned row, unsigned tot1, unsigned tot2); */
+
+/* 		void trigger(uint32_t trigger_number); */
+/* 		void rawData(uint32_t data); */
+
+/* 	protected: */
+/* 		void flush(void); */
+
+/* 		int current_channel; */
+/* 		std::array<std::ostringstream, 8> buffers; */
+/* 		std::vector<int> channels; */
+/* 		std::ofstream o; */
+
+/* 		std::size_t count = 0; */
+/* }; */
+
 class DllExport RawFileWriter : public Histogrammer {
 	public:
-		RawFileWriter(const std::vector<int> &_channels, const std::string &_file) : channels(_channels), o(_file) { }
+		RawFileWriter(const std::vector<int> &_channels, const std::string &_file){ }
 		~RawFileWriter(void) { flush(); }
 
-		void dataHeader(int bcid, int lv1id, int flag);
-		void addressRecord(int type, int address);
-		void valueRecord(int value);
-		void serviceRecord(int code, int count);
-		void dataRecord(unsigned column, unsigned row, unsigned tot1, unsigned tot2);
+		void dataHeader(int bcid, int lv1id, int flag){};
+		void addressRecord(int type, int address){};
+		void valueRecord(int value){};
+		void serviceRecord(int code, int count){};
+		void dataRecord(unsigned column, unsigned row, unsigned tot1, unsigned tot2){};
 
-		void trigger(uint32_t trigger_number);
-		void rawData(uint32_t data);
-
-	protected:
-		void flush(void);
-
-		int current_channel;
-		std::array<std::ostringstream, 8> buffers;
-		std::vector<int> channels;
-		std::ofstream o;
-
-		std::size_t count = 0;
+		void trigger(uint32_t trigger_number){};
+		void rawData(uint32_t data){};
+		void flush(void){};
 };
 
 #endif

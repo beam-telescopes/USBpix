@@ -101,60 +101,60 @@ const std::vector<std::pair<uint16_t, uint16_t>> &PixelRegisterDecoder::getRegis
 	return registers;
 }
 
-void RawFileWriter::dataHeader(int bcid, int lv1id, int flag) {
-	buffers[current_channel-1] << "DH " << flag << ' ' << lv1id << ' ' << bcid << std::endl;
-}
+// void RawFileWriter::dataHeader(int bcid, int lv1id, int flag) {
+// 	buffers[current_channel-1] << "DH " << flag << ' ' << lv1id << ' ' << bcid << std::endl;
+// }
 
-void RawFileWriter::addressRecord(int type, int address) {
-	buffers[current_channel-1] << "AR " << type << ' ' << address << std::endl;
-}
+// void RawFileWriter::addressRecord(int type, int address) {
+// 	buffers[current_channel-1] << "AR " << type << ' ' << address << std::endl;
+// }
 
-void RawFileWriter::valueRecord(int value) {
-	buffers[current_channel-1] << "VR " << value << std::endl;
-}
+// void RawFileWriter::valueRecord(int value) {
+// 	buffers[current_channel-1] << "VR " << value << std::endl;
+// }
 
-void RawFileWriter::serviceRecord(int code, int count) {
-	buffers[current_channel-1] << "SR " << code << ' ' << count << std::endl;
-}
+// void RawFileWriter::serviceRecord(int code, int count) {
+// 	buffers[current_channel-1] << "SR " << code << ' ' << count << std::endl;
+// }
 
-void RawFileWriter::dataRecord(unsigned column, unsigned row, unsigned tot1, unsigned tot2) {
-	buffers[current_channel-1] << "DR " << (column+1) << ' ' << (row+1) << ' ' << tot1 << ' ' << tot2 << std::endl;
-}
+// void RawFileWriter::dataRecord(unsigned column, unsigned row, unsigned tot1, unsigned tot2) {
+// 	buffers[current_channel-1] << "DR " << (column+1) << ' ' << (row+1) << ' ' << tot1 << ' ' << tot2 << std::endl;
+// }
 
-void RawFileWriter::trigger(uint32_t trigger_number) {
-	for(int c : channels) {
-		buffers[c-1] << "TD 0 0 " << trigger_number << std::endl;
-	}
-}
+// void RawFileWriter::trigger(uint32_t trigger_number) {
+// 	for(int c : channels) {
+// 		buffers[c-1] << "TD 0 0 " << trigger_number << std::endl;
+// 	}
+// }
 
-void RawFileWriter::rawData(uint32_t data) {
-	if(count > 0x100000) { // flush after 4MiB of raw data
-		count = 0;
-		flush();
-	}
-	count++;
+// void RawFileWriter::rawData(uint32_t data) {
+// 	if(count > 0x100000) { // flush after 4MiB of raw data
+// 		count = 0;
+// 		flush();
+// 	}
+// 	count++;
 
-	if(data>>31 == 0) { // FE data
-		uint8_t channel = selectBits(data, 24, 8);
-		if(channel > 0 && channel <= 8) {
-			current_channel = channel;
-			buffers[current_channel-1] << "0x" << std::hex << std::setw(6) << std::setfill('0') << (data & 0x00FFFFFF) << std::endl << std::dec;
-		}
-	} else { // Trigger data
-		for(int c : channels) {
-			buffers[c-1] << "0x" << std::hex << std::setw(8) << std::setfill('0') << (data & 0x7FFFFFFF) << std::endl << std::dec;
-		}
-	}
-}
+// 	if(data>>31 == 0) { // FE data
+// 		uint8_t channel = selectBits(data, 24, 8);
+// 		if(channel > 0 && channel <= 8) {
+// 			current_channel = channel;
+// 			buffers[current_channel-1] << "0x" << std::hex << std::setw(6) << std::setfill('0') << (data & 0x00FFFFFF) << std::endl << std::dec;
+// 		}
+// 	} else { // Trigger data
+// 		for(int c : channels) {
+// 			buffers[c-1] << "0x" << std::hex << std::setw(8) << std::setfill('0') << (data & 0x7FFFFFFF) << std::endl << std::dec;
+// 		}
+// 	}
+// }
 
-void RawFileWriter::flush(void) {
-	for(int c : channels) {
-	  //std::cout << "CHANNEL " << c << std::endl; 
-		o << "CHANNEL " << c << std::endl;
-		o << buffers[c-1].str();
-		buffers[c-1].str("");
-	}
-}
+// void RawFileWriter::flush(void) {
+// 	for(int c : channels) {
+// 	  //std::cout << "CHANNEL " << c << std::endl; 
+// 		o << "CHANNEL " << c << std::endl;
+// 		o << buffers[c-1].str();
+// 		buffers[c-1].str("");
+// 	}
+// }
 
 template class Histogrammer1D<4096>; // explicit instantiation to make VC linker happy
 template class Histogrammer1D<8192>;
