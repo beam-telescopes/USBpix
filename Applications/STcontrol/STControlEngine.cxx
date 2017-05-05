@@ -219,7 +219,7 @@ STControlEngine::STControlEngine( QApplication *app, STCLogContainer& log_in, QO
 STControlEngine::~STControlEngine(){
 
   // close remaining SourceMonitors
-  if(m_proc->processId()!=0){
+  if(m_proc->pid()!=0){
     m_proc->kill();
     m_proc->waitForFinished();
   }
@@ -2055,7 +2055,7 @@ int STControlEngine::pixScan(pixScanRunOptions scanOpts, bool start_monitor){
 
   if(scanOpts.scanConfig==0) return -1; // can't work without config
      
-  if(m_proc->processId()!=0){
+  if(m_proc->pid()!=0){
     m_proc->kill(); // There can be only one!
     m_proc->waitForFinished();
   }
