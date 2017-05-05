@@ -108,16 +108,15 @@ contains(DEFINES, WITHEUDAQ) {
   SOURCES += STeudaq_producer_I4.cxx
   SOURCES += STeudaq_producer_I3.cxx
   
-  INCLUDEPATH += $(EUDAQ)/main/include
+  INCLUDEPATH += $(EUDAQ)/main/lib/core/include
 
   unix {
     DEFINES += EUDAQ_PLATFORM=PF_LINUX
-    LIBS += -L$(EUDAQ)/lib -lEUDAQ
+    LIBS += -L$(EUDAQ)/lib -leudaq_core
   }
 
   win32 {
-    INCLUDEPATH += $(EUDAQ)/extern/pthread-win32/include
-    LIBS        += EUDAQ.lib
+    LIBS        += libeudaq_core.lib
   }
 }
 

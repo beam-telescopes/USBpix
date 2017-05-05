@@ -1,5 +1,4 @@
-#include <eudaq/Timer.hh>
-#include <eudaq/RawDataEvent.hh>
+#include <eudaq/RawEvent.hh>
 #include <eudaq/Logger.hh>
 
 #include "STeudaq_producer.h"
@@ -146,8 +145,8 @@ void EUDAQProducer::sendEventsI3(bool endrun)
     
     if (endrun && STEP_DEBUG) std::cout << "Sending Event " << triggerNumber << std::endl;
     
-    // Create a RawDataEvent to contain the event data to be sent
-    eudaq::RawDataEvent ev (EUDAQProducer::EVENT_TYPE, m_run, m_ev);
+    auto evpt = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
+    auto &ev = *(evpt.get());    
     
     // Now search all boards for events with this trigger number
     // and check for data consistency
@@ -225,7 +224,7 @@ void EUDAQProducer::sendEventsI3(bool endrun)
     }
     
     try {
-      SendEvent(ev);
+      SendEvent(std::move(evpt));
     } catch (...){
       if(STEP_DEBUG) std::cout << "ERROR: unable to send event " << m_ev << std::endl;
     }

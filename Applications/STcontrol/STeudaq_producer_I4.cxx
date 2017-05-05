@@ -1,5 +1,4 @@
-#include <eudaq/Timer.hh>
-#include <eudaq/RawDataEvent.hh>
+#include <eudaq/RawEvent.hh>
 #include <eudaq/Logger.hh>
 
 #include "STeudaq_producer.h"
@@ -203,9 +202,9 @@ void EUDAQProducer::sendEventsI4(bool endrun)
       
       if(STEP_DEBUG && triggerNumber%100 == 0 ) std::cout << "Sending Event " << triggerNumber <<  "... ";
       
-      //Create a RawDataEvent to contain the event data to be sent
-      eudaq::RawDataEvent ev (EUDAQProducer::EVENT_TYPE, m_run, m_ev);
-      
+      auto evpt = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
+      auto &ev = *(evpt.get());    
+
       //Now search all chips for events with this trigger number
       for (size_t chip = 0; chip < boardChips.size(); chip++) 
 	{
@@ -324,7 +323,7 @@ void EUDAQProducer::sendEventsI4(bool endrun)
       
       try 
 	{
-	  SendEvent(ev);
+	  SendEvent(std::move(evpt));
 	} 
       catch (...)
 	{
