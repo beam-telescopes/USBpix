@@ -1,0 +1,4 @@
+move /opt/eudaq/lib/libEUAQ.so /opt/USBpix/lib
+export EUDAQ=/opt/eudaq
+source setup.sh
+make

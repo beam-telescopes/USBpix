@@ -393,6 +393,8 @@ void EUDAQProducer::OnStartRun(unsigned param)
 	m_STeudaq.startCurrentScanSlot(QString(QString("Run ") + QString::number(m_run)), raw_filename);
 
 	readout_counter = 0;
+	SetConnectionState(eudaq::ConnectionState::STATE_RUNNING, "Started");
+
 }
 
 void EUDAQProducer::beganScanning() 
