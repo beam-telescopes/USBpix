@@ -60,7 +60,7 @@ export DAQ_BASE="$(pwd)"
 origparams="$*"
 #
 # default: no TDAQ, no EUDAQ, GPIB identified automatically
-eudaq=yes
+eudaq=auto
 tdaq=no
 gpib=auto
 spec=default
@@ -357,7 +357,7 @@ echo "USBPIX3I4    = ${USBPIX3I4}"
 if [[ "$run_qmake" == "1" ]]
 then
   rm Makefile
-  qmake-qt5 -r
+  qmake -r
 else
   echo "Skipping qmake run. Updates on .pro files and switches to this script may be ignored, but your environment is up to date."
 fi
