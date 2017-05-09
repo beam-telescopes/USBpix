@@ -412,7 +412,7 @@ void EUDAQProducer::beganScanning()
 	auto ev = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
 	ev->SetBORE();
 	auto &bore = *(ev.get());
-	eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE(EUDAQProducer::EVENT_TYPE, m_run));
+	// eudaq::RawDataEvent bore(eudaq::RawDataEvent::BORE(EUDAQProducer::EVENT_TYPE, m_run));
 	//send boards
 	bore.SetTag("boards", eudaq::to_string(board_count)); //);
 
@@ -461,13 +461,16 @@ void EUDAQProducer::DoStopRun()
 	// has to be done in a waiting loop, because after exiting this function
 	// eudaq will not update the status any more
 	run_finished = false;
-	eudaq::Timer t;
 	auto tp_start = std::chrono::steady_clock::now();
 	while ((!run_finished || data_pending_running || !all_events_recieved)){
 	  auto tp = std::chrono::steady_clock::now();
 	  std::chrono::nanoseconds milsec(tp - tp_start);
-	  if(milsec.count()>120000000000)
+	  std::cout<<">>>>>>{run_finished : data_pending_running : all_events_recieved}"
+		   << run_finished << data_pending_running << all_events_recieved << std::endl;
+	  if(milsec.count()>10000000000){
+	    std::cout<<">>>>>>Timeout 10 seconds\n";
 	    break;
+	  }
 	}
 
 	//send remaining events to run control

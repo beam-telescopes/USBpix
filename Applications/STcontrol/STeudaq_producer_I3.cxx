@@ -37,7 +37,7 @@ void EUDAQProducer::dataPendingI3(std::vector<unsigned int *>* data_vec, int boa
   unsigned int *data = data_vec->at(0);
   
   if(STEP_DEBUG) std::cout << "Searching for last trigger" << std::endl;
-  eudaq::Timer t;
+  // eudaq::Timer t;
   // search new data for last trigger number:
   int t_trigger_number=0;
   int multiplier=0;
@@ -76,7 +76,7 @@ void EUDAQProducer::dataPendingI3(std::vector<unsigned int *>* data_vec, int boa
     return;
   }
 
-  if(STEP_DEBUG) std::cout << "Searching for last trigger ended after" << t.Seconds() << std::endl;
+  // if(STEP_DEBUG) std::cout << "Searching for last trigger ended after" << t.Seconds() << std::endl;
   
   // check for remaining events:
   if ((*std::max_element (recieved_trigger.begin(), recieved_trigger.end())) == (*std::min_element (recieved_trigger.begin(), recieved_trigger.end()))) {
@@ -198,6 +198,7 @@ void EUDAQProducer::sendEventsI3(bool endrun)
 	      one_event.clear();
 	      one_event.push_back(encodeTriggerNumber(triggerNumber));
 	      ev.AddBlock(cur_BoardIndex, one_event);
+	      ev.SetTriggerN(triggerNumber);
 	      proceedLoop=false;
 	    } else {
 	      // Trigger Number fits
@@ -210,6 +211,7 @@ void EUDAQProducer::sendEventsI3(bool endrun)
 	      
 	      // add data (hit, EoE words and Trigger word to event)
 	      ev.AddBlock(cur_BoardIndex, one_event);
+	      ev.SetTriggerN(triggerNumber);
 	      proceedLoop=false;
 	    }
 	  }
@@ -218,6 +220,7 @@ void EUDAQProducer::sendEventsI3(bool endrun)
 	  one_event.clear();
 	  one_event.push_back(encodeTriggerNumber(triggerNumber));
 	  ev.AddBlock(cur_BoardIndex, one_event);
+	  ev.SetTriggerN(triggerNumber);
 	  proceedLoop=false;
 	}
       }

@@ -284,6 +284,7 @@ void EUDAQProducer::sendEventsI4(bool endrun)
 			  one_event.push_back(encodeTriggerNumber(triggerNumber, true));
 			  one_event.push_back(encodeTriggerNumber(triggerNumber, false));
 			  ev.AddBlock(chip, one_event);
+			  ev.SetTriggerN(triggerCounter);
 			  proceedLoop = false;
 			} 
 		      else
@@ -303,6 +304,7 @@ void EUDAQProducer::sendEventsI4(bool endrun)
 			  if(STEP_DEBUG && triggerNumber%100 == 0 ) std::cout << "Success!" << std::endl;
 			  //add data (hit, EoE words and Trigger word to event)
 			  ev.AddBlock(chip, one_event);
+			  ev.SetTriggerN(triggerNumber);
 			  proceedLoop = false;
 			}
 		    }
@@ -316,6 +318,7 @@ void EUDAQProducer::sendEventsI4(bool endrun)
 		  one_event.push_back(encodeTriggerNumber(triggerNumber, true));
 		  one_event.push_back(encodeTriggerNumber(triggerNumber, false));
 		  ev.AddBlock(chip, one_event);
+		  ev.SetTriggerN(triggerNumber);
 		  proceedLoop=false;
 		}
 	    }
