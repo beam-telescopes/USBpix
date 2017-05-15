@@ -53,11 +53,12 @@ class EUDAQProducer : public eudaq::Producer {
  EUDAQProducer(STEUDAQ& base, std::string prdname, std::string runctrl); 
 	~EUDAQProducer();
 	// EUDAQ methods, must be re-implemented here
+	void DoInitialise() override;
 	void DoConfigure() override;
 	void DoStartRun() override;
 	void DoStopRun() override;
 	void DoTerminate() override;
-	void DoReset() override {};
+	void DoReset() override;
 	// misc. helper functions for STcontrol communication
 	void dataPending(std::vector<unsigned int *>* data, int boardid);
 	void ScanStatus(int boardid, bool SRAMFullSignal, int SRAMFillingLevel, int TriggerRate);

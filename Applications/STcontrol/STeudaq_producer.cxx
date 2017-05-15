@@ -49,10 +49,21 @@ void EUDAQProducer::ScanStatus(int boardid, bool SRAMFullSignal, int /*SRAMFilli
 	}
 }
 
+
+void EUDAQProducer::DoReset(){
+  EUDAQ_THROW("the reset method is not implemented yet");
+};
+
+
 //This gets called whenever the DAQ is configured
-void EUDAQProducer::DoConfigure() 
+void EUDAQProducer::DoConfigure(){
+  //configuraton is moved to init
+}
+
+
+void EUDAQProducer::DoInitialise() 
 {
-    auto conf = GetConfiguration();
+    auto conf = GetInitConfiguration();
     const eudaq::Configuration & config = *(conf.get());
 	if(STEP_DEBUG) std::cout << "EUDAQ-Producer OnConfigure thread-ID: " << QThread::currentThreadId() << std::endl;
 	m_config = config;
