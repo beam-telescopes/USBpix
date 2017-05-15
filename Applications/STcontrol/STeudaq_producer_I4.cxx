@@ -285,6 +285,7 @@ void EUDAQProducer::sendEventsI4(bool endrun)
 			  one_event.push_back(encodeTriggerNumber(triggerNumber, false));
 			  ev.AddBlock(chip, one_event);
 			  ev.SetTriggerN(triggerCounter);
+			  ev.SetFlagBit(eudaq::Event::Flags::FLAG_FAKE);
 			  proceedLoop = false;
 			} 
 		      else
@@ -319,6 +320,7 @@ void EUDAQProducer::sendEventsI4(bool endrun)
 		  one_event.push_back(encodeTriggerNumber(triggerNumber, false));
 		  ev.AddBlock(chip, one_event);
 		  ev.SetTriggerN(triggerNumber);
+		  ev.SetFlagBit(eudaq::Event::Flags::FLAG_FAKE);
 		  proceedLoop=false;
 		}
 	    }

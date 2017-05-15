@@ -476,8 +476,8 @@ void EUDAQProducer::DoStopRun()
 	while ((!run_finished || data_pending_running || !all_events_recieved)){
 	  auto tp = std::chrono::steady_clock::now();
 	  std::chrono::nanoseconds milsec(tp - tp_start);
-	  std::cout<<">>>>>>{run_finished : data_pending_running : all_events_recieved}"
-		   << run_finished << data_pending_running << all_events_recieved << std::endl;
+	  // std::cout<<">>>>>>{run_finished : data_pending_running : all_events_recieved}"
+	  // 	   << run_finished << data_pending_running << all_events_recieved << std::endl;
 	  if(milsec.count()>10000000000){
 	    std::cout<<">>>>>>Timeout 10 seconds\n";
 	    break;
