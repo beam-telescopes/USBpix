@@ -1,4 +1,4 @@
-#include <eudaq/RawDataEvent.hh>
+#include <eudaq/RawEvent.hh>
 #include <eudaq/Logger.hh>
 
 #include "STeudaq_producer.h"
