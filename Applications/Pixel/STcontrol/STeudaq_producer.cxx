@@ -55,16 +55,17 @@ void EUDAQProducer::ScanStatus(int boardid, bool SRAMFullSignal, int /*SRAMFilli
 	}
 }
 
+void EUDAQProducer::DoReset(){
+    EUDAQ_THROW("the reset method is not implemented yet");
+}
+
 //This gets called whenever the DAQ is configured
-void EUDAQProducer::DoConfigure() 
+void EUDAQProducer::DoInitialise()
 {
-  auto conf = GetConfiguration();
+  auto conf = GetInitConfiguration();
   const eudaq::Configuration & config = *(conf.get());
   if(STEP_DEBUG) std::cout << "EUDAQ-Producer OnConfigure thread-ID: " << QThread::currentThreadId() << std::endl;
-     
-	// SetStatus(eudaq::Status::LVL_BUSY, "Configuring");
-
-	m_config = config;
+     	m_config = config;
 	configuration = 0;
 	tot_mode = 0;
 
@@ -90,7 +91,7 @@ void EUDAQProducer::DoConfigure()
 		if(chipsOnBoard.size() == 0)
 		{
 			EUDAQ_ERROR((QString("Invalid module configuration for board  ") + scan_options.boards[i]).toStdString().c_str());
-			// SetStatus(eudaq::Status::LVL_ERROR, "Error during initialisation");
+			EUDAQ_THROW("Error during initialisation");
 			return;
 		}
 
@@ -216,8 +217,7 @@ void EUDAQProducer::DoConfigure()
 
 		if(send_error)
 		{
-			// SetStatus(eudaq::Status::LVL_ERROR, "Error during initialisation");
-		  EUDAQ_ERROR("Error during initialisation");
+		  EUDAQ_THROW("Error during initialisation");
 		  return;
 		}
 	}
@@ -255,9 +255,13 @@ void EUDAQProducer::DoConfigure()
 	else
 	{
 		// SetStatus(eudaq::Status::LVL_ERROR, "Error while initializing PixControllers");
-	  EUDAQ_ERROR("Error while initializing PixControllers");
+	  EUDAQ_THROW("Error while initializing PixControllers");
 	}
 } 
+
+void EUDAQProducer::DoConfigure(){
+
+}
 
 void EUDAQProducer::configured(bool success)
 {
@@ -466,9 +470,8 @@ void EUDAQProducer::beganScanning()
 	bore.SetTag("first_sensor_id", scan_options.first_sensor_id);
 	bore.SetTag("tot_mode", tot_mode);
 
-	SendEvent(std::move(ev));
-	
-	if(STEP_DEBUG) std::cout << "bore sent" << std::endl;
+	bore->Print(std::cout);	
+	if(STEP_DEBUG) std::cout << "bore does not sent" << std::endl;
 
 	// At the end, set the status that will be displayed in the Run Control.
     	// SetStatus(eudaq::Status::LVL_BUSY, "Running");
@@ -525,7 +528,11 @@ void EUDAQProducer::DoStopRun()
 
 	auto ev = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
 	ev->SetEORE();
-	SendEvent(std::move(ev));
+	// SendEvent(std::move(ev));
+	ev->Print(std::cout);
+	if(STEP_DEBUG) std::cout << "eore does not sent" << std::endl;
+
+	
 	// SendEvent(eudaq::RawDataEvent::EORE(EUDAQProducer::EVENT_TYPE, m_run, m_ev));
 
 	// SetStatus(eudaq::Status::LVL_OK, "Stopped");
@@ -570,8 +577,8 @@ void EUDAQProducer::DoTerminate()
 
 void EUDAQProducer::errorReceived( std::string msg )
 {
-	// SetStatus(eudaq::Status::LVL_ERROR, "See Log");
 	EUDAQ_ERROR(msg);
+	EUDAQ_THROW("errorReceived, See Log");
 }
 
 void EUDAQProducer::dataPending(std::vector<unsigned int *>* data_vec, int boardid)
@@ -825,6 +832,7 @@ void EUDAQProducer::sendEvents(bool endrun)
 		//Create a RawDataEvent to contain the event data to be sent
 		// eudaq::RawDataEvent ev (EUDAQProducer::EVENT_TYPE, m_run, m_ev);
 		auto evpt = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
+		
 		auto &ev = *(evpt.get());
 		
 		//Now search all chips for events with this trigger number
@@ -906,6 +914,8 @@ void EUDAQProducer::sendEvents(bool endrun)
 							one_event.push_back(encodeTriggerNumber(triggerNumber, true));
 							one_event.push_back(encodeTriggerNumber(triggerNumber, false));
 							ev.AddBlock(chip, one_event);
+							ev.SetTriggerN(triggerCounter);
+							ev.SetFlagBit(eudaq::Event::Flags::FLAG_FAKE);
 							proceedLoop = false;
 						} 
 						else
@@ -924,6 +934,7 @@ void EUDAQProducer::sendEvents(bool endrun)
 			  
 							//add data (hit, EoE words and Trigger word to event)
 			  				ev.AddBlock(chip, one_event);
+							ev.SetTriggerN(triggerCounter);
 			  				proceedLoop = false;
 						}
 		      			}
@@ -936,6 +947,8 @@ void EUDAQProducer::sendEvents(bool endrun)
 					//Add two dummy trigger blocks (no data!)!
 					one_event.push_back(encodeTriggerNumber(triggerNumber, true));
 					one_event.push_back(encodeTriggerNumber(triggerNumber, false));
+					ev.SetTriggerN(triggerCounter);
+					ev.SetFlagBit(eudaq::Event::Flags::FLAG_FAKE);
 					ev.AddBlock(chip, one_event);
 					proceedLoop=false;
 				}
