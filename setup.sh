@@ -3,6 +3,14 @@
 
 BUILD_CONFIG_DIR=build-config
 
+echo "**************note for stcontrol_eudaq************"
+echo "*******export EUDAQ=/opt/eudaq_version/eudaq20 (installed path of eudaq 2)"
+echo "*******export QT5DIR=/usr (using the system qt5)"
+echo "*******source setup.sh -eudaq yes -tdaq no -gpib no -siusbman no  (!!!!source!!!!)"
+echo "*******make install"
+echo "*******copy libeudaq_core.so to lib?"
+echo "**************************************************"
+
 usbpix_print_help()
 {
   echo "usage: source setup.sh [-h] [-tdaq <yes|no>] [-eudaq <auto|yes|no>] [-gpib <auto|yes|no>] [-spec <default|linux-g++|...>] [-buildtype <release|debug|full-debug>]"

@@ -91,6 +91,7 @@ bool STEUDAQ::start(QString RunControlAddress)
 		
 	  if(STE_DEBUG) std::cout << "Starting producer... ";
 	  m_producer = new EUDAQProducer(*this, getProducerName(), rc_address.toStdString());
+	  m_producer->Connect();
 	  if(STE_DEBUG) std::cout << "producer started!" << std::endl;
 	  setState(connected);
 	  

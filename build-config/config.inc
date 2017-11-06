@@ -94,7 +94,7 @@ equals(BUILDTYPE, "debug") {
 
 ###
 # C++ version
-CONFIG += c++11
+CONFIG += c++14
 
 equals(BUILDTYPE, "debug-symbols") {
 	unix {
