@@ -4,6 +4,8 @@
 #include "STeudaq_producer.h"
 #include <defines.h>
 
+#define STEPDEBUG true
+
 unsigned int encodeTriggerNumber(unsigned int trigger_number, bool first) {
   // this trigger is good => save result!
   unsigned int word1, word2;
@@ -169,6 +171,9 @@ void EUDAQProducer::sendEventsI4(bool endrun)
   std::vector<unsigned int> one_event;
   bool isTriggerWord, proceedLoop;
   
+  uint32_t tg_h17 = 0;
+  uint16_t last_tg_l15 = 0;
+	
   //if endrun then send all the data that is currently stored
   if(endrun) 
     {
@@ -248,7 +253,15 @@ void EUDAQProducer::sendEventsI4(bool endrun)
 	      // if we got here, this should be trigger word, but let's check again
 	      if(isTriggerWord)
 		{
-		  
+		      uint16_t tg_l15 = 0x7fff & (TriggerWord[6] + (TriggerWord[7]<<8));
+		      if(tg_l15 < last_tg_l15 && last_tg_l15>0x6000 && tg_l15<0x2000){
+			tg_h17++;
+			EUDAQ_INFO("increase high 17bits of trigger number, last_tg_l15("+ std::to_string(last_tg_l15)+") tg_l15("+ std::to_string(tg_l15)+")" );
+		      }
+			uint32_t tg_n = (tg_h17<<15) + tg_l15;
+			//evup->SetTriggerN(tg_n);
+		        triggerNumber = tg_n;
+			last_tg_l15 = tg_l15;  
 		  //std::cout << "Found trigger word!" << std::endl;
 		  
 		  // get 2nd trigger word
