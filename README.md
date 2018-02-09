@@ -16,3 +16,17 @@ git clone https://[your CERN username]@gitlab.cern.ch/jgrosse/USBpix.git
 which delivers the master branch (trunk). For another branch, go to the cloned version and use
 
 git checkout [branch name]
+
+# Updates for EUDAQ2
+
+## Installation on Ubuntu 16
+
+After setting the specific environment variables
+```
+setup_installation_ubuntu16.sh
+```
+run the USBpix setup.sh
+
+## Development
+
+* Reading out the trigger words in STeudaq_producer_I4.cxx
