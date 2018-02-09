@@ -22,9 +22,9 @@ git checkout [branch name]
 ## Installation on Ubuntu 16
 
 After setting the specific environment variables
-'''
+```
 setup_installation_ubuntu16.sh
-'''
+```
 run the USBpix setup.sh
 
 ## Development
