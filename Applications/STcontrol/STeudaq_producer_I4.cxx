@@ -3,6 +3,7 @@
 
 #include "STeudaq_producer.h"
 #include <defines.h>
+#include <bitset>
 
 #define STEPDEBUG true
 
@@ -167,7 +168,7 @@ void EUDAQProducer::sendEventsI4(bool endrun)
   // Check if there are completed events
   int min_trigger_number;
   //int cur_BoardIndex;
-  unsigned int Word, TriggerWord2;
+  unsigned int TriggerWord, TriggerWord2;
   std::vector<unsigned int> one_event;
   bool isTriggerWord, proceedLoop;
   
@@ -230,30 +231,30 @@ void EUDAQProducer::sendEventsI4(bool endrun)
 		  //std::cout << "In !isTriggerWorld loop" << std::endl;
 		  
 		  //std::cout << "Front access!" << std::endl;
-		  Word = EventData[chip].front();
+		  TriggerWord = EventData[chip].front();
 		  //std::cout << "Front delete!" << std::endl;
 		  EventData[chip].pop_front();
 		  
 		  //std::cout << "trying TRIGGER_WORD_MACRO or DATA_HEADER_MACRO: "; 
 		  
-		  if(TRIGGER_WORD_MACRO(Word))
+		  if(TRIGGER_WORD_MACRO(TriggerWord))
 		    {
 		      //std::cout << "success!" << std::endl;
 		      isTriggerWord = true;
 		    }
-		  else if(DATA_HEADER_MACRO(Word))
+		  else if(DATA_HEADER_MACRO(TriggerWord))
 		    {
 		      //std::cout << "success!" << std::endl;
 		      dh_counter++;
 		    }
 		  
-		  one_event.push_back(Word);
+		  one_event.push_back(TriggerWord);
 		}
 	      
 	      // if we got here, this should be trigger word, but let's check again
 	      if(isTriggerWord)
 		{
-		      uint16_t tg_l15 = 0x7fff & (TriggerWord[6] + (TriggerWord[7]<<8));
+		      uint16_t tg_l15 = 0x7fff & (std::bitset<sizeof(unsigned int)> (TriggerWord)[6] + (std::bitset<sizeof(unsigned int)> (TriggerWord)[7]<<8));
 		      if(tg_l15 < last_tg_l15 && last_tg_l15>0x6000 && tg_l15<0x2000){
 			tg_h17++;
 			EUDAQ_INFO("increase high 17bits of trigger number, last_tg_l15("+ std::to_string(last_tg_l15)+") tg_l15("+ std::to_string(tg_l15)+")" );
@@ -270,20 +271,20 @@ void EUDAQProducer::sendEventsI4(bool endrun)
 		  one_event.push_back(TriggerWord2);
 		  
 		  //check if it is the desired trigger number
-		  if(( (int)(TRIGGER_NUMBER_MACRO2(Word, TriggerWord2))%TLU_TRIGGER_AMOUNT) < triggerNumber)
+		  if(( (int)(TRIGGER_NUMBER_MACRO2(TriggerWord, TriggerWord2))%TLU_TRIGGER_AMOUNT) < triggerNumber)
 		    {
-		      std::cout << "Failed! Expected trigger " << triggerNumber << ", found " << (int)(TRIGGER_NUMBER_MACRO2(Word, TriggerWord2))%TLU_TRIGGER_AMOUNT << std::endl;
+		      std::cout << "Failed! Expected trigger " << triggerNumber << ", found " << (int)(TRIGGER_NUMBER_MACRO2(TriggerWord, TriggerWord2))%TLU_TRIGGER_AMOUNT << std::endl;
 		      //Events should have already been send in an earlier loop, process loop once more
-		      EUDAQ_WARN(QString("Trigger Number to small. recieved: " + QString::number(TRIGGER_NUMBER_MACRO2(Word, TriggerWord2)) + 
+		      EUDAQ_WARN(QString("Trigger Number to small. recieved: " + QString::number(TRIGGER_NUMBER_MACRO2(TriggerWord, TriggerWord2)) + 
 					 " for board " + /*String::number(board_ids[cur_BoardIndex]) + */" - expected: " + QString::number(triggerNumber)).toStdString().c_str());
 		      
 		      one_event.clear();
 		    }
 		  else
 		    {
-		      if( ((int)(TRIGGER_NUMBER_MACRO2(Word, TriggerWord2))%TLU_TRIGGER_AMOUNT) > triggerNumber)
+		      if( ((int)(TRIGGER_NUMBER_MACRO2(TriggerWord, TriggerWord2))%TLU_TRIGGER_AMOUNT) > triggerNumber)
 			{
-			  std::cout << "Trigger missing! Expected trigger " << triggerNumber << ", found " << (int)(TRIGGER_NUMBER_MACRO2(Word, TriggerWord2))%TLU_TRIGGER_AMOUNT << std::endl;
+			  std::cout << "Trigger missing! Expected trigger " << triggerNumber << ", found " << (int)(TRIGGER_NUMBER_MACRO2(TriggerWord, TriggerWord2))%TLU_TRIGGER_AMOUNT << std::endl;
 			  
 			  // Trigger Number missing
 			  EUDAQ_INFO(QString("Trigger Number " + QString::number(triggerNumber) + " is missing for board ").toStdString()) ;// + 
