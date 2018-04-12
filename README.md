@@ -19,7 +19,7 @@ git checkout [branch name]
 
 # Updates for EUDAQ2
 
-## Installation on Ubuntu 16
+## Installation on Ubuntu 16.04
 
 After setting the specific environment variables
 ```
