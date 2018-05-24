@@ -25,6 +25,8 @@ After setting the specific environment variables
 ```
 setup_installation_ubuntu16.sh
 ```
+(On fhlrcduranta in TB22 in /opt/configs/setup_ubuntu16_paths_for_STControl.sh)
+
 run the USBpix setup.sh
 
 ## Development
