@@ -92,6 +92,8 @@ equals(BUILDTYPE, "debug") {
   message("[BUILDTYPE debug] Building debug binaries")
 }
 
+# C++ version
+CONFIG += c++11
 
 equals(BUILDTYPE, "debug-symbols") {
 	unix {

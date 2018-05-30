@@ -470,7 +470,7 @@ void EUDAQProducer::beganScanning()
 	bore.SetTag("first_sensor_id", scan_options.first_sensor_id);
 	bore.SetTag("tot_mode", tot_mode);
 
-	bore->Print(std::cout);	
+	// bore.Print(std::cout);	
 	if(STEP_DEBUG) std::cout << "bore does not sent" << std::endl;
 
 	// At the end, set the status that will be displayed in the Run Control.

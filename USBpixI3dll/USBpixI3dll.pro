@@ -29,7 +29,7 @@ win32{
 
 unix{
   DEFINES += CF__LINUX
-  QMAKE_CXXFLAGS += -Wno-write-strings $(GENCCFLAG) -fno-inline
+  QMAKE_CXXFLAGS += -Wno-write-strings $(GENCCFLAG) --std=c++11 -fno-inline
 }
 
 CONFIG += dll 
