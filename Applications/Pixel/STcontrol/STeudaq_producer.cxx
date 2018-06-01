@@ -56,7 +56,8 @@ void EUDAQProducer::ScanStatus(int boardid, bool SRAMFullSignal, int /*SRAMFilli
 }
 
 void EUDAQProducer::DoReset(){
-    EUDAQ_THROW("the reset method is not implemented yet");
+	scanning = false;
+    //EUDAQ_THROW("the reset method is not implemented yet");
 }
 
 //This gets called whenever the DAQ is configured
