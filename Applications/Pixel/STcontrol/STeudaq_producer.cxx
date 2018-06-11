@@ -76,9 +76,8 @@ void EUDAQProducer::DoInitialise()
 	//Get Configuration Data
 	QStringList config_files, config_modules, trigger_replication_modes;
 	QString config_file, config_module, trigger_replication_mode;
-
+	m_flag_swap_xy = config.Get("SWAP_XY", 0);	
 	scan_options.boards = QString::fromStdString(config.Get("boards", "no")).split(",", QString::SkipEmptyParts);
-
 	for(size_t i=0; i < (size_t)scan_options.boards.size() ; i++)
 	{
 		//Module configuration
@@ -574,6 +573,8 @@ void EUDAQProducer::DoTerminate()
 	if(STEP_DEBUG) std::cout << "Terminating..." << std::endl;
 	
 	m_STeudaq.ProducerDisconnected();
+    
+    std::terminate();
 }
 
 void EUDAQProducer::errorReceived( std::string msg )
@@ -833,7 +834,12 @@ void EUDAQProducer::sendEvents(bool endrun)
 		//Create a RawDataEvent to contain the event data to be sent
 		// eudaq::RawDataEvent ev (EUDAQProducer::EVENT_TYPE, m_run, m_ev);
 		auto evpt = eudaq::Event::MakeUnique(EUDAQProducer::EVENT_TYPE);
-		
+		if(m_flag_swap_xy){
+		  evpt->SetTag("SWAP_XY", 1);
+		}
+		else{
+		  evpt->SetTag("SWAP_XY", 0);
+		}
 		auto &ev = *(evpt.get());
 		
 		//Now search all chips for events with this trigger number

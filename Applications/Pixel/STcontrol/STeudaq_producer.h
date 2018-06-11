@@ -68,7 +68,8 @@ class EUDAQProducer : public eudaq::Producer {
   private:
 	std::string EVENT_TYPE;
 	STEUDAQ &m_STeudaq;
-
+	uint32_t m_flag_swap_xy;
+	
  	unsigned m_run, m_ev;
 	bool data_pending_running, run_finished;
 	int board_count, boards_read_out;
