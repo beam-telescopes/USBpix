@@ -15,11 +15,12 @@ Error in <UnknownClass::InitInterpreter()>: LLVM SYMBOLS ARE EXPOSED TO CLING! T
 
 Get the code:
 ```
-git clone -b release_5.3_eudaq20 https://github.com/beam-telescopes/USBpix.git
+git clone https://github.com/beam-telescopes/USBpix.git PATH
+cd PATH
+git checkout release_5.3_eudaq20
 ```
 Set the environments and setup:
 ```
-cd USBpix/
 source set_environments_ubuntu16.sh (source set_environments_ubuntu18.sh) 
 source setup.sh -gpib no -siusbman no
 ```
@@ -30,5 +31,7 @@ make install
 ```
 Start the application:
 ```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/PATH/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/eudaq2/lib
 ./bin/STcontrol_eudaq
 ```
